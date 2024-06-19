@@ -3,7 +3,7 @@ spring.application.name: e-commerce
 spring:
   config:
     import:
-      - classpath:/application-local.yml
+      - classpath:/static/application-local.yml
       - classpath:/application-prod.yml
 
   profiles:

@@ -36,5 +36,7 @@ out/
 ### VS Code ###
 .vscode/
 
+**/generated/**
+application-local.yml
 application-prod.yml
 data/**
