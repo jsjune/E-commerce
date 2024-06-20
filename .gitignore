@@ -37,6 +37,8 @@ out/
 .vscode/
 
 **/generated/**
+application-test.yml
+application-secret.yml
 application-local.yml
 application-prod.yml
 data/**

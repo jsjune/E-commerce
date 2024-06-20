@@ -3,8 +3,13 @@ spring.application.name: e-commerce
 spring:
   config:
     import:
-      - classpath:/static/application-local.yml
+      - classpath:/application-local.yml
       - classpath:/application-prod.yml
 
   profiles:
     default: local
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB

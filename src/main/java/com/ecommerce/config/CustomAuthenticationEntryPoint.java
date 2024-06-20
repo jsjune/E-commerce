@@ -5,6 +5,7 @@ import static com.ecommerce.common.error.ErrorCode.BAD_CREDENTIALS;
 
 import com.ecommerce.common.Response;
 import com.ecommerce.common.error.ErrorCode;
+import com.ecommerce.common.error.GlobalException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

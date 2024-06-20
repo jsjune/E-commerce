@@ -1,18 +1,32 @@
 package com.ecommerce.member.entity;
 
+import com.ecommerce.product.entity.Product;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Embeddable
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 @Getter
 public class Cart {
-    private String name;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private int quantity;
-    private int price;
-    private String thumbnailUrl;
-    private Long productId;
+    @ManyToOne
+    private Product product;
+    @ManyToOne
+    private Member member;
+
+    public void setMember(Member member) {
+        this.member = member;
+    }
 }

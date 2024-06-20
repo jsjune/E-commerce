@@ -1,5 +1,6 @@
 package com.ecommerce.common;
 
+import java.time.LocalDateTime;
 import lombok.Getter;
 
 @Getter
@@ -7,11 +8,13 @@ public class Response<T> {
     private boolean success;
     private int status;
     private T data;
+    private LocalDateTime timeStamp;
 
     public Response(boolean success, int status, T data) {
         this.success = success;
         this.status = status;
         this.data = data;
+        this.timeStamp = LocalDateTime.now();
     }
 
     public static <T> Response<T> success(int status, T data) {

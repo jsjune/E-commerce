@@ -2,6 +2,7 @@ package com.ecommerce.config;
 
 import com.ecommerce.config.filter.JwtTokenFilter;
 import com.ecommerce.config.jwt.JwtUtils;
+import com.ecommerce.member.entity.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,6 +37,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize ->
                 authorize.requestMatchers("/actuator/**", "/h2-console/**").permitAll()
                     .requestMatchers("/auth/signup", "/auth/login").permitAll()
+                    .requestMatchers("/products").hasAuthority("SELLER")
                     .anyRequest().authenticated()
             )
             .headers(headers ->
