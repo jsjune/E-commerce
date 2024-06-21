@@ -2,9 +2,9 @@ package com.ecommerce.product.controller;
 
 import com.ecommerce.common.Response;
 import com.ecommerce.member.auth.LoginUser;
-import com.ecommerce.product.controller.req.ProductRequest;
-import com.ecommerce.product.controller.res.ProductListResponse;
-import com.ecommerce.product.controller.res.ProductResponse;
+import com.ecommerce.product.controller.req.ProductRequestDto;
+import com.ecommerce.product.controller.res.ProductListResponseDto;
+import com.ecommerce.product.controller.res.ProductResponseDto;
 import com.ecommerce.product.usecase.ProductReadUseCase;
 import com.ecommerce.product.usecase.ProductWriteUseCase;
 import lombok.RequiredArgsConstructor;
@@ -25,18 +25,18 @@ public class ProductController {
     private final ProductReadUseCase productReadUseCase;
 
     @PostMapping("/products")
-    public Response<Void> createProduct(@AuthenticationPrincipal LoginUser loginUser, @ModelAttribute ProductRequest request) {
+    public Response<Void> createProduct(@AuthenticationPrincipal LoginUser loginUser, @ModelAttribute ProductRequestDto request) {
         productWriteUseCase.createProduct(loginUser, request);
         return Response.success(HttpStatus.OK.value(), null);
     }
 
     @GetMapping("/products/{id}")
-    public Response<ProductResponse> getProduct(@PathVariable Long id) {
+    public Response<ProductResponseDto> getProduct(@PathVariable Long id) {
         return Response.success(HttpStatus.OK.value(), productReadUseCase.getProduct(id));
     }
 
     @GetMapping("/products")
-    public Response<ProductListResponse> getProducts(Pageable pageable) {
+    public Response<ProductListResponseDto> getProducts(Pageable pageable) {
         return Response.success(HttpStatus.OK.value(), productReadUseCase.getProducts(pageable));
     }
 }

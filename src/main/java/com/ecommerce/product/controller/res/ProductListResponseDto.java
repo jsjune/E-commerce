@@ -6,8 +6,8 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class ProductListResponse {
-    private List<ProductList> products;
+public class ProductListResponseDto {
+    private List<ProductListDto> products;
     private int currentPage;
     private int totalPage;
 }

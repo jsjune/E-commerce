@@ -1,4 +1,4 @@
-package com.ecommerce.common;
+package com.ecommerce.product.utils;
 
 import com.ecommerce.common.error.ErrorCode;
 import com.ecommerce.common.error.GlobalException;

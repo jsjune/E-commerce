@@ -60,6 +60,12 @@ dependencies {
     // https://mvnrepository.com/artifact/net.coobird/thumbnailator
     implementation 'net.coobird:thumbnailator:0.4.20'
 
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-mail
+    implementation 'org.springframework.boot:spring-boot-starter-mail:3.2.6'
+
+    // https://mvnrepository.com/artifact/org.testcontainers/testcontainers
+    testImplementation 'org.testcontainers:testcontainers:1.19.7'
+
 }
 
 // QueryDsl 디렉토리 경로

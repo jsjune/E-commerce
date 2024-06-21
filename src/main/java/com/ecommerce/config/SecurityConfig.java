@@ -6,6 +6,7 @@ import com.ecommerce.member.entity.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -36,8 +37,8 @@ public class SecurityConfig {
                 UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(authorize ->
                 authorize.requestMatchers("/actuator/**", "/h2-console/**").permitAll()
-                    .requestMatchers("/auth/signup", "/auth/login").permitAll()
-                    .requestMatchers("/products").hasAuthority("SELLER")
+                    .requestMatchers("/auth/mailCheck","/auth/usernameCheck","/auth/signup", "/auth/login", "/email/**").permitAll()
+                    .requestMatchers(HttpMethod.POST,"/products").hasAuthority("SELLER")
                     .anyRequest().authenticated()
             )
             .headers(headers ->

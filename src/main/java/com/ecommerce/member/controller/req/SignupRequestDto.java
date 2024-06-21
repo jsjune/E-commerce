@@ -8,7 +8,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 @Builder
-public class SignupRequest {
+public class SignupRequestDto {
     private String username;
     private String phoneNumber;
     private String email;

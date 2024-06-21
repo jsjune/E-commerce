@@ -2,9 +2,9 @@ package com.ecommerce.product.usecase.impl;
 
 import com.ecommerce.common.error.ErrorCode;
 import com.ecommerce.common.error.GlobalException;
-import com.ecommerce.product.controller.res.ProductList;
-import com.ecommerce.product.controller.res.ProductListResponse;
-import com.ecommerce.product.controller.res.ProductResponse;
+import com.ecommerce.product.controller.res.ProductListDto;
+import com.ecommerce.product.controller.res.ProductListResponseDto;
+import com.ecommerce.product.controller.res.ProductResponseDto;
 import com.ecommerce.product.entity.Product;
 import com.ecommerce.product.entity.ProductImage;
 import com.ecommerce.product.repository.ProductRepository;
@@ -24,9 +24,9 @@ public class ProductReadService implements ProductReadUseCase {
     private final ProductRepository productRepository;
 
     @Override
-    public ProductResponse getProduct(Long id) {
+    public ProductResponseDto getProduct(Long id) {
         return productRepository.findById(id)
-            .map(product -> ProductResponse.builder()
+            .map(product -> ProductResponseDto.builder()
                 .company(product.getSeller().getCompany())
                 .phoneNumber(product.getSeller().getPhoneNumber())
                 .name(product.getName())
@@ -41,16 +41,16 @@ public class ProductReadService implements ProductReadUseCase {
     }
 
     @Override
-    public ProductListResponse getProducts(Pageable pageable) {
+    public ProductListResponseDto getProducts(Pageable pageable) {
         Page<Product> products = productRepository.findAll(pageable);
-        List<ProductList> response = products.getContent().stream()
+        List<ProductListDto> response = products.getContent().stream()
             .map(this::mapToProductResponse)
             .collect(Collectors.toList());
-        return new ProductListResponse(response, products.getNumber(), products.getTotalPages());
+        return new ProductListResponseDto(response, products.getNumber(), products.getTotalPages());
     }
 
-    private ProductList mapToProductResponse(Product product) {
-        return ProductList.builder()
+    private ProductListDto mapToProductResponse(Product product) {
+        return ProductListDto.builder()
             .id(product.getId())
             .company(product.getSeller().getCompany())
             .phoneNumber(product.getSeller().getPhoneNumber())

@@ -1,9 +1,9 @@
 package com.ecommerce.product.usecase.impl;
 
-import com.ecommerce.common.ImageValidator;
-import com.ecommerce.common.S3Utils;
+import com.ecommerce.product.utils.ImageValidator;
+import com.ecommerce.product.utils.S3Utils;
 import com.ecommerce.member.auth.LoginUser;
-import com.ecommerce.product.controller.req.ProductRequest;
+import com.ecommerce.product.controller.req.ProductRequestDto;
 import com.ecommerce.product.entity.Product;
 import com.ecommerce.product.entity.ProductImage;
 import com.ecommerce.product.repository.ProductRepository;
@@ -28,7 +28,7 @@ public class ProductWriteService implements ProductWriteUseCase {
     private static final String UPLOAD_FOLDER = "images";
 
     @Override
-    public void createProduct(LoginUser loginUser, ProductRequest request) {
+    public void createProduct(LoginUser loginUser, ProductRequestDto request) {
         List<ProductImage> images = new ArrayList<>();
         for (MultipartFile image : request.getProductImages()) {
             if (!image.isEmpty()) {

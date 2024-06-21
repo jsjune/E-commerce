@@ -8,10 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.ecommerce.IntegrationTestSupport;
 import com.ecommerce.common.error.ErrorCode;
 import com.ecommerce.common.error.GlobalException;
-import com.ecommerce.member.controller.req.LoginRequest;
-import com.ecommerce.member.controller.req.LoginRequest.LoginRequestBuilder;
-import com.ecommerce.member.controller.req.SignupRequest;
-import com.ecommerce.member.controller.res.LoginResponse;
+import com.ecommerce.member.controller.req.LoginRequestDto;
+import com.ecommerce.member.controller.req.SignupRequestDto;
+import com.ecommerce.member.controller.res.LoginResponseDto;
 import com.ecommerce.member.entity.Member;
 import com.ecommerce.member.entity.UserRole;
 import com.ecommerce.member.repository.MemberRepository;
@@ -38,6 +37,78 @@ class AuthServiceTest extends IntegrationTestSupport {
         memberRepository.deleteAllInBatch();
     }
 
+    @DisplayName("유저 계정 중복 검사 존재할때")
+    @Test
+    void exists_username() {
+        // given
+        String username = "abc";
+        Member member = Member.builder()
+            .username(username)
+            .build();
+        memberRepository.save(member);
+
+        // when
+        Boolean result = authUseCase.usernameCheck(username);
+
+        // then
+        assertEquals(result, false);
+    }
+
+    @DisplayName("유저 계정 중복 검사 존재하지 않을때")
+    @Test
+    void not_exists_username() {
+        // given
+        String username = "abc";
+
+        // when
+        Boolean result = authUseCase.usernameCheck(username);
+
+        // then
+        assertEquals(result, true);
+    }
+
+    @DisplayName("이메일 중복 검사 존재할때")
+    @Test
+    void exists_email() {
+        // given
+        String email = "abc@naver.com";
+        Member member = Member.builder()
+            .email(email)
+            .build();
+        memberRepository.save(member);
+
+        // when
+        Boolean result = authUseCase.mailCheck(email);
+
+        // then
+        assertEquals(result, false);
+
+    }
+
+    @DisplayName("이메일 중복 검사 존재하지 않을때")
+    @Test
+    void email_check_not_exists_email() {
+        // given
+        String email = "abc@naver.com";
+
+        // when
+        Boolean result = authUseCase.mailCheck(email);
+
+        // then
+        assertEquals(result, true);
+    }
+
+    @DisplayName("이메일 중복 검사 존재하지 않을때")
+    @Test
+    void email_check_invalid_email_format() {
+        // given
+        String email = "abc";
+
+        // when then
+        GlobalException exception = assertThrows(GlobalException.class,
+            () -> authUseCase.mailCheck(email));
+        assertEquals(ErrorCode.INVALID_EMAIL_FORMAT, exception.getErrorCode());
+    }
 
     @DisplayName("존재하는 이름 회원가입 실패")
     @Test
@@ -48,7 +119,7 @@ class AuthServiceTest extends IntegrationTestSupport {
             .username(username)
             .build();
         memberRepository.save(member);
-        SignupRequest request = SignupRequest.builder()
+        SignupRequestDto request = SignupRequestDto.builder()
             .username(username)
             .build();
 
@@ -67,7 +138,7 @@ class AuthServiceTest extends IntegrationTestSupport {
             .email(email)
             .build();
         memberRepository.save(member);
-        SignupRequest request = SignupRequest.builder()
+        SignupRequestDto request = SignupRequestDto.builder()
             .email(email)
             .build();
 
@@ -82,7 +153,7 @@ class AuthServiceTest extends IntegrationTestSupport {
     void signup() {
         // given
         String email = "aaa@naver.com";
-        SignupRequest request = SignupRequest.builder()
+        SignupRequestDto request = SignupRequestDto.builder()
             .username("abc")
             .phoneNumber("010-1234-5678")
             .email(email)
@@ -104,13 +175,14 @@ class AuthServiceTest extends IntegrationTestSupport {
     @Test
     void not_exist_member_login_fail() {
         // given
-        LoginRequestBuilder request = LoginRequest.builder()
+        LoginRequestDto request = LoginRequestDto.builder()
             .account("aaa")
-            .password("1234");
+            .password("1234")
+            .build();
 
         // when then
         AuthenticationException exception = assertThrows(AuthenticationException.class,
-            () -> authUseCase.login(request.build()));
+            () -> authUseCase.login(request));
         assertEquals(ErrorCode.USER_NOT_FOUND.getMessage(), exception.getMessage());
     }
 
@@ -124,13 +196,14 @@ class AuthServiceTest extends IntegrationTestSupport {
             .build();
         memberRepository.save(member);
         // given
-        LoginRequestBuilder request = LoginRequest.builder()
+        LoginRequestDto request = LoginRequestDto.builder()
             .account(username)
-            .password("12345");
+            .password("12345")
+            .build();
 
         // when then
         AuthenticationException exception = assertThrows(AuthenticationException.class,
-            () -> authUseCase.login(request.build()));
+            () -> authUseCase.login(request));
         assertEquals("자격 증명에 실패하였습니다.", exception.getMessage());
     }
 
@@ -145,13 +218,13 @@ class AuthServiceTest extends IntegrationTestSupport {
             .role(UserRole.USER)
             .build();
         memberRepository.save(member);
-        LoginRequest request = LoginRequest.builder()
+        LoginRequestDto request = LoginRequestDto.builder()
             .account(username)
             .password("1234")
             .build();
 
         // when
-        LoginResponse response = authUseCase.login(request);
+        LoginResponseDto response = authUseCase.login(request);
 
         // then
         assertThat(response.getAccessToken()).isNotNull();
@@ -161,7 +234,7 @@ class AuthServiceTest extends IntegrationTestSupport {
 
     @DisplayName("이메일로 로그인")
     @Test
-    void test() {
+    void email_login() {
         // given
         String email = "abc@naver.com";
         Member member = Member.builder()
@@ -170,13 +243,13 @@ class AuthServiceTest extends IntegrationTestSupport {
             .role(UserRole.USER)
             .build();
         memberRepository.save(member);
-        LoginRequest request = LoginRequest.builder()
+        LoginRequestDto request = LoginRequestDto.builder()
             .account(email)
             .password("1234")
             .build();
 
         // when
-        LoginResponse response = authUseCase.login(request);
+        LoginResponseDto response = authUseCase.login(request);
 
         // then
         assertThat(response.getAccessToken()).isNotNull();

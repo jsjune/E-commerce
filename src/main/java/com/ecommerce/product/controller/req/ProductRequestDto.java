@@ -1,22 +1,22 @@
-package com.ecommerce.product.controller.res;
-
+package com.ecommerce.product.controller.req;
 
 import java.util.List;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.web.multipart.MultipartFile;
 
 @Getter
-@AllArgsConstructor
 @Builder
-public class ProductResponse {
+@AllArgsConstructor
+public class ProductRequestDto {
     private String company;
     private String phoneNumber;
     private String name;
     private String description;
     private int price;
+    private int stock;
     private Set<String> tags;
-    private List<String> orgProductImages;
-
+    private List<MultipartFile> productImages;
 }

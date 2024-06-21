@@ -9,7 +9,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Builder
 @Getter
-public class ProductList {
+public class ProductListDto {
     private Long id;
     private String company;
     private String phoneNumber;

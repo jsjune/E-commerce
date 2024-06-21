@@ -1,11 +1,11 @@
 package com.ecommerce.product.usecase;
 
-import com.ecommerce.product.controller.res.ProductListResponse;
-import com.ecommerce.product.controller.res.ProductResponse;
+import com.ecommerce.product.controller.res.ProductListResponseDto;
+import com.ecommerce.product.controller.res.ProductResponseDto;
 import org.springframework.data.domain.Pageable;
 public interface ProductReadUseCase {
 
-    ProductResponse getProduct(Long id);
+    ProductResponseDto getProduct(Long id);
 
-    ProductListResponse getProducts(Pageable pageable);
+    ProductListResponseDto getProducts(Pageable pageable);
 }

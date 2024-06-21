@@ -1,10 +1,12 @@
 package com.ecommerce.member.controller;
 
 import com.ecommerce.common.Response;
-import com.ecommerce.member.controller.req.LoginRequest;
-import com.ecommerce.member.controller.req.SignupRequest;
-import com.ecommerce.member.controller.res.LoginResponse;
+import com.ecommerce.member.controller.req.LoginRequestDto;
+import com.ecommerce.member.controller.req.SignupRequestDto;
+import com.ecommerce.member.controller.req.UserValidationRequestDto;
+import com.ecommerce.member.controller.res.LoginResponseDto;
 import com.ecommerce.member.usecase.AuthUseCase;
+import com.ecommerce.member.utils.EmailValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,14 +18,24 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController {
     private final AuthUseCase authUseCase;
 
+    @PostMapping("/auth/mailCheck")
+    public Response<Boolean> mailCheck(@RequestBody UserValidationRequestDto request) {
+        return Response.success(HttpStatus.OK.value(), authUseCase.mailCheck(request.getEmail()));
+    }
+
+    @PostMapping("/auth/usernameCheck")
+    public Response<Boolean> usernameCheck(@RequestBody UserValidationRequestDto request) {
+        return Response.success(HttpStatus.OK.value(), authUseCase.usernameCheck(request.getUsername()));
+    }
+
     @PostMapping("/auth/signup")
-    public Response<Void> signup(@RequestBody SignupRequest request){
+    public Response<Void> signup(@RequestBody SignupRequestDto request){
         authUseCase.signup(request);
         return Response.success(HttpStatus.OK.value(), null);
     }
 
     @PostMapping("/auth/login")
-    public Response<LoginResponse> login(@RequestBody LoginRequest request) {
+    public Response<LoginResponseDto> login(@RequestBody LoginRequestDto request) {
         return Response.success(HttpStatus.OK.value(), authUseCase.login(request));
     }
 

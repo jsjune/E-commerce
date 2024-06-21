@@ -4,12 +4,13 @@ import com.ecommerce.common.error.ErrorCode;
 import com.ecommerce.common.error.GlobalException;
 import com.ecommerce.config.jwt.JwtUtils;
 import com.ecommerce.member.auth.LoginUser;
-import com.ecommerce.member.controller.req.LoginRequest;
-import com.ecommerce.member.controller.req.SignupRequest;
-import com.ecommerce.member.controller.res.LoginResponse;
+import com.ecommerce.member.controller.req.LoginRequestDto;
+import com.ecommerce.member.controller.req.SignupRequestDto;
+import com.ecommerce.member.controller.res.LoginResponseDto;
 import com.ecommerce.member.entity.Member;
 import com.ecommerce.member.repository.MemberRepository;
 import com.ecommerce.member.usecase.AuthUseCase;
+import com.ecommerce.member.utils.EmailValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,7 +30,7 @@ public class AuthService implements AuthUseCase {
     private final JwtUtils jwtUtils;
 
     @Override
-    public void signup(SignupRequest request) {
+    public void signup(SignupRequestDto request) {
         memberRepository.findByEmailOrUsername(request.getEmail(), request.getUsername())
             .ifPresent(member -> {
                 throw new GlobalException(ErrorCode.EXIST_MEMBER);
@@ -46,18 +47,32 @@ public class AuthService implements AuthUseCase {
     }
 
     @Override
-    public LoginResponse login(LoginRequest request) {
+    public LoginResponseDto login(LoginRequestDto request) {
         UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(
             request.getAccount(), request.getPassword());
         Authentication authentication = authenticationManager.authenticate(authRequest);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
         String accessToken = jwtUtils.generateAccessTokenFromLoginUser(loginUser);
-        return new LoginResponse(
+        return new LoginResponseDto(
             loginUser.getMember().getId(),
             loginUser.getMember().getUsername(),
             loginUser.getMember().getRole().name(),
             accessToken
         );
+    }
+
+    @Override
+    public Boolean mailCheck(String email) {
+        boolean validate = EmailValidator.validate(email);
+        if(!validate) {
+            throw new GlobalException(ErrorCode.INVALID_EMAIL_FORMAT);
+        }
+        return memberRepository.findByEmail(email).isEmpty();
+    }
+
+    @Override
+    public Boolean usernameCheck(String username) {
+        return memberRepository.findByUsername(username).isEmpty();
     }
 }

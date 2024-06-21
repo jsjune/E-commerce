@@ -9,8 +9,8 @@ import com.ecommerce.common.error.GlobalException;
 import com.ecommerce.member.entity.Member;
 import com.ecommerce.member.entity.UserRole;
 import com.ecommerce.member.repository.MemberRepository;
-import com.ecommerce.product.controller.res.ProductListResponse;
-import com.ecommerce.product.controller.res.ProductResponse;
+import com.ecommerce.product.controller.res.ProductListResponseDto;
+import com.ecommerce.product.controller.res.ProductResponseDto;
 import com.ecommerce.product.entity.Product;
 import com.ecommerce.product.entity.ProductImage;
 import com.ecommerce.product.repository.ProductRepository;
@@ -63,7 +63,7 @@ class ProductReadServiceTest extends IntegrationTestSupport {
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
-        ProductListResponse response = productReadUseCase.getProducts(pageable);
+        ProductListResponseDto response = productReadUseCase.getProducts(pageable);
 
         // then
         assertEquals(response.getProducts().size(), products.size());
@@ -100,7 +100,7 @@ class ProductReadServiceTest extends IntegrationTestSupport {
         Long id = 1L;
 
         // when
-        ProductResponse response = productReadUseCase.getProduct(id);
+        ProductResponseDto response = productReadUseCase.getProduct(id);
 
         // then
         assertEquals(response.getName(), product.getName());
