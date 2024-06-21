@@ -10,6 +10,7 @@ import com.ecommerce.product.entity.ProductImage;
 import com.ecommerce.product.repository.ProductRepository;
 import com.ecommerce.product.usecase.ProductReadUseCase;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -47,6 +48,11 @@ public class ProductReadService implements ProductReadUseCase {
             .map(this::mapToProductResponse)
             .collect(Collectors.toList());
         return new ProductListResponseDto(response, products.getNumber(), products.getTotalPages());
+    }
+
+    @Override
+    public Optional<Product> findById(Long productId) {
+        return productRepository.findById(productId);
     }
 
     private ProductListDto mapToProductResponse(Product product) {

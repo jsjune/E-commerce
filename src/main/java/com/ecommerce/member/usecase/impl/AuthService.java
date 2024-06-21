@@ -130,5 +130,10 @@ public class AuthService implements AuthUseCase {
         }
         return null;
     }
+
+    @Override
+    public Optional<Member> findById(Long memberId) {
+        return memberRepository.findById(memberId);
+    }
 }
 

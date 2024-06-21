@@ -9,6 +9,7 @@ import com.ecommerce.member.repository.MemberRepository;
 import com.ecommerce.member.usecase.CartUseCase;
 import com.ecommerce.product.entity.ProductImage;
 import com.ecommerce.product.repository.ProductRepository;
+import com.ecommerce.product.usecase.ProductReadUseCase;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -22,12 +23,12 @@ public class CartService implements CartUseCase {
 
     private final CartRepository cartRepository;
     private final MemberRepository memberRepository;
-    private final ProductRepository productRepository;
+    private final ProductReadUseCase productReadUseCase;
 
     @Override
     public void addCart(Long memberId, Long productId) {
         memberRepository.findById(memberId).ifPresent(member -> {
-            productRepository.findById(productId).ifPresent(product -> {
+            productReadUseCase.findById(productId).ifPresent(product -> {
                 for (Cart cart : member.getCarts()) {
                     if (cart.getProduct().getId().equals(productId)) {
                         cart.increaseQuantity(1);
