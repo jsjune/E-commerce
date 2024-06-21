@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -42,10 +43,16 @@ public class Member extends BaseTimeEntity {
         this.password = password;
         this.role = role;
         this.company = company;
-        this.carts = carts;
+        this.carts = carts == null ? new ArrayList<>() : carts;
     }
 
     public void addCart(Cart cart) {
+        for (Cart existCart : carts) {
+            if(existCart.getProduct().getId().equals(cart.getProduct().getId())) {
+                existCart.increaseQuantity(cart.getQuantity());
+                return;
+            }
+        }
         cart.setMember(this);
         this.carts.add(cart);
     }

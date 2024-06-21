@@ -97,10 +97,9 @@ class ProductReadServiceTest extends IntegrationTestSupport {
                 List.of(new ProductImage("image", "imagePath", "thumbnail", "thumbnailPath")))
             .build();
         productRepository.save(product);
-        Long id = 1L;
 
         // when
-        ProductResponseDto response = productReadUseCase.getProduct(id);
+        ProductResponseDto response = productReadUseCase.getProduct(product.getId());
 
         // then
         assertEquals(response.getName(), product.getName());

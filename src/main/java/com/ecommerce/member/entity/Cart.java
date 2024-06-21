@@ -26,7 +26,21 @@ public class Cart {
     @ManyToOne
     private Member member;
 
+    public Cart(int quantity, Product product, Member member) {
+        this.quantity = quantity;
+        this.product = product;
+        this.member = member;
+    }
+
     public void setMember(Member member) {
         this.member = member;
+    }
+
+    public void increaseQuantity(int quantity) {
+        this.quantity += quantity;
+    }
+
+    public void updateQuantity(int quantity) {
+        this.quantity = quantity;
     }
 }
