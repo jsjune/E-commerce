@@ -90,7 +90,7 @@ docker {
 
 test {
     useJUnitPlatform()
-    finalizedBy jacocoTestReport
+//    finalizedBy jacocoTestReport
 }
 
 // jacooc

@@ -6,11 +6,16 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.ecommerce.IntegrationTestSupport;
+import com.ecommerce.common.AesUtil;
 import com.ecommerce.common.error.ErrorCode;
 import com.ecommerce.common.error.GlobalException;
+import com.ecommerce.member.auth.LoginUser;
 import com.ecommerce.member.controller.req.LoginRequestDto;
+import com.ecommerce.member.controller.req.PasswordRequestDto;
 import com.ecommerce.member.controller.req.SignupRequestDto;
+import com.ecommerce.member.controller.req.UserInfoRequestDto;
 import com.ecommerce.member.controller.res.LoginResponseDto;
+import com.ecommerce.member.controller.res.MemberInfoResponseDto;
 import com.ecommerce.member.entity.Member;
 import com.ecommerce.member.entity.UserRole;
 import com.ecommerce.member.repository.MemberRepository;
@@ -31,6 +36,8 @@ class AuthServiceTest extends IntegrationTestSupport {
     MemberRepository memberRepository;
     @Autowired
     BCryptPasswordEncoder encoder;
+    @Autowired
+    private AesUtil aesUtil;
 
     @BeforeEach
     void setUp() {
@@ -150,7 +157,7 @@ class AuthServiceTest extends IntegrationTestSupport {
 
     @DisplayName("회원가입 성공")
     @Test
-    void signup() {
+    void signup() throws Exception {
         // given
         String email = "aaa@naver.com";
         SignupRequestDto request = SignupRequestDto.builder()
@@ -253,6 +260,103 @@ class AuthServiceTest extends IntegrationTestSupport {
 
         // then
         assertThat(response.getAccessToken()).isNotNull();
+    }
+
+    @DisplayName("잘못된 비밀번호로 수정 실패")
+    @Test
+    void password_update_fail() {
+        // given
+        String currentPw = "1234";
+        Member member = Member.builder()
+            .password(encoder.encode(currentPw))
+            .build();
+        memberRepository.save(member);
+        PasswordRequestDto request = PasswordRequestDto.builder()
+            .currentPw("12345")
+            .newPw("123456")
+            .build();
+
+        // when
+        boolean result = authUseCase.updatePw(request.getCurrentPw(), request.getNewPw(),
+            member.getId());
+
+        // then
+        assertEquals(result, false);
+    }
+
+    @DisplayName("비밀번호 수정 성공")
+    @Test
+    void password_update_success() {
+        // given
+        String currentPw = "1234";
+        Member member = Member.builder()
+            .password(encoder.encode(currentPw))
+            .build();
+        memberRepository.save(member);
+        PasswordRequestDto request = PasswordRequestDto.builder()
+            .currentPw(currentPw)
+            .newPw("123456")
+            .build();
+
+        // when
+        boolean result = authUseCase.updatePw(request.getCurrentPw(), request.getNewPw(),
+            member.getId());
+
+        // then
+        assertEquals(result, true);
+
+    }
+
+    @DisplayName("내 프로필 조회")
+    @Test
+    void get_user_info() throws Exception {
+        // given
+        String phoneNumber = "010-1234-5678";
+        Member member = Member.builder()
+            .email("abc@naver.com")
+            .username("abc")
+            .phoneNumber(aesUtil.aesEncode(phoneNumber))
+            .role(UserRole.USER)
+            .company(null)
+            .build();
+        memberRepository.save(member);
+        LoginUser loginUser = new LoginUser(member);
+
+        // when
+        MemberInfoResponseDto result = authUseCase.getUserInfo(loginUser.getMember().getId());
+
+        // then
+        assertEquals(result.getEmail(), member.getEmail());
+        assertEquals(result.getPhoneNumber(), phoneNumber);
+    }
+
+    @DisplayName("프로필 수정")
+    @Test
+    void test() throws Exception {
+        // given
+        Member member = Member.builder()
+            .email("abc@naver.com")
+            .username("abc")
+            .phoneNumber(aesUtil.aesEncode("010-1234-5678"))
+            .role(UserRole.USER)
+            .company(null)
+            .build();
+        memberRepository.save(member);
+        String username = "aaa";
+        UserInfoRequestDto request = UserInfoRequestDto.builder()
+            .email("abc@naver.com")
+            .username(username)
+            .phoneNumber("010-1234-5678")
+            .company(null)
+            .build();
+        LoginUser loginUser = new LoginUser(member);
+
+        // when
+        MemberInfoResponseDto result = authUseCase.updateUserInfo(
+            loginUser.getMember().getId(), request);
+
+        // then
+        assertEquals(result.getUsername(), username);
 
     }
 }

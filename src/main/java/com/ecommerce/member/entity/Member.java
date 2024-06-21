@@ -49,4 +49,15 @@ public class Member extends BaseTimeEntity {
         cart.setMember(this);
         this.carts.add(cart);
     }
+
+    public void updatePassword(String password) {
+        this.password = password;
+    }
+
+    public void updateInfo(String username, String phoneNumber, String email, String company) {
+        this.username = username;
+        this.phoneNumber = phoneNumber;
+        this.email = email;
+        this.company = company;
+    }
 }

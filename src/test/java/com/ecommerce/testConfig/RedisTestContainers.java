@@ -1,4 +1,4 @@
-package com.ecommerce.config;
+package com.ecommerce.testConfig;
 
 import org.junit.jupiter.api.DisplayName;
 import org.springframework.context.annotation.Configuration;
