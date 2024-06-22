@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class MemberAddressListResponseDto {
-    private List<MemberAddressListDto> memberAddresses;
+public class DeliveryAddressListResponseDto {
+    private List<DeliveryAddressListDto> deliveryAddresses;
 
 }

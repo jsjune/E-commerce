@@ -81,4 +81,9 @@ public class CartService implements CartUseCase {
                 });
         });
     }
+
+    @Override
+    public void clearCart(Long memberId, List<Long> productId) {
+        cartRepository.deleteAllByMemberIdAndProductIdIn(memberId, productId);
+    }
 }

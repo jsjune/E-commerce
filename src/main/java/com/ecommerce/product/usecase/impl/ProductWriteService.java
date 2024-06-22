@@ -1,5 +1,7 @@
 package com.ecommerce.product.usecase.impl;
 
+import com.ecommerce.common.error.ErrorCode;
+import com.ecommerce.common.error.GlobalException;
 import com.ecommerce.product.utils.ImageValidator;
 import com.ecommerce.product.utils.S3Utils;
 import com.ecommerce.member.auth.LoginUser;
@@ -57,5 +59,15 @@ public class ProductWriteService implements ProductWriteUseCase {
             .productImages(images)
             .build();
         productRepository.save(product);
+    }
+
+    @Override
+    public void decreaseStock(Long productId, int quantity) {
+        Product product = productRepository.findById(productId)
+            .orElseThrow(() -> new GlobalException(ErrorCode.PRODUCT_NOT_FOUND));
+        if(product.getTotalStock() < quantity) {
+            throw new GlobalException(ErrorCode.PRODUCT_STOCK_NOT_ENOUGH);
+        }
+        product.decreaseStock(quantity);
     }
 }

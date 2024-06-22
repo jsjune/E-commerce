@@ -2,7 +2,7 @@ package com.ecommerce.delivery.controller;
 
 import com.ecommerce.common.Response;
 import com.ecommerce.delivery.controller.req.AddressRequestDto;
-import com.ecommerce.delivery.controller.res.MemberAddressListResponseDto;
+import com.ecommerce.delivery.controller.res.DeliveryAddressListResponseDto;
 import com.ecommerce.delivery.usecase.DeliveryAddressUseCase;
 import com.ecommerce.member.auth.LoginUser;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ public class DeliveryController {
     }
 
     @GetMapping("/delivery/addresses")
-    public Response<MemberAddressListResponseDto> getAddresses(@AuthenticationPrincipal LoginUser loginUser)
+    public Response<DeliveryAddressListResponseDto> getAddresses(@AuthenticationPrincipal LoginUser loginUser)
         throws Exception {
         return Response.success(HttpStatus.OK.value(), deliveryAddressUseCase.getAddresses(loginUser.getMember().getId()));
     }

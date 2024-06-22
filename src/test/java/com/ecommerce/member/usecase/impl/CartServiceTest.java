@@ -13,6 +13,7 @@ import com.ecommerce.member.usecase.CartUseCase;
 import com.ecommerce.product.entity.Product;
 import com.ecommerce.product.repository.ProductRepository;
 import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,30 @@ class CartServiceTest extends IntegrationTestSupport {
         cartRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
         productRepository.deleteAllInBatch();
+    }
+
+    @DisplayName("장바구니 비우기")
+    @Test
+    void clear_cart() {
+        // given
+        Member member = Member.builder().build();
+        memberRepository.save(member);
+        Product product = Product.builder().build();
+        Product product2 = Product.builder().build();
+        productRepository.save(product);
+        productRepository.save(product2);
+        cartUseCase.addCart(member.getId(), product.getId());
+        cartUseCase.addCart(member.getId(), product2.getId());
+        cartUseCase.addCart(member.getId(), product2.getId());
+        List<Long> productId = List.of(product.getId(), product2.getId());
+
+        // when
+        cartRepository.deleteAllByMemberIdAndProductIdIn(member.getId(), productId);
+        List<Cart> result = cartRepository.findAll();
+
+        // then
+        assertEquals(result.size(), 0);
+
     }
 
     @DisplayName("장바구니 수량 조절하기")

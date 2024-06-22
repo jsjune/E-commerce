@@ -48,6 +48,7 @@ public class PaymentMethodService implements PaymentMethodUseCase {
         List<PaymentMethodListDto> paymentMethods = new ArrayList<>();
         for (PaymentMethod paymentMethod : findPaymentMethod) {
             PaymentMethodListDto paymentMethodList = PaymentMethodListDto.builder()
+                .paymentId(paymentMethod.getId())
                 .paymentType(paymentMethod.getPaymentType().name())
                 .bank(aesUtil.aesDecode(paymentMethod.getBank()))
                 .accountNumber(aesUtil.aesDecode(paymentMethod.getAccountNumber()))

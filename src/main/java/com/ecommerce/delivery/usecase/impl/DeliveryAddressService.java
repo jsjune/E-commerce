@@ -2,11 +2,11 @@ package com.ecommerce.delivery.usecase.impl;
 
 import com.ecommerce.common.AesUtil;
 import com.ecommerce.delivery.controller.req.AddressRequestDto;
-import com.ecommerce.delivery.controller.res.MemberAddressListDto;
-import com.ecommerce.delivery.controller.res.MemberAddressListResponseDto;
+import com.ecommerce.delivery.controller.res.DeliveryAddressListDto;
+import com.ecommerce.delivery.controller.res.DeliveryAddressListResponseDto;
 import com.ecommerce.delivery.entity.Address;
-import com.ecommerce.delivery.entity.MemberAddress;
-import com.ecommerce.delivery.repository.MemberAddressRepository;
+import com.ecommerce.delivery.entity.DeliveryAddress;
+import com.ecommerce.delivery.repository.DeliveryAddressRepository;
 import com.ecommerce.delivery.usecase.DeliveryAddressUseCase;
 import com.ecommerce.member.entity.Member;
 import com.ecommerce.member.usecase.AuthUseCase;
@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class DeliveryAddressService implements DeliveryAddressUseCase {
 
     private final AuthUseCase authUseCase;
-    private final MemberAddressRepository memberAddressRepository;
+    private final DeliveryAddressRepository deliveryAddressRepository;
     private final AesUtil aesUtil;
 
     @Override
@@ -32,43 +32,44 @@ public class DeliveryAddressService implements DeliveryAddressUseCase {
         Optional<Member> findMember = authUseCase.findById(memberId);
         if (findMember.isPresent()) {
             Member member = findMember.get();
-            memberAddressRepository.findByMemberIdAndIsMainAddress(memberId, true)
-                .ifPresent(memberAddress -> memberAddress.setMainAddress(false));
+            deliveryAddressRepository.findByMemberIdAndIsMainAddress(memberId, true)
+                .ifPresent(deliveryAddress -> deliveryAddress.setMainAddress(false));
             Address address = Address.builder()
                 .street(aesUtil.aesEncode(request.getStreet()))
                 .detailAddress(aesUtil.aesEncode(request.getDetailAddress()))
                 .zipCode(aesUtil.aesEncode(request.getZipCode()))
                 .alias(request.getAlias())
                 .build();
-            MemberAddress memberAddress = MemberAddress.builder()
+            DeliveryAddress deliveryAddress = DeliveryAddress.builder()
                 .member(member)
                 .address(address)
+                .receiver(request.getReceiver())
                 .isMainAddress(request.isMainAddress())
                 .build();
-            memberAddressRepository.save(memberAddress);
+            deliveryAddressRepository.save(deliveryAddress);
         }
     }
 
     @Override
-    public MemberAddressListResponseDto getAddresses(Long memberId) throws Exception {
-        List<MemberAddress> memberAddresses = memberAddressRepository.findAllByMemberId(memberId)
+    public DeliveryAddressListResponseDto getAddresses(Long memberId) throws Exception {
+        List<DeliveryAddress> deliveryAddresses = deliveryAddressRepository.findAllByMemberId(memberId)
             .stream()
-            .sorted(Comparator.comparing(MemberAddress::isMainAddress, Comparator.reverseOrder()))
+            .sorted(Comparator.comparing(DeliveryAddress::isMainAddress, Comparator.reverseOrder()))
             .toList();
-        List<MemberAddressListDto> memberAddressList = new ArrayList<>();
-        for (MemberAddress memberAddress : memberAddresses) {
-            MemberAddressListDto addressListDto = MemberAddressListDto.builder()
-                .memberAddressId(memberAddress.getId())
-                .street(aesUtil.aesDecode(memberAddress.getAddress().getStreet()))
-                .detailAddress(aesUtil.aesDecode(memberAddress.getAddress().getDetailAddress()))
-                .zipCode(aesUtil.aesDecode(memberAddress.getAddress().getZipCode()))
-                .alias(memberAddress.getAddress().getAlias())
-                .receiver(memberAddress.getReceiver())
-                .isMainAddress(memberAddress.isMainAddress())
+        List<DeliveryAddressListDto> DeliveryAddressList = new ArrayList<>();
+        for (DeliveryAddress deliveryAddress : deliveryAddresses) {
+            DeliveryAddressListDto addressListDto = DeliveryAddressListDto.builder()
+                .deliveryAddressId(deliveryAddress.getId())
+                .street(aesUtil.aesDecode(deliveryAddress.getAddress().getStreet()))
+                .detailAddress(aesUtil.aesDecode(deliveryAddress.getAddress().getDetailAddress()))
+                .zipCode(aesUtil.aesDecode(deliveryAddress.getAddress().getZipCode()))
+                .alias(deliveryAddress.getAddress().getAlias())
+                .receiver(deliveryAddress.getReceiver())
+                .isMainAddress(deliveryAddress.isMainAddress())
                 .build();
-            memberAddressList.add(addressListDto);
+            DeliveryAddressList.add(addressListDto);
         }
-        return new MemberAddressListResponseDto(memberAddressList);
+        return new DeliveryAddressListResponseDto(DeliveryAddressList);
     }
 
 }

@@ -7,8 +7,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 @Builder
-public class MemberAddressListDto {
-    private Long memberAddressId;
+public class DeliveryAddressListDto {
+    private Long deliveryAddressId;
     private String street;
     private String detailAddress;
     private String zipCode;

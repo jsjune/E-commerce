@@ -5,12 +5,18 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.ecommerce.IntegrationTestSupport;
 import com.ecommerce.common.AesUtil;
 import com.ecommerce.delivery.controller.req.AddressRequestDto;
-import com.ecommerce.delivery.controller.res.MemberAddressListResponseDto;
-import com.ecommerce.delivery.entity.MemberAddress;
-import com.ecommerce.delivery.repository.MemberAddressRepository;
+import com.ecommerce.delivery.controller.res.DeliveryAddressListResponseDto;
+import com.ecommerce.delivery.entity.Delivery;
+import com.ecommerce.delivery.entity.DeliveryAddress;
+import com.ecommerce.delivery.repository.DeliveryAddressRepository;
 import com.ecommerce.delivery.usecase.DeliveryAddressUseCase;
+import com.ecommerce.delivery.usecase.DeliveryUseCase;
 import com.ecommerce.member.entity.Member;
 import com.ecommerce.member.repository.MemberRepository;
+import com.ecommerce.order.entity.OrderLine;
+import com.ecommerce.order.repository.OrderLineRepository;
+import com.ecommerce.product.entity.Product;
+import com.ecommerce.product.repository.ProductRepository;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,14 +30,48 @@ class DeliveryAddressServiceTest extends IntegrationTestSupport {
     @Autowired
     private MemberRepository memberRepository;
     @Autowired
-    private MemberAddressRepository memberAddressRepository;
+    private DeliveryAddressRepository deliveryAddressRepository;
     @Autowired
-    private AesUtil aesUtil;
+    private DeliveryUseCase deliveryUseCase;
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private OrderLineRepository orderLineRepository;
 
     @BeforeEach
     void setUp() {
-        memberAddressRepository.deleteAllInBatch();
+        orderLineRepository.deleteAllInBatch();
+        productRepository.deleteAllInBatch();
+        deliveryAddressRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
+    }
+
+    @DisplayName("배송 요청")
+    @Test
+    void process_delivery() throws Exception {
+        // given
+        Member member = Member.builder().build();
+        memberRepository.save(member);
+        AddressRequestDto request = getAddressRequest(true);
+        deliveryAddressUseCase.registerAddress(member.getId(), request);
+
+        Product product = Product.builder().price(1000).build();
+        productRepository.save(product);
+        OrderLine orderLine = OrderLine.builder()
+            .product(product)
+            .quantity(3)
+            .build();
+        orderLineRepository.save(orderLine);
+        DeliveryAddress findDeliveryAddress = deliveryAddressRepository.findAll().stream().findFirst()
+            .get();
+
+        // when
+        Delivery result = deliveryUseCase.processDelivery(orderLine, findDeliveryAddress.getId());
+
+        // then
+        assertEquals(result.getDeliveryAddress().getId(), findDeliveryAddress.getId());
+        assertEquals(result.getOrderLine().getId(), orderLine.getId());
+        assertEquals(result.getProduct().getId(), product.getId());
     }
 
     @DisplayName("등록한 배송지 목록 조회")
@@ -46,13 +86,13 @@ class DeliveryAddressServiceTest extends IntegrationTestSupport {
         deliveryAddressUseCase.registerAddress(member.getId(),request2);
 
         // when
-        MemberAddressListResponseDto result = deliveryAddressUseCase.getAddresses(
+        DeliveryAddressListResponseDto result = deliveryAddressUseCase.getAddresses(
             member.getId());
 
         // then
-        assertEquals(result.getMemberAddresses().size(), 2);
-        assertEquals(result.getMemberAddresses().get(0).getStreet(), request2.getStreet());
-        assertTrue(result.getMemberAddresses().get(0).isMainAddress());
+        assertEquals(result.getDeliveryAddresses().size(), 2);
+        assertEquals(result.getDeliveryAddresses().get(0).getStreet(), request2.getStreet());
+        assertTrue(result.getDeliveryAddresses().get(0).isMainAddress());
     }
 
     @DisplayName("대표 배송지가 있는데 다시 대표 배송지로 등록할 경우")
@@ -69,9 +109,9 @@ class DeliveryAddressServiceTest extends IntegrationTestSupport {
         deliveryAddressUseCase.registerAddress(member.getId(), request);
 
         // then
-        List<MemberAddress> result = memberAddressRepository.findAllByMemberId(
+        List<DeliveryAddress> result = deliveryAddressRepository.findAllByMemberId(
             member.getId());
-        assertEquals(result.stream().filter(MemberAddress::isMainAddress).count(), 1);
+        assertEquals(result.stream().filter(DeliveryAddress::isMainAddress).count(), 1);
         assertFalse(result.get(0).isMainAddress());
         assertTrue(result.get(1).isMainAddress());
     }
@@ -87,12 +127,12 @@ class DeliveryAddressServiceTest extends IntegrationTestSupport {
 
         // when
         deliveryAddressUseCase.registerAddress(member.getId(), request);
-        MemberAddress memberAddress = memberAddressRepository.findAllByMemberId(member.getId())
+        DeliveryAddress deliveryAddress = deliveryAddressRepository.findAllByMemberId(member.getId())
             .stream().findFirst().orElse(null);
 
         // then
-        assertNotNull(memberAddress);
-        assertEquals(memberAddress.isMainAddress(), request.isMainAddress());
+        assertNotNull(deliveryAddress);
+        assertEquals(deliveryAddress.isMainAddress(), request.isMainAddress());
 
     }
 

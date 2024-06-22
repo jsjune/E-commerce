@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class MemberAddress {
+public class DeliveryAddress {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,7 +27,7 @@ public class MemberAddress {
     private boolean isMainAddress;
 
     @Builder
-    public MemberAddress(Long id, Member member, Address address, String alias, String receiver,
+    public DeliveryAddress(Long id, Member member, Address address, String alias, String receiver,
         boolean isMainAddress) {
         this.id = id;
         this.member = member;

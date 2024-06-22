@@ -9,8 +9,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -28,7 +30,24 @@ public class ProductOrder {
     private OrderStatus status;
     @OneToMany(mappedBy = "productOrder")
     private List<OrderLine> orderLines;
-    private Long paymentId;
-    private Long deliveryId;
+    private int totalPrice;
+    private int totalDiscount;
 
+    @Builder
+    public ProductOrder(Long id, Member member, OrderStatus status, List<OrderLine> orderLines,
+        int totalPrice, int totalDiscount) {
+        this.id = id;
+        this.member = member;
+        this.status = status;
+        this.orderLines = orderLines;
+        this.totalPrice = totalPrice;
+        this.totalDiscount = totalDiscount;
+    }
+
+    public void finalizeOrder(OrderStatus orderStatus, int finalTotalPrice,
+        int finalTotalDiscount) {
+        this.status = orderStatus;
+        this.totalPrice = finalTotalPrice;
+        this.totalDiscount = finalTotalDiscount;
+    }
 }

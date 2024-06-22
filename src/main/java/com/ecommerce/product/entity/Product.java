@@ -57,4 +57,9 @@ public class Product extends BaseTimeEntity {
         this.tags = tags;
         this.productImages = productImages;
     }
+
+    public void decreaseStock(int quantity) {
+        this.totalStock -= quantity;
+        this.soldQuantity += quantity;
+    }
 }
