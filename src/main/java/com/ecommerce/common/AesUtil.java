@@ -14,7 +14,9 @@ public class AesUtil {
     private String privateKey_256;
 
     public String aesEncode(String data) throws Exception {
-        System.out.println("privateKey_256 = " + privateKey_256);
+        if (isNull(data)) {
+            return null;
+        }
         SecretKeySpec secretKey = new SecretKeySpec(privateKey_256.getBytes(), "AES");
         IvParameterSpec iV = new IvParameterSpec(
             privateKey_256.substring(0, 16).getBytes());
@@ -29,6 +31,9 @@ public class AesUtil {
     }
 
     public String aesDecode(String data) throws Exception {
+        if (isNull(data)) {
+            return null;
+        }
         SecretKeySpec secretKey = new SecretKeySpec(privateKey_256.getBytes(), "AES");
         IvParameterSpec iV = new IvParameterSpec(
             privateKey_256.substring(0, 16).getBytes());
@@ -40,6 +45,10 @@ public class AesUtil {
         byte[] decryptionByte = cipher.doFinal(Hex.decodeHex(data));
 
         return new String(decryptionByte);
+    }
+
+    private static boolean isNull(String data) {
+        return data == null || data.isEmpty();
     }
 
 }
