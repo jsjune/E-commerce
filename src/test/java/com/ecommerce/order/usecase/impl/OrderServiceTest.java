@@ -1,11 +1,15 @@
 package com.ecommerce.order.usecase.impl;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.ecommerce.IntegrationTestSupport;
+import com.ecommerce.common.error.ErrorCode;
+import com.ecommerce.common.error.GlobalException;
 import com.ecommerce.delivery.controller.req.AddressRequestDto;
 import com.ecommerce.delivery.entity.Delivery;
 import com.ecommerce.delivery.entity.DeliveryAddress;
+import com.ecommerce.delivery.entity.DeliveryStatus;
 import com.ecommerce.delivery.repository.DeliveryAddressRepository;
 import com.ecommerce.delivery.repository.DeliveryRepository;
 import com.ecommerce.delivery.usecase.DeliveryAddressUseCase;
@@ -18,7 +22,9 @@ import com.ecommerce.order.controller.req.CartOrderRequestDto;
 import com.ecommerce.order.controller.req.OrderRequest;
 import com.ecommerce.order.controller.req.ProductOrderRequestDto;
 import com.ecommerce.order.controller.res.OrderDetailResponseDto;
-import com.ecommerce.order.entity.OrderStatus;
+import com.ecommerce.order.entity.OrderLine;
+import com.ecommerce.order.entity.OrderLineStatus;
+import com.ecommerce.order.entity.ProdcutOrderStatus;
 import com.ecommerce.order.entity.ProductOrder;
 import com.ecommerce.order.repository.OrderLineRepository;
 import com.ecommerce.order.repository.ProductOrderRepository;
@@ -78,6 +84,72 @@ class OrderServiceTest extends IntegrationTestSupport {
         paymentMethodRepository.deleteAllInBatch();
         productRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
+    }
+
+    @DisplayName("배송 중 주문 취소시 실패")
+    @Test
+    void in_delivery_order_cancel_fail() {
+        // given
+        OrderLine orderline = OrderLine.builder()
+            .build();
+        orderLineRepository.save(orderline);
+        Delivery delivery = Delivery.builder()
+            .orderLine(orderline)
+            .status(DeliveryStatus.IN_DELIVERY)
+            .build();
+        deliveryRepository.save(delivery);
+        orderline.finalizeOrderLine(null,null,delivery.getId());
+
+        // when then
+        GlobalException exception = assertThrows(GlobalException.class,
+            () -> orderUseCase.cancelOrder(1L, orderline.getId()));
+        assertEquals(exception.getErrorCode(), ErrorCode.DELIVERY_STATUS_NOT_REQUESTED);
+    }
+
+    @DisplayName("주문 취소 성공")
+    @Test
+    void cancel_order() throws Exception {
+        // given
+        Member member = Member.builder().build();
+        memberRepository.save(member);
+
+        PaymentMethodRequestDto paymentMethodRequest = getPaymentMethodRequestDto("bank");
+        paymentMethodUseCase.registerPaymentMethod(member.getId(), paymentMethodRequest);
+        PaymentMethod paymentMethod = paymentMethodRepository.findAll().stream().findFirst().get();
+
+        boolean isMainAddress = true;
+        AddressRequestDto deliveryRequest = getAddressRequest(isMainAddress);
+        deliveryAddressUseCase.registerAddress(member.getId(), deliveryRequest);
+        DeliveryAddress deliveryAddress = deliveryAddressRepository.findAllByMemberId(member.getId())
+            .stream().findFirst().get();
+
+        Product product = Product.builder().price(1000).totalStock(100).soldQuantity(0).productImages(new ArrayList<>()).build();
+        Product product2 = Product.builder().price(3000).totalStock(100).soldQuantity(0).productImages(new ArrayList<>()).build();
+        productRepository.save(product);
+        productRepository.save(product2);
+        cartUseCase.addCart(member.getId(), product.getId());
+        cartUseCase.addCart(member.getId(), product2.getId());
+        cartUseCase.addCart(member.getId(), product2.getId());
+        orderUseCase.registerOrderOfCart(member.getId(), List.of(product.getId(), product2.getId()));
+        ProductOrder productOrder = productOrderRepository.findAll().stream().findFirst().get();
+
+        OrderRequest request = OrderRequest.builder()
+            .orderId(productOrder.getId())
+            .paymentMethodId(paymentMethod.getId())
+            .deliveryAddressId(deliveryAddress.getId())
+            .build();
+        orderUseCase.submitOrder(member.getId(), request);
+
+        // when
+        orderUseCase.cancelOrder(member.getId(), productOrder.getOrderLines().get(1).getId());
+        OrderLine orderLineResult = orderLineRepository.findById(
+            productOrder.getOrderLines().get(1).getId()).get();
+        Product productResult = productRepository.findById(product2.getId()).get();
+
+        // then
+        assertEquals(orderLineResult.getOrderLineStatus(), OrderLineStatus.CANCELLED);
+        assertEquals(productResult.getSoldQuantity(), 0);
+        assertEquals(productResult.getTotalStock(), 100);
     }
 
     @DisplayName("주문서 상세 조회")
@@ -172,7 +244,7 @@ class OrderServiceTest extends IntegrationTestSupport {
         // then
         assertEquals(deliveryResult.size(), 2);
         assertEquals(paymentResult.size(), 2);
-        assertEquals(orderResult.getStatus(), OrderStatus.PAYMENT_COMPLETED);
+        assertEquals(orderResult.getProductOrderStatus(), ProdcutOrderStatus.COMPLETED);
         assertEquals(orderResult.getTotalPrice(), paymentResult.stream().mapToInt(Payment::getTotalPrice).sum());
         assertEquals(productResult.getSoldQuantity(),1);
         assertEquals(productResult.getTotalStock(),99);

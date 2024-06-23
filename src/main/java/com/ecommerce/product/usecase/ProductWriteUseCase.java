@@ -7,4 +7,6 @@ public interface ProductWriteUseCase {
     void createProduct(LoginUser loginUser, ProductRequestDto request);
 
     void decreaseStock(Long productId, int quantity);
+
+    void incrementStock(Long productId, int quantity);
 }

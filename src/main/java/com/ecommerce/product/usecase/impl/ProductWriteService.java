@@ -70,4 +70,11 @@ public class ProductWriteService implements ProductWriteUseCase {
         }
         product.decreaseStock(quantity);
     }
+
+    @Override
+    public void incrementStock(Long productId, int quantity) {
+        Product product = productRepository.findById(productId)
+            .orElseThrow(() -> new GlobalException(ErrorCode.PRODUCT_NOT_FOUND));
+        product.incrementStock(quantity);
+    }
 }

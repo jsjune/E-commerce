@@ -23,7 +23,7 @@ public class OrderLineDto {
         this.price = orderLine.getProduct().getPrice();
         this.quantity = orderLine.getQuantity();
         this.thumbnailUrl = orderLine.getProduct().getProductImages().stream().map(ProductImage::getThumbnailUrl).findFirst().orElse(null);
-        this.status = orderLine.getStatus().name();
+        this.status = orderLine.getOrderLineStatus().name();
         this.paymentId = orderLine.getPaymentId();
         this.deliveryId = orderLine.getDeliveryId();
     }

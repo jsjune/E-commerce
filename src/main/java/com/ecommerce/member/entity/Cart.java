@@ -1,5 +1,6 @@
 package com.ecommerce.member.entity;
 
+import com.ecommerce.common.BaseTimeEntity;
 import com.ecommerce.product.entity.Product;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
@@ -16,7 +17,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 @Getter
-public class Cart {
+public class Cart extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

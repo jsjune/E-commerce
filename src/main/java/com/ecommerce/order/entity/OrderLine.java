@@ -1,5 +1,6 @@
 package com.ecommerce.order.entity;
 
+import com.ecommerce.common.BaseTimeEntity;
 import com.ecommerce.product.entity.Product;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -16,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class OrderLine {
+public class OrderLine extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,30 +26,36 @@ public class OrderLine {
     @ManyToOne
     private Product product;
     private int quantity;
+    private int discount;
     @Enumerated(EnumType.STRING)
-    private OrderLineStatus status;
+    private OrderLineStatus orderLineStatus;
     private Long paymentId;
     private Long deliveryId;
 
     @Builder
     public OrderLine(Long id, ProductOrder productOrder, Product product, int quantity,
-        OrderLineStatus status,Long paymentId, Long deliveryId) {
+        int discount, OrderLineStatus orderLineStatus,Long paymentId, Long deliveryId) {
         this.id = id;
         this.productOrder = productOrder;
         this.product = product;
         this.quantity = quantity;
-        this.status = status;
+        this.discount = discount;
+        this.orderLineStatus = orderLineStatus;
         this.paymentId = paymentId;
         this.deliveryId = deliveryId;
     }
 
     public void finalizeOrderLine(OrderLineStatus orderLineStatus, Long paymentId, Long deliveryId) {
-        this.status = orderLineStatus;
+        this.orderLineStatus = orderLineStatus;
         this.paymentId = paymentId;
         this.deliveryId = deliveryId;
     }
 
     public void assignToOrder(ProductOrder productOrder) {
         this.productOrder = productOrder;
+    }
+
+    public void cancelOrderLine() {
+        this.orderLineStatus = OrderLineStatus.CANCELLED;
     }
 }

@@ -17,4 +17,6 @@ public interface OrderUseCase {
     OrderDetailResponseDto getOrder(Long memberId, Long orderId);
 
     OrderListResponseDto getOrders(Long memberId);
+
+    void cancelOrder(Long memberId, Long orderLineId);
 }

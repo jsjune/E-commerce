@@ -51,7 +51,6 @@ public class PaymentService implements PaymentUseCase {
             .member(member)
             .paymentMethod(paymentMethod)
             .totalPrice(totalPrice)
-            .discountPrice(0)
             .status(PaymentStatus.COMPLETED)
             .referenceCode(referenceCode)
             .build();

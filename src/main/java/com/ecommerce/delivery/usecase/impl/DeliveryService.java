@@ -11,7 +11,6 @@ import com.ecommerce.delivery.repository.DeliveryAddressRepository;
 import com.ecommerce.delivery.repository.DeliveryRepository;
 import com.ecommerce.delivery.usecase.DeliveryUseCase;
 import com.ecommerce.order.entity.OrderLine;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,9 +48,19 @@ public class DeliveryService implements DeliveryUseCase {
                 .product(orderLine.getProduct())
                 .deliveryAddress(deliveryAddress)
                 .orderLine(orderLine)
-                .status(DeliveryStatus.REQUEST)
+                .status(DeliveryStatus.REQUESTED)
                 .referenceCode(referenceCode)
                 .build();
             return deliveryRepository.save(delivery);
+    }
+
+    @Override
+    public void deliveryStatusCheck(Long deliveryId) {
+        deliveryRepository.findById(deliveryId)
+            .ifPresent(delivery -> {
+                if (!delivery.getStatus().name().equals(DeliveryStatus.REQUESTED.name())) {
+                    throw new GlobalException(ErrorCode.DELIVERY_STATUS_NOT_REQUESTED);
+                }
+            });
     }
 }

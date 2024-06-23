@@ -12,7 +12,7 @@ import com.ecommerce.order.controller.res.OrderDetailResponseDto;
 import com.ecommerce.order.controller.res.OrderListResponseDto;
 import com.ecommerce.order.entity.OrderLine;
 import com.ecommerce.order.entity.OrderLineStatus;
-import com.ecommerce.order.entity.OrderStatus;
+import com.ecommerce.order.entity.ProdcutOrderStatus;
 import com.ecommerce.order.entity.ProductOrder;
 import com.ecommerce.order.repository.OrderLineRepository;
 import com.ecommerce.order.repository.ProductOrderRepository;
@@ -53,13 +53,14 @@ public class OrderService implements OrderUseCase {
                 OrderLine orderLine = OrderLine.builder()
                     .product(cart.getProduct())
                     .quantity(cart.getQuantity())
-                    .status(OrderLineStatus.INITIATED)
+                    .discount(0)
+                    .orderLineStatus(OrderLineStatus.INITIATED)
                     .build();
                 orderLines.add(orderLine);
             }
             ProductOrder productOrder = ProductOrder.builder()
                 .member(member)
-                .status(OrderStatus.INITIATED)
+                .productOrderStatus(ProdcutOrderStatus.INITIATED)
                 .orderLines(orderLines)
                 .totalPrice(totalPrice)
                 .totalDiscount(0)
@@ -83,11 +84,12 @@ public class OrderService implements OrderUseCase {
                 OrderLine orderLine = OrderLine.builder()
                     .product(product)
                     .quantity(request.getQuantity())
-                    .status(OrderLineStatus.INITIATED)
+                    .discount(0)
+                    .orderLineStatus(OrderLineStatus.INITIATED)
                     .build();
                 ProductOrder productOrder = ProductOrder.builder()
                     .member(member)
-                    .status(OrderStatus.INITIATED)
+                    .productOrderStatus(ProdcutOrderStatus.INITIATED)
                     .orderLines(List.of(orderLine))
                     .totalPrice(product.getPrice() * request.getQuantity())
                     .totalDiscount(0)
@@ -110,8 +112,9 @@ public class OrderService implements OrderUseCase {
 
                 List<Long> productIds = new ArrayList<>();
                 int finalTotalPrice = 0;
-                int finalTotalDiscount = 0;
+                int totalDiscount = 0;
                 for (OrderLine orderLine : productOrder.getOrderLines()) {
+                    totalDiscount += orderLine.getDiscount();
                     productIds.add(orderLine.getProduct().getId());
 
                     // 결제 요청
@@ -119,7 +122,6 @@ public class OrderService implements OrderUseCase {
                         request.getPaymentMethodId());
 
                     finalTotalPrice += payment.getTotalPrice();
-                    finalTotalDiscount += payment.getDiscountPrice();
                     Delivery delivery = deliveryUseCase.processDelivery(orderLine,
                         request.getDeliveryAddressId());
 
@@ -135,7 +137,7 @@ public class OrderService implements OrderUseCase {
                 // 장바구니 비우기
                 cartUseCase.clearCart(memberId, productIds);
 
-                productOrder.finalizeOrder(OrderStatus.PAYMENT_COMPLETED, finalTotalPrice, finalTotalDiscount);
+                productOrder.finalizeOrder(ProdcutOrderStatus.COMPLETED, finalTotalPrice, totalDiscount);
                 productOrderRepository.save(productOrder);
             }
         }
@@ -148,7 +150,7 @@ public class OrderService implements OrderUseCase {
             ProductOrder productOrder = findProductOrder.get();
             return OrderDetailResponseDto.builder()
                 .orderLines(productOrder.getOrderLines())
-                .orderStatus(productOrder.getStatus().name())
+                .orderStatus(productOrder.getProductOrderStatus().name())
                 .totalPrice(productOrder.getTotalPrice())
                 .totalDiscount(productOrder.getTotalDiscount())
                 .build();
@@ -160,5 +162,18 @@ public class OrderService implements OrderUseCase {
     public OrderListResponseDto getOrders(Long memberId) {
         List<ProductOrder> findProductOrder = productOrderRepository.findAllByMemberId(memberId);
         return new OrderListResponseDto(findProductOrder);
+    }
+
+    @Override
+    public void cancelOrder(Long memberId, Long orderLineId) {
+        orderLineRepository.findById(orderLineId).ifPresent(orderLine -> {
+            deliveryUseCase.deliveryStatusCheck(orderLine.getDeliveryId());
+            orderLine.cancelOrderLine();
+            productWriteUseCase.incrementStock(orderLine.getProduct().getId(), orderLine.getQuantity());
+            ProductOrder productOrder = orderLine.getProductOrder();
+            int price = orderLine.getProduct().getPrice() * orderLine.getQuantity();
+            productOrder.cancelOrder(price, orderLine.getDiscount());
+            orderLineRepository.save(orderLine);
+        });
     }
 }

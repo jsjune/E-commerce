@@ -129,6 +129,7 @@ class DeliveryAddressServiceTest extends IntegrationTestSupport {
         deliveryAddressUseCase.registerAddress(member.getId(), request);
         DeliveryAddress deliveryAddress = deliveryAddressRepository.findAllByMemberId(member.getId())
             .stream().findFirst().orElse(null);
+        System.out.println("deliveryAddress.getCreatedAt() : " + deliveryAddress.getCreatedAt());
 
         // then
         assertNotNull(deliveryAddress);

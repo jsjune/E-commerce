@@ -8,4 +8,6 @@ public interface DeliveryUseCase {
 
     Delivery processDelivery(OrderLine orderLine, Long deliveryAddressId)
         throws Exception;
+
+    void deliveryStatusCheck(Long deliveryId);
 }

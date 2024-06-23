@@ -1,5 +1,6 @@
 package com.ecommerce.delivery.entity;
 
+import com.ecommerce.common.BaseTimeEntity;
 import com.ecommerce.order.entity.OrderLine;
 import com.ecommerce.order.entity.ProductOrder;
 import com.ecommerce.product.entity.Product;
@@ -18,7 +19,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Delivery {
+public class Delivery extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

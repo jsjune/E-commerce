@@ -1,5 +1,6 @@
 package com.ecommerce.delivery.entity;
 
+import com.ecommerce.common.BaseTimeEntity;
 import com.ecommerce.member.entity.Member;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -15,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class DeliveryAddress {
+public class DeliveryAddress extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

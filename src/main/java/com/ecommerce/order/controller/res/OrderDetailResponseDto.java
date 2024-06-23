@@ -25,7 +25,7 @@ public class OrderDetailResponseDto {
 
     public OrderDetailResponseDto(ProductOrder productOrders) {
         this.orderLines = productOrders.getOrderLines().stream().map(OrderLineDto::new).toList();
-        this.orderStatus = productOrders.getStatus().name();
+        this.orderStatus = productOrders.getProductOrderStatus().name();
         this.totalPrice = productOrders.getTotalPrice();
         this.totalDiscount = productOrders.getTotalDiscount();
     }

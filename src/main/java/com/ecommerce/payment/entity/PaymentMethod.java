@@ -1,5 +1,6 @@
 package com.ecommerce.payment.entity;
 
+import com.ecommerce.common.BaseTimeEntity;
 import com.ecommerce.member.entity.Member;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -16,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class PaymentMethod {
+public class PaymentMethod extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
