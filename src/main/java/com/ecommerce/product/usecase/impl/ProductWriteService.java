@@ -2,6 +2,8 @@ package com.ecommerce.product.usecase.impl;
 
 import com.ecommerce.common.error.ErrorCode;
 import com.ecommerce.common.error.GlobalException;
+import com.ecommerce.member.entity.Member;
+import com.ecommerce.member.usecase.AuthUseCase;
 import com.ecommerce.product.utils.ImageValidator;
 import com.ecommerce.product.utils.S3Utils;
 import com.ecommerce.member.auth.LoginUser;
@@ -25,12 +27,14 @@ import org.springframework.web.multipart.MultipartFile;
 @Transactional
 public class ProductWriteService implements ProductWriteUseCase {
 
+    private final AuthUseCase authUseCase;
     private final ProductRepository productRepository;
     private final S3Utils s3Utils;
     private static final String UPLOAD_FOLDER = "images";
 
     @Override
-    public void createProduct(LoginUser loginUser, ProductRequestDto request) {
+    public void createProduct(Long memberId, ProductRequestDto request) {
+        Member member = authUseCase.findByIdAndRole(memberId);
         List<ProductImage> images = new ArrayList<>();
         for (MultipartFile image : request.getProductImages()) {
             if (!image.isEmpty()) {
@@ -54,7 +58,7 @@ public class ProductWriteService implements ProductWriteUseCase {
             .price(request.getPrice())
             .totalStock(request.getStock())
             .soldQuantity(0)
-            .seller(loginUser.getMember())
+            .seller(member)
             .tags(request.getTags())
             .productImages(images)
             .build();

@@ -7,7 +7,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 public interface ProductReadUseCase {
 
-    ProductResponseDto getProduct(Long id);
+    ProductResponseDto getProduct(Long productId);
 
     ProductListResponseDto getProducts(Pageable pageable);
 

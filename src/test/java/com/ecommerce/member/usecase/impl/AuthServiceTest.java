@@ -235,7 +235,7 @@ class AuthServiceTest extends IntegrationTestSupport {
 
         // then
         assertThat(response.getAccessToken()).isNotNull();
-
+        assertEquals(response.getUsername(), username);
 
     }
 
@@ -244,8 +244,10 @@ class AuthServiceTest extends IntegrationTestSupport {
     void email_login() {
         // given
         String email = "abc@naver.com";
+        String username = "abc";
         Member member = Member.builder()
             .email(email)
+            .username(username)
             .password(encoder.encode("1234"))
             .role(UserRole.USER)
             .build();
@@ -260,6 +262,7 @@ class AuthServiceTest extends IntegrationTestSupport {
 
         // then
         assertThat(response.getAccessToken()).isNotNull();
+        assertEquals(response.getUsername(), username);
     }
 
     @DisplayName("잘못된 비밀번호로 수정 실패")

@@ -42,12 +42,18 @@ public class OrderService implements OrderUseCase {
     private final CartUseCase cartUseCase;
 
     @Override
-    public void registerOrderOfCart(Long memberId, List<Long> cartIds) {
+    public OrderDetailResponseDto registerOrderOfCart(Long memberId, List<Long> cartIds) {
         Optional<Member> findMember = authUseCase.findById(memberId);
         if (findMember.isPresent()) {
             Member member = findMember.get();
-            List<OrderLine> orderLines = new ArrayList<>();
             int totalPrice = 0;
+            ProductOrder productOrder = ProductOrder.builder()
+                .member(member)
+                .productOrderStatus(ProdcutOrderStatus.INITIATED)
+                .totalDiscount(0)
+                .build();
+            productOrderRepository.save(productOrder);
+            List<OrderLine> orderLines = new ArrayList<>();
             for (Cart cart : member.getCarts()) {
                 totalPrice += cart.getProduct().getPrice() * cart.getQuantity();
                 OrderLine orderLine = OrderLine.builder()
@@ -57,47 +63,54 @@ public class OrderService implements OrderUseCase {
                     .orderLineStatus(OrderLineStatus.INITIATED)
                     .build();
                 orderLines.add(orderLine);
+                productOrder.addOrderLine(orderLine);
             }
-            ProductOrder productOrder = ProductOrder.builder()
-                .member(member)
-                .productOrderStatus(ProdcutOrderStatus.INITIATED)
-                .orderLines(orderLines)
-                .totalPrice(totalPrice)
-                .totalDiscount(0)
-                .build();
-            for (OrderLine orderLine : orderLines) {
-                orderLine.assignToOrder(productOrder);
-            }
-            productOrderRepository.save(productOrder);
+            productOrder.assignTotalPrice(totalPrice);
             orderLineRepository.saveAll(orderLines);
+            return OrderDetailResponseDto.builder()
+                .productOrderId(productOrder.getId())
+                .orderLines(productOrder.getOrderLines())
+                .orderStatus(productOrder.getProductOrderStatus().name())
+                .totalPrice(productOrder.getTotalPrice())
+                .totalDiscount(productOrder.getTotalDiscount())
+                .build();
         }
+        return null;
     }
 
     @Override
-    public void registerOrder(Long memberId, ProductOrderRequestDto request) {
+    public OrderDetailResponseDto registerOrder(Long memberId, ProductOrderRequestDto request) {
         Optional<Member> findMember = authUseCase.findById(memberId);
         if (findMember.isPresent()) {
             Member member = findMember.get();
             Optional<Product> findProduct = productReadUseCase.findById(request.getProductId());
             if (findProduct.isPresent()) {
                 Product product = findProduct.get();
+                ProductOrder productOrder = ProductOrder.builder()
+                    .member(member)
+                    .productOrderStatus(ProdcutOrderStatus.INITIATED)
+                    .totalPrice(product.getPrice() * request.getQuantity())
+                    .totalDiscount(0)
+                    .build();
+                productOrderRepository.save(productOrder);
                 OrderLine orderLine = OrderLine.builder()
                     .product(product)
                     .quantity(request.getQuantity())
                     .discount(0)
                     .orderLineStatus(OrderLineStatus.INITIATED)
                     .build();
-                ProductOrder productOrder = ProductOrder.builder()
-                    .member(member)
-                    .productOrderStatus(ProdcutOrderStatus.INITIATED)
-                    .orderLines(List.of(orderLine))
-                    .totalPrice(product.getPrice() * request.getQuantity())
-                    .totalDiscount(0)
-                    .build();
-                productOrderRepository.save(productOrder);
+                productOrder.addOrderLine(orderLine);
                 orderLineRepository.save(orderLine);
+                return OrderDetailResponseDto.builder()
+                    .productOrderId(productOrder.getId())
+                    .orderLines(productOrder.getOrderLines())
+                    .orderStatus(productOrder.getProductOrderStatus().name())
+                    .totalPrice(productOrder.getTotalPrice())
+                    .totalDiscount(productOrder.getTotalDiscount())
+                    .build();
             }
         }
+        return null;
     }
 
     @Override
@@ -149,6 +162,7 @@ public class OrderService implements OrderUseCase {
         if(findProductOrder.isPresent()) {
             ProductOrder productOrder = findProductOrder.get();
             return OrderDetailResponseDto.builder()
+                .productOrderId(productOrder.getId())
                 .orderLines(productOrder.getOrderLines())
                 .orderStatus(productOrder.getProductOrderStatus().name())
                 .totalPrice(productOrder.getTotalPrice())

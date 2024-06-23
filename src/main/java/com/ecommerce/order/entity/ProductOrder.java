@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -39,9 +40,14 @@ public class ProductOrder extends BaseTimeEntity {
         this.id = id;
         this.member = member;
         this.productOrderStatus = productOrderStatus;
-        this.orderLines = orderLines;
+        this.orderLines = orderLines == null ? new ArrayList<>() : orderLines;
         this.totalPrice = totalPrice;
         this.totalDiscount = totalDiscount;
+    }
+
+    public void addOrderLine(OrderLine orderLine) {
+        this.orderLines.add(orderLine);
+        orderLine.assignToOrder(this);
     }
 
     public void finalizeOrder(ProdcutOrderStatus prodcutOrderStatus, int finalTotalPrice,
@@ -54,5 +60,9 @@ public class ProductOrder extends BaseTimeEntity {
     public void cancelOrder(int price, int discount) {
         this.totalPrice -= price;
         this.totalDiscount -= discount;
+    }
+
+    public void assignTotalPrice(int totalPrice) {
+        this.totalPrice = totalPrice;
     }
 }

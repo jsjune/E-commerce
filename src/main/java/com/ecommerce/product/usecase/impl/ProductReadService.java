@@ -25,8 +25,8 @@ public class ProductReadService implements ProductReadUseCase {
     private final ProductRepository productRepository;
 
     @Override
-    public ProductResponseDto getProduct(Long id) {
-        return productRepository.findById(id)
+    public ProductResponseDto getProduct(Long productId) {
+        return productRepository.findById(productId)
             .map(product -> ProductResponseDto.builder()
                 .company(product.getSeller().getCompany())
                 .phoneNumber(product.getSeller().getPhoneNumber())

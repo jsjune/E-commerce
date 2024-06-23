@@ -66,6 +66,9 @@ dependencies {
     // https://mvnrepository.com/artifact/org.testcontainers/testcontainers
     testImplementation 'org.testcontainers:testcontainers:1.19.7'
 
+    // https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-netflix-eureka-client
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:4.1.0'
+
 }
 
 // QueryDsl 디렉토리 경로

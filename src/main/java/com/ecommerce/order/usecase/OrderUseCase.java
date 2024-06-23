@@ -8,9 +8,9 @@ import java.util.List;
 
 public interface OrderUseCase {
 
-    void registerOrderOfCart(Long memberId, List<Long> cartIds);
+    OrderDetailResponseDto registerOrderOfCart(Long memberId, List<Long> cartIds);
 
-    void registerOrder(Long memberId, ProductOrderRequestDto request);
+    OrderDetailResponseDto registerOrder(Long memberId, ProductOrderRequestDto request);
 
     void submitOrder(Long memberId, OrderRequest request) throws Exception;
 

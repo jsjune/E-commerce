@@ -15,50 +15,55 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/order")
 public class OrderController {
 
     private final OrderUseCase orderUseCase;
 
-    @PostMapping("/order/cart/create")
-    public Response<Void> registerOrderOfCart(@AuthenticationPrincipal LoginUser loginUser,
+    @PostMapping("/cart/create")
+    public Response<OrderDetailResponseDto> registerOrderOfCart(@RequestHeader("Member-Id")Long memberId,
         @RequestBody CartOrderRequestDto request) {
-        orderUseCase.registerOrderOfCart(loginUser.getMember().getId(), request.getCartIds());
-        return Response.success(HttpStatus.OK.value(), null);
+        OrderDetailResponseDto data = orderUseCase.registerOrderOfCart(memberId,
+            request.getCartIds());
+        return Response.success(HttpStatus.OK.value(), data);
     }
 
-    @PostMapping("/order/create")
-    public Response<Void> registerOrder(@AuthenticationPrincipal LoginUser loginUser,@RequestBody
+    @PostMapping("/create")
+    public Response<OrderDetailResponseDto> registerOrder(@RequestHeader("Member-Id")Long memberId,@RequestBody
         ProductOrderRequestDto request) {
-        orderUseCase.registerOrder(loginUser.getMember().getId(), request);
-        return Response.success(HttpStatus.OK.value(), null);
+        OrderDetailResponseDto data = orderUseCase.registerOrder(memberId,
+            request);
+        return Response.success(HttpStatus.OK.value(), data);
     }
 
-    @PostMapping("/order/submit")
-    public Response<Void> submitOrder(@AuthenticationPrincipal LoginUser loginUser, @RequestBody
+    @PostMapping("/submit")
+    public Response<Void> submitOrder(@RequestHeader("Member-Id")Long memberId, @RequestBody
         OrderRequest request) throws Exception {
-        orderUseCase.submitOrder(loginUser.getMember().getId(), request);
+        orderUseCase.submitOrder(memberId, request);
         return Response.success(HttpStatus.OK.value(), null);
     }
 
-    @GetMapping("/order/{orderId}")
-    public Response<OrderDetailResponseDto> getOrder(@AuthenticationPrincipal LoginUser loginUser, Long orderId) {
-        OrderDetailResponseDto data = orderUseCase.getOrder(loginUser.getMember().getId(), orderId);
+    @GetMapping("/{orderId}")
+    public Response<OrderDetailResponseDto> getOrder(@RequestHeader("Member-Id")Long memberId,@PathVariable Long orderId) {
+        OrderDetailResponseDto data = orderUseCase.getOrder(memberId, orderId);
         return Response.success(HttpStatus.OK.value(), data);
     }
 
-    @GetMapping("/order")
-    public Response<OrderListResponseDto> getOrders(@AuthenticationPrincipal LoginUser loginUser) {
-        OrderListResponseDto data = orderUseCase.getOrders(loginUser.getMember().getId());
+    @GetMapping
+    public Response<OrderListResponseDto> getOrders(@RequestHeader("Member-Id")Long memberId) {
+        OrderListResponseDto data = orderUseCase.getOrders(memberId);
         return Response.success(HttpStatus.OK.value(), data);
     }
 
-    @PostMapping("/orderLine/{orderLineId}/cancel")
-    public Response<Void> cancelOrder(@AuthenticationPrincipal LoginUser loginUser,@PathVariable Long orderLineId) {
-        orderUseCase.cancelOrder(loginUser.getMember().getId(), orderLineId);
+    @PostMapping("/{orderLineId}/cancel")
+    public Response<Void> cancelOrder(@RequestHeader("Member-Id")Long memberId,@PathVariable Long orderLineId) {
+        orderUseCase.cancelOrder(memberId, orderLineId);
         return Response.success(HttpStatus.OK.value(), null);
     }
 }

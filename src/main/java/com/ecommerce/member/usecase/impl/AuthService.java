@@ -11,6 +11,7 @@ import com.ecommerce.member.controller.req.UserInfoRequestDto;
 import com.ecommerce.member.controller.res.LoginResponseDto;
 import com.ecommerce.member.controller.res.MemberInfoResponseDto;
 import com.ecommerce.member.entity.Member;
+import com.ecommerce.member.entity.UserRole;
 import com.ecommerce.member.repository.MemberRepository;
 import com.ecommerce.member.usecase.AuthUseCase;
 import com.ecommerce.member.utils.EmailValidator;
@@ -134,6 +135,12 @@ public class AuthService implements AuthUseCase {
     @Override
     public Optional<Member> findById(Long memberId) {
         return memberRepository.findById(memberId);
+    }
+
+    @Override
+    public Member findByIdAndRole(Long memberId) {
+        return memberRepository.findByIdAndRole(memberId, UserRole.SELLER)
+            .orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_NOT_FOUND));
     }
 }
 

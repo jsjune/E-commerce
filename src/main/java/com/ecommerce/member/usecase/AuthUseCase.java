@@ -24,4 +24,6 @@ public interface AuthUseCase {
         throws Exception;
 
     Optional<Member> findById(Long memberId);
+
+    Member findByIdAndRole(Long memberId);
 }

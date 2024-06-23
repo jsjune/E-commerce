@@ -11,24 +11,27 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/delivery")
 public class DeliveryController {
     private final DeliveryAddressUseCase deliveryAddressUseCase;
 
-    @PostMapping("/delivery/addresses")
-    public Response<Void> registerAddress(@AuthenticationPrincipal LoginUser loginUser, @RequestBody AddressRequestDto request)
+    @PostMapping("/addresses")
+    public Response<Void> registerAddress(@RequestHeader("Member-Id")Long memberId, @RequestBody AddressRequestDto request)
         throws Exception {
-        deliveryAddressUseCase.registerAddress(loginUser.getMember().getId(), request);
+        deliveryAddressUseCase.registerAddress(memberId, request);
         return Response.success(HttpStatus.OK.value(), null);
     }
 
-    @GetMapping("/delivery/addresses")
-    public Response<DeliveryAddressListResponseDto> getAddresses(@AuthenticationPrincipal LoginUser loginUser)
+    @GetMapping("/addresses")
+    public Response<DeliveryAddressListResponseDto> getAddresses(@RequestHeader("Member-Id")Long memberId)
         throws Exception {
-        return Response.success(HttpStatus.OK.value(), deliveryAddressUseCase.getAddresses(loginUser.getMember().getId()));
+        return Response.success(HttpStatus.OK.value(), deliveryAddressUseCase.getAddresses(memberId));
     }
 
 

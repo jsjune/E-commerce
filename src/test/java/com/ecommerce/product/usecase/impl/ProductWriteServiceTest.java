@@ -62,7 +62,7 @@ class ProductWriteServiceTest extends IntegrationTestSupport {
         // when
         when(s3Utils.uploadThumbFile(any(), any())).thenReturn("imageUrl");
         when(s3Utils.uploadFile(any(), any())).thenReturn("s_imageUrl");
-        productWriteUseCase.createProduct(new LoginUser(member), request);
+        productWriteUseCase.createProduct(member.getId(), request);
 
         // then
         productRepository.findAll().stream().findFirst().ifPresent(product -> {
@@ -76,7 +76,7 @@ class ProductWriteServiceTest extends IntegrationTestSupport {
     private Member registerMember() {
         Member member = Member.builder()
             .username("가나다")
-            .role(UserRole.USER)
+            .role(UserRole.SELLER)
             .build();
         memberRepository.save(member);
         return member;
