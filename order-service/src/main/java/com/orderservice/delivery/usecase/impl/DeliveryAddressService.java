@@ -10,6 +10,8 @@ import com.orderservice.delivery.entity.DeliveryAddress;
 import com.orderservice.delivery.repository.DeliveryAddressRepository;
 import com.orderservice.delivery.usecase.DeliveryAddressUseCase;
 import com.orderservice.utils.AesUtil;
+import com.orderservice.utils.error.ErrorCode;
+import com.orderservice.utils.error.GlobalException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -22,13 +24,11 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class DeliveryAddressService implements DeliveryAddressUseCase {
 
-    private final MemberClient memberClient;
     private final DeliveryAddressRepository deliveryAddressRepository;
     private final AesUtil aesUtil;
 
     @Override
     public void registerAddress(Long memberId, AddressRequestDto request) throws Exception {
-        MemberDto member = memberClient.getMemberInfo(memberId);
         deliveryAddressRepository.findByMemberIdAndIsMainAddress(memberId, true)
             .ifPresent(deliveryAddress -> deliveryAddress.setMainAddress(false));
         Address address = Address.builder()
@@ -38,7 +38,7 @@ public class DeliveryAddressService implements DeliveryAddressUseCase {
             .alias(request.getAlias())
             .build();
         DeliveryAddress deliveryAddress = DeliveryAddress.builder()
-            .memberId(member.memberId())
+            .memberId(memberId)
             .address(address)
             .receiver(request.getReceiver())
             .isMainAddress(request.isMainAddress())

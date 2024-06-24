@@ -11,6 +11,8 @@ import com.memberservice.entity.Member;
 import com.memberservice.repository.CartRepository;
 import com.memberservice.repository.MemberRepository;
 import com.memberservice.usecase.CartUseCase;
+import com.memberservice.utils.error.ErrorCode;
+import com.memberservice.utils.error.GlobalException;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,9 @@ public class CartService implements CartUseCase {
     public void addCart(Long memberId, Long productId) {
         memberRepository.findById(memberId).ifPresent(member -> {
             ProductDto product = productClient.getProduct(productId);
+            if (product == null) {
+                throw new GlobalException(ErrorCode.PRODUCT_NOT_FOUND);
+            }
             for (Cart cart : member.getCarts()) {
                 if (cart.getProductId().equals(productId)) {
                     cart.increaseQuantity(1);

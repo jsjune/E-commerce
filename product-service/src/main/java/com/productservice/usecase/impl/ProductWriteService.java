@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,9 @@ public class ProductWriteService implements ProductWriteUseCase {
     @Override
     public void createProduct(Long memberId, ProductRequestDto request) throws Exception {
         MemberDto member = memberClient.getMemberInfo(memberId);
+        if(member == null) {
+            throw new GlobalException(ErrorCode.MEMBER_NOT_FOUND);
+        }
         List<ProductImage> images = new ArrayList<>();
         for (MultipartFile image : request.getProductImages()) {
             if (!image.isEmpty()) {
@@ -69,19 +73,27 @@ public class ProductWriteService implements ProductWriteUseCase {
     }
 
     @Override
-    public void decreaseStock(Long productId, int quantity) {
-        Product product = productRepository.findById(productId)
-            .orElseThrow(() -> new GlobalException(ErrorCode.PRODUCT_NOT_FOUND));
-        if(product.getTotalStock() < quantity) {
-            throw new GlobalException(ErrorCode.PRODUCT_STOCK_NOT_ENOUGH);
+    public Boolean decreaseStock(Long productId, int quantity) {
+        Optional<Product> findProduct = productRepository.findById(productId);
+        if (findProduct.isPresent()) {
+            Product product = findProduct.get();
+            if (product.getTotalStock() < quantity) {
+                return false;
+            }
+            product.decreaseStock(quantity);
+            return true;
         }
-        product.decreaseStock(quantity);
+        return null;
     }
 
     @Override
-    public void incrementStock(Long productId, int quantity) {
-        Product product = productRepository.findById(productId)
-            .orElseThrow(() -> new GlobalException(ErrorCode.PRODUCT_NOT_FOUND));
-        product.incrementStock(quantity);
+    public Boolean incrementStock(Long productId, int quantity) {
+        Optional<Product> findProduct = productRepository.findById(productId);
+        if (findProduct.isPresent()) {
+            Product product = findProduct.get();
+            product.incrementStock(quantity);
+            return true;
+        }
+        return null;
     }
 }

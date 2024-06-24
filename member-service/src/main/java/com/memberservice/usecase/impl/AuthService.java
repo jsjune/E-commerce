@@ -10,7 +10,6 @@ import com.memberservice.controller.req.UserInfoRequestDto;
 import com.memberservice.controller.res.LoginResponseDto;
 import com.memberservice.controller.res.MemberInfoResponseDto;
 import com.memberservice.entity.Member;
-import com.memberservice.entity.UserRole;
 import com.memberservice.repository.MemberRepository;
 import com.memberservice.usecase.AuthUseCase;
 import com.memberservice.utils.AesUtil;
@@ -138,10 +137,13 @@ public class AuthService implements AuthUseCase {
 
     @Override
     public MemberDto getMemberInfo(Long memberId) throws Exception {
-        Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_NOT_FOUND));
-        return new MemberDto(member.getId(), aesUtil.aesDecode(member.getPhoneNumber()),
-            member.getCompany());
+        Optional<Member> findMember = memberRepository.findById(memberId);
+        if (findMember.isPresent()) {
+            Member member = findMember.get();
+            return new MemberDto(member.getId(), aesUtil.aesDecode(member.getPhoneNumber()),
+                member.getCompany());
+        }
+        return null;
     }
 }
 

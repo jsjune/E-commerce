@@ -24,12 +24,12 @@ public class ProductAdapterController {
     }
 
     @PostMapping("/{productId}/decrease")
-    public void decreaseStock(@PathVariable Long productId, @RequestParam int quantity) {
-        productWriteUseCase.decreaseStock(productId, quantity);
+    public Boolean decreaseStock(@PathVariable Long productId, @RequestParam int quantity) {
+        return productWriteUseCase.decreaseStock(productId, quantity);
     }
 
     @PostMapping("/{productId}/increment")
-    public void incrementStock(@PathVariable Long productId, @RequestParam int quantity) {
-        productWriteUseCase.incrementStock(productId, quantity);
+    public Boolean incrementStock(@PathVariable Long productId, @RequestParam int quantity) {
+        return productWriteUseCase.incrementStock(productId, quantity);
     }
 }

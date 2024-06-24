@@ -5,8 +5,8 @@ import com.productservice.controller.req.ProductRequestDto;
 public interface ProductWriteUseCase {
     void createProduct(Long memberId, ProductRequestDto request) throws Exception;
 
-    void decreaseStock(Long productId, int quantity);
+    Boolean decreaseStock(Long productId, int quantity);
 
-    void incrementStock(Long productId, int quantity);
+    Boolean incrementStock(Long productId, int quantity);
 
 }

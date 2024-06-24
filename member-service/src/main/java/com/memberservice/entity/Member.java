@@ -19,6 +19,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Builder
 public class Member extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,7 +34,6 @@ public class Member extends BaseTimeEntity {
     @OneToMany(mappedBy = "member")
     private List<Cart> carts;
 
-    @Builder
     public Member(Long id, String username, String phoneNumber, String email, String password,
         UserRole role, String company, List<Cart> carts) {
         this.id = id;

@@ -139,7 +139,13 @@ public class OrderService implements OrderUseCase {
                 orderLineRepository.save(orderLine);
 
                 // 재고 감소
-                productClient.decreaseStock(orderLine.getProductId(), orderLine.getQuantity());
+                Boolean checkStock = productClient.decreaseStock(orderLine.getProductId(),
+                    orderLine.getQuantity());
+                if (checkStock == null) {
+                    throw new GlobalException(ErrorCode.PRODUCT_NOT_FOUND);
+                }else if(!checkStock) {
+                    throw new GlobalException(ErrorCode.PRODUCT_STOCK_NOT_ENOUGH);
+                }
             }
 
             // 장바구니 비우기
@@ -179,7 +185,11 @@ public class OrderService implements OrderUseCase {
         orderLineRepository.findById(orderLineId).ifPresent(orderLine -> {
             deliveryUseCase.deliveryStatusCheck(orderLine.getDeliveryId());
             orderLine.cancelOrderLine();
-            productClient.incrementStock(orderLine.getProductId(), orderLine.getQuantity());
+            Boolean incrementStock = productClient.incrementStock(orderLine.getProductId(),
+                orderLine.getQuantity());
+            if(incrementStock == null) {
+                throw new GlobalException(ErrorCode.PRODUCT_NOT_FOUND);
+            }
             ProductOrder productOrder = orderLine.getProductOrder();
             int price = orderLine.getPrice() * orderLine.getQuantity();
             productOrder.cancelOrder(price, orderLine.getDiscount());
