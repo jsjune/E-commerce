@@ -7,9 +7,8 @@ import com.ecommerce.member.entity.Member;
 import com.ecommerce.member.repository.CartRepository;
 import com.ecommerce.member.repository.MemberRepository;
 import com.ecommerce.member.usecase.CartUseCase;
-import com.ecommerce.product.entity.ProductImage;
-import com.ecommerce.product.repository.ProductRepository;
-import com.ecommerce.product.usecase.ProductReadUseCase;
+import com.ecommerce.common.adapter.ProductClient;
+import com.ecommerce.common.adapter.dto.ProductDto;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -23,23 +22,29 @@ public class CartService implements CartUseCase {
 
     private final CartRepository cartRepository;
     private final MemberRepository memberRepository;
-    private final ProductReadUseCase productReadUseCase;
+    private final ProductClient productClient;
 
     @Override
     public void addCart(Long memberId, Long productId) {
         memberRepository.findById(memberId).ifPresent(member -> {
-            productReadUseCase.findById(productId).ifPresent(product -> {
-                for (Cart cart : member.getCarts()) {
-                    if (cart.getProduct().getId().equals(productId)) {
-                        cart.increaseQuantity(1);
-                        return;
-                    }
+            ProductDto product = productClient.getProduct(productId);
+            for (Cart cart : member.getCarts()) {
+                if (cart.getProductId().equals(productId)) {
+                    cart.increaseQuantity(1);
+                    return;
                 }
-                Cart cart = new Cart(1, product, member);
-                member.addCart(cart);
-                cartRepository.save(cart);
-                memberRepository.save(member);
-            });
+            }
+            Cart cart = Cart.builder()
+                .member(member)
+                .productId(product.productId())
+                .productName(product.productName())
+                .price(product.price())
+                .thumbnailUrl(product.thumbnailUrl())
+                .quantity(1)
+                .build();
+            member.addCart(cart);
+            cartRepository.save(cart);
+            memberRepository.save(member);
         });
     }
 
@@ -56,13 +61,11 @@ public class CartService implements CartUseCase {
             List<CartListDto> cartList = member.getCarts().stream()
                 .map(cart -> new CartListDto(
                     cart.getId(),
-                    cart.getProduct().getId(),
-                    cart.getProduct().getName(),
-                    cart.getProduct().getPrice(),
+                    cart.getProductId(),
+                    cart.getProductName(),
+                    cart.getPrice(),
                     cart.getQuantity(),
-                    cart.getProduct().getProductImages().stream()
-                        .map(ProductImage::getThumbnailUrl)
-                        .findFirst().orElse(null)
+                    cart.getThumbnailUrl()
                 )).toList();
             return new CartResponseDto(cartList);
         }

@@ -2,8 +2,6 @@ package com.ecommerce.delivery.entity;
 
 import com.ecommerce.common.BaseTimeEntity;
 import com.ecommerce.order.entity.OrderLine;
-import com.ecommerce.order.entity.ProductOrder;
-import com.ecommerce.product.entity.Product;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -23,8 +21,9 @@ public class Delivery extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
-    private Product product;
+    private Long productId;
+    private String productName;
+    private int quantity;
     @ManyToOne
     private DeliveryAddress deliveryAddress;
     @ManyToOne
@@ -34,10 +33,12 @@ public class Delivery extends BaseTimeEntity {
     private String referenceCode;
 
     @Builder
-    public Delivery(Long id, Product product, DeliveryAddress deliveryAddress, OrderLine orderLine,
+    public Delivery(Long id, Long productId, String productName, int quantity, DeliveryAddress deliveryAddress, OrderLine orderLine,
         DeliveryStatus status, String referenceCode) {
         this.id = id;
-        this.product = product;
+        this.productId = productId;
+        this.productName = productName;
+        this.quantity = quantity;
         this.deliveryAddress = deliveryAddress;
         this.orderLine = orderLine;
         this.status = status;

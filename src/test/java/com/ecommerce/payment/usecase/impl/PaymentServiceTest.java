@@ -3,6 +3,7 @@ package com.ecommerce.payment.usecase.impl;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.ecommerce.IntegrationTestSupport;
+import com.ecommerce.common.adapter.dto.ProductDto;
 import com.ecommerce.member.entity.Member;
 import com.ecommerce.member.repository.MemberRepository;
 import com.ecommerce.order.entity.OrderLine;
@@ -13,8 +14,6 @@ import com.ecommerce.payment.entity.PaymentStatus;
 import com.ecommerce.payment.repository.PaymentMethodRepository;
 import com.ecommerce.payment.repository.PaymentRepository;
 import com.ecommerce.payment.usecase.PaymentUseCase;
-import com.ecommerce.product.entity.Product;
-import com.ecommerce.product.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,15 +31,12 @@ class PaymentServiceTest extends IntegrationTestSupport {
     private OrderLineRepository orderLineRepository;
     @Autowired
     private PaymentMethodRepository paymentMethodRepository;
-    @Autowired
-    private ProductRepository productRepository;
 
     @BeforeEach
     void setUp() {
         paymentMethodRepository.deleteAllInBatch();
         orderLineRepository.deleteAllInBatch();
         paymentRepository.deleteAllInBatch();
-        productRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
     }
 
@@ -50,10 +46,11 @@ class PaymentServiceTest extends IntegrationTestSupport {
         // given
         Member member = Member.builder().build();
         memberRepository.save(member);
-        Product product = Product.builder().price(3000).build();
-        productRepository.save(product);
+        ProductDto product = registeredProduct(1L, 3000);
         OrderLine orderLine = OrderLine.builder()
-            .product(product)
+            .productId(product.productId())
+            .productName(product.productName())
+            .price(product.price())
             .quantity(2)
             .build();
         orderLineRepository.save(orderLine);
@@ -70,5 +67,9 @@ class PaymentServiceTest extends IntegrationTestSupport {
         assertEquals(result.getPaymentMethod(), paymentMethod);
         assertEquals(result.getStatus(), PaymentStatus.COMPLETED);
         assertEquals(result.getTotalPrice(), 6000);
+    }
+
+    private static ProductDto registeredProduct(Long productId, int price) {
+        return new ProductDto(productId, "상품" + productId, price, "썸네일");
     }
 }

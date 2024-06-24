@@ -1,4 +1,5 @@
 rootProject.name = 'e-commerce'
 include 'discovery-service'
 include 'apigateway-service'
+include 'product-service'
 

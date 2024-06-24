@@ -19,7 +19,7 @@ public class EmailController {
     private final EmailService emailService;
 
     @PostMapping("/send")
-    public String sendEmail(@RequestParam EmailDto emailDto)
+    public String sendEmail(@RequestBody EmailDto emailDto)
         throws MessagingException, UnsupportedEncodingException {
         emailService.sendEmail(emailDto.getEmail());
         return "Email sent";

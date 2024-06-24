@@ -1,9 +1,15 @@
 package com.ecommerce.delivery.usecase.impl;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import com.ecommerce.IntegrationTestSupport;
-import com.ecommerce.common.AesUtil;
+import com.ecommerce.common.adapter.ProductClient;
+import com.ecommerce.common.adapter.dto.ProductDto;
 import com.ecommerce.delivery.controller.req.AddressRequestDto;
 import com.ecommerce.delivery.controller.res.DeliveryAddressListResponseDto;
 import com.ecommerce.delivery.entity.Delivery;
@@ -15,13 +21,13 @@ import com.ecommerce.member.entity.Member;
 import com.ecommerce.member.repository.MemberRepository;
 import com.ecommerce.order.entity.OrderLine;
 import com.ecommerce.order.repository.OrderLineRepository;
-import com.ecommerce.product.entity.Product;
-import com.ecommerce.product.repository.ProductRepository;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 class DeliveryAddressServiceTest extends IntegrationTestSupport {
 
@@ -34,14 +40,13 @@ class DeliveryAddressServiceTest extends IntegrationTestSupport {
     @Autowired
     private DeliveryUseCase deliveryUseCase;
     @Autowired
-    private ProductRepository productRepository;
-    @Autowired
     private OrderLineRepository orderLineRepository;
+    @MockBean
+    private ProductClient productClient;
 
     @BeforeEach
     void setUp() {
         orderLineRepository.deleteAllInBatch();
-        productRepository.deleteAllInBatch();
         deliveryAddressRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
     }
@@ -55,10 +60,12 @@ class DeliveryAddressServiceTest extends IntegrationTestSupport {
         AddressRequestDto request = getAddressRequest(true);
         deliveryAddressUseCase.registerAddress(member.getId(), request);
 
-        Product product = Product.builder().price(1000).build();
-        productRepository.save(product);
+        ProductDto product = registeredProduct();
         OrderLine orderLine = OrderLine.builder()
-            .product(product)
+            .productId(product.productId())
+            .productName(product.productName())
+            .price(product.price())
+            .thumbnailUrl(product.thumbnailUrl())
             .quantity(3)
             .build();
         orderLineRepository.save(orderLine);
@@ -66,12 +73,12 @@ class DeliveryAddressServiceTest extends IntegrationTestSupport {
             .get();
 
         // when
+        when(productClient.getProduct(any())).thenReturn(product);
         Delivery result = deliveryUseCase.processDelivery(orderLine, findDeliveryAddress.getId());
 
         // then
         assertEquals(result.getDeliveryAddress().getId(), findDeliveryAddress.getId());
         assertEquals(result.getOrderLine().getId(), orderLine.getId());
-        assertEquals(result.getProduct().getId(), product.getId());
     }
 
     @DisplayName("등록한 배송지 목록 조회")
@@ -146,5 +153,9 @@ class DeliveryAddressServiceTest extends IntegrationTestSupport {
             .receiver("홍길동")
             .isMainAddress(isMainAddress)
             .build();
+    }
+
+    private static ProductDto registeredProduct() {
+        return new ProductDto(1L, "상품", 1000, "썸네일");
     }
 }

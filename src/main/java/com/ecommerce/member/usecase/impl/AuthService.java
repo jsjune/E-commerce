@@ -4,6 +4,7 @@ import com.ecommerce.common.AesUtil;
 import com.ecommerce.common.error.ErrorCode;
 import com.ecommerce.common.error.GlobalException;
 import com.ecommerce.config.jwt.JwtUtils;
+import com.ecommerce.member.adapter.dto.MemberDto;
 import com.ecommerce.member.auth.LoginUser;
 import com.ecommerce.member.controller.req.LoginRequestDto;
 import com.ecommerce.member.controller.req.SignupRequestDto;
@@ -104,11 +105,12 @@ public class AuthService implements AuthUseCase {
         if (findMember.isPresent()) {
             Member member = findMember.get();
             return MemberInfoResponseDto.builder()
-                    .username(member.getUsername())
-                    .email(member.getEmail())
-                    .phoneNumber(aesUtil.aesDecode(member.getPhoneNumber()))
-                    .company(member.getCompany())
-                    .build();
+                .memberId(member.getId())
+                .username(member.getUsername())
+                .email(member.getEmail())
+                .phoneNumber(aesUtil.aesDecode(member.getPhoneNumber()))
+                .company(member.getCompany())
+                .build();
         }
         return null;
     }
@@ -123,6 +125,7 @@ public class AuthService implements AuthUseCase {
                 request.getEmail(), request.getCompany());
             memberRepository.save(member);
             return MemberInfoResponseDto.builder()
+                .memberId(member.getId())
                 .username(member.getUsername())
                 .email(member.getEmail())
                 .phoneNumber(aesUtil.aesDecode(member.getPhoneNumber()))
@@ -141,6 +144,14 @@ public class AuthService implements AuthUseCase {
     public Member findByIdAndRole(Long memberId) {
         return memberRepository.findByIdAndRole(memberId, UserRole.SELLER)
             .orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_NOT_FOUND));
+    }
+
+    @Override
+    public MemberDto getMemberInfo(Long memberId) throws Exception {
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_NOT_FOUND));
+        return new MemberDto(member.getId(), aesUtil.aesDecode(member.getPhoneNumber()),
+            member.getCompany());
     }
 }
 

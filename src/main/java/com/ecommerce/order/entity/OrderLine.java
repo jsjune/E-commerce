@@ -1,7 +1,6 @@
 package com.ecommerce.order.entity;
 
 import com.ecommerce.common.BaseTimeEntity;
-import com.ecommerce.product.entity.Product;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -23,9 +22,11 @@ public class OrderLine extends BaseTimeEntity {
     private Long id;
     @ManyToOne
     private ProductOrder productOrder;
-    @ManyToOne
-    private Product product;
+    private Long productId;
+    private String productName;
+    private int price;
     private int quantity;
+    private String thumbnailUrl;
     private int discount;
     @Enumerated(EnumType.STRING)
     private OrderLineStatus orderLineStatus;
@@ -33,12 +34,15 @@ public class OrderLine extends BaseTimeEntity {
     private Long deliveryId;
 
     @Builder
-    public OrderLine(Long id, ProductOrder productOrder, Product product, int quantity,
+    public OrderLine(Long id, ProductOrder productOrder, Long productId,String productName,int price, int quantity,String thumbnailUrl,
         int discount, OrderLineStatus orderLineStatus,Long paymentId, Long deliveryId) {
         this.id = id;
         this.productOrder = productOrder;
-        this.product = product;
+        this.productId = productId;
+        this.productName = productName;
+        this.price = price;
         this.quantity = quantity;
+        this.thumbnailUrl = thumbnailUrl;
         this.discount = discount;
         this.orderLineStatus = orderLineStatus;
         this.paymentId = paymentId;

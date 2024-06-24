@@ -2,8 +2,11 @@ package com.ecommerce.order.usecase.impl;
 
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 import com.ecommerce.IntegrationTestSupport;
+import com.ecommerce.common.adapter.ProductClient;
+import com.ecommerce.common.adapter.dto.ProductDto;
 import com.ecommerce.common.error.ErrorCode;
 import com.ecommerce.common.error.GlobalException;
 import com.ecommerce.delivery.controller.req.AddressRequestDto;
@@ -36,14 +39,12 @@ import com.ecommerce.payment.entity.PaymentType;
 import com.ecommerce.payment.repository.PaymentMethodRepository;
 import com.ecommerce.payment.repository.PaymentRepository;
 import com.ecommerce.payment.usecase.PaymentMethodUseCase;
-import com.ecommerce.product.entity.Product;
-import com.ecommerce.product.repository.ProductRepository;
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 class OrderServiceTest extends IntegrationTestSupport {
 
@@ -55,8 +56,6 @@ class OrderServiceTest extends IntegrationTestSupport {
     private ProductOrderRepository productOrderRepository;
     @Autowired
     private OrderLineRepository orderLineRepository;
-    @Autowired
-    private ProductRepository productRepository;
     @Autowired
     private CartUseCase cartUseCase;
     @Autowired
@@ -73,6 +72,8 @@ class OrderServiceTest extends IntegrationTestSupport {
     private DeliveryAddressUseCase deliveryAddressUseCase;
     @Autowired
     private CartRepository cartRepository;
+    @MockBean
+    private ProductClient productClient;
 
     @BeforeEach
     void setUp() {
@@ -82,7 +83,6 @@ class OrderServiceTest extends IntegrationTestSupport {
         productOrderRepository.deleteAllInBatch();
         deliveryAddressRepository.deleteAllInBatch();
         paymentMethodRepository.deleteAllInBatch();
-        productRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
     }
 
@@ -123,14 +123,10 @@ class OrderServiceTest extends IntegrationTestSupport {
         DeliveryAddress deliveryAddress = deliveryAddressRepository.findAllByMemberId(member.getId())
             .stream().findFirst().get();
 
-        Product product = Product.builder().price(1000).totalStock(100).soldQuantity(0).productImages(new ArrayList<>()).build();
-        Product product2 = Product.builder().price(3000).totalStock(100).soldQuantity(0).productImages(new ArrayList<>()).build();
-        productRepository.save(product);
-        productRepository.save(product2);
-        cartUseCase.addCart(member.getId(), product.getId());
-        cartUseCase.addCart(member.getId(), product2.getId());
-        cartUseCase.addCart(member.getId(), product2.getId());
-        orderUseCase.registerOrderOfCart(member.getId(), List.of(product.getId(), product2.getId()));
+        ProductDto product = registeredProduct(1L, 1000);
+        when(productClient.getProduct(product.productId())).thenReturn(product);
+        cartUseCase.addCart(member.getId(), product.productId());
+        orderUseCase.registerOrderOfCart(member.getId(), List.of(product.productId()));
         ProductOrder productOrder = productOrderRepository.findAll().stream().findFirst().get();
 
         OrderRequest request = OrderRequest.builder()
@@ -141,15 +137,12 @@ class OrderServiceTest extends IntegrationTestSupport {
         orderUseCase.submitOrder(member.getId(), request);
 
         // when
-        orderUseCase.cancelOrder(member.getId(), productOrder.getOrderLines().get(1).getId());
+        orderUseCase.cancelOrder(member.getId(), productOrder.getOrderLines().get(0).getId());
         OrderLine orderLineResult = orderLineRepository.findById(
-            productOrder.getOrderLines().get(1).getId()).get();
-        Product productResult = productRepository.findById(product2.getId()).get();
+            productOrder.getOrderLines().get(0).getId()).get();
 
         // then
         assertEquals(orderLineResult.getOrderLineStatus(), OrderLineStatus.CANCELLED);
-        assertEquals(productResult.getSoldQuantity(), 0);
-        assertEquals(productResult.getTotalStock(), 100);
     }
 
     @DisplayName("주문서 상세 조회")
@@ -169,14 +162,14 @@ class OrderServiceTest extends IntegrationTestSupport {
         DeliveryAddress deliveryAddress = deliveryAddressRepository.findAllByMemberId(member.getId())
             .stream().findFirst().get();
 
-        Product product = Product.builder().price(1000).totalStock(100).soldQuantity(0).productImages(new ArrayList<>()).build();
-        Product product2 = Product.builder().price(3000).totalStock(100).soldQuantity(0).productImages(new ArrayList<>()).build();
-        productRepository.save(product);
-        productRepository.save(product2);
-        cartUseCase.addCart(member.getId(), product.getId());
-        cartUseCase.addCart(member.getId(), product2.getId());
-        cartUseCase.addCart(member.getId(), product2.getId());
-        orderUseCase.registerOrderOfCart(member.getId(), List.of(product.getId(), product2.getId()));
+        ProductDto product1 = registeredProduct(1L, 2000);
+        ProductDto product2 = registeredProduct(2L, 4000);;
+        when(productClient.getProduct(product1.productId())).thenReturn(product1);
+        when(productClient.getProduct(product2.productId())).thenReturn(product2);
+        cartUseCase.addCart(member.getId(), product1.productId());
+        cartUseCase.addCart(member.getId(), product2.productId());
+        cartUseCase.addCart(member.getId(), product2.productId());
+        orderUseCase.registerOrderOfCart(member.getId(), List.of(product1.productId(), product2.productId()));
         ProductOrder productOrder = productOrderRepository.findAll().stream().findFirst().get();
 
         OrderRequest request = OrderRequest.builder()
@@ -191,11 +184,11 @@ class OrderServiceTest extends IntegrationTestSupport {
 
         // then
         assertEquals(result.getOrderLines().size(), 2);
-        assertEquals(result.getOrderLines().get(0).getPrice(), product.getPrice());
+        assertEquals(result.getOrderLines().get(0).getPrice(), product1.price());
         assertEquals(result.getOrderLines().get(0).getQuantity(), 1);
-        assertEquals(result.getOrderLines().get(1).getPrice(), product2.getPrice());
+        assertEquals(result.getOrderLines().get(1).getPrice(), product2.price());
         assertEquals(result.getOrderLines().get(1).getQuantity(), 2);
-        assertEquals(result.getTotalPrice(), 7000);
+        assertEquals(result.getTotalPrice(), 10000);
     }
 
     @DisplayName("주문 하기")
@@ -215,14 +208,14 @@ class OrderServiceTest extends IntegrationTestSupport {
         DeliveryAddress deliveryAddress = deliveryAddressRepository.findAllByMemberId(member.getId())
             .stream().findFirst().get();
 
-        Product product = Product.builder().price(1000).totalStock(100).soldQuantity(0).productImages(new ArrayList<>()).build();
-        Product product2 = Product.builder().price(3000).totalStock(100).soldQuantity(0).productImages(new ArrayList<>()).build();
-        productRepository.save(product);
-        productRepository.save(product2);
-        cartUseCase.addCart(member.getId(), product.getId());
-        cartUseCase.addCart(member.getId(), product2.getId());
-        cartUseCase.addCart(member.getId(), product2.getId());
-        orderUseCase.registerOrderOfCart(member.getId(), List.of(product.getId(), product2.getId()));
+        ProductDto product1 = registeredProduct(1L, 2000);
+        ProductDto product2 = registeredProduct(2L, 4000);;
+        when(productClient.getProduct(product1.productId())).thenReturn(product1);
+        when(productClient.getProduct(product2.productId())).thenReturn(product2);
+        cartUseCase.addCart(member.getId(), product1.productId());
+        cartUseCase.addCart(member.getId(), product2.productId());
+        cartUseCase.addCart(member.getId(), product2.productId());
+        orderUseCase.registerOrderOfCart(member.getId(), List.of(product1.productId(), product2.productId()));
         ProductOrder productOrder = productOrderRepository.findAll().stream().findFirst().get();
 
         OrderRequest request = OrderRequest.builder()
@@ -232,13 +225,12 @@ class OrderServiceTest extends IntegrationTestSupport {
             .build();
 
         // when
+
         orderUseCase.submitOrder(member.getId(), request);
 
         ProductOrder orderResult = productOrderRepository.findAll().stream().findFirst().get();
         List<Payment> paymentResult = paymentRepository.findAll();
         List<Delivery> deliveryResult = deliveryRepository.findAll();
-        Product productResult = productRepository.findById(product.getId()).get();
-        Product productResult2 = productRepository.findById(product2.getId()).get();
         List<Cart> cartResult = cartRepository.findAll();
 
         // then
@@ -246,10 +238,6 @@ class OrderServiceTest extends IntegrationTestSupport {
         assertEquals(paymentResult.size(), 2);
         assertEquals(orderResult.getProductOrderStatus(), ProdcutOrderStatus.COMPLETED);
         assertEquals(orderResult.getTotalPrice(), paymentResult.stream().mapToInt(Payment::getTotalPrice).sum());
-        assertEquals(productResult.getSoldQuantity(),1);
-        assertEquals(productResult.getTotalStock(),99);
-        assertEquals(productResult2.getSoldQuantity(),2);
-        assertEquals(productResult2.getTotalStock(),98);
         assertEquals(cartResult.size(), 0);
     }
 
@@ -259,18 +247,18 @@ class OrderServiceTest extends IntegrationTestSupport {
         // given
         Member member = Member.builder().build();
         memberRepository.save(member);
-        Product product = Product.builder().price(1000).productImages(new ArrayList<>()).build();
-        productRepository.save(product);
-        ProductOrderRequestDto request = new ProductOrderRequestDto(product.getId(), 3);
+        ProductDto product = registeredProduct(1L, 2000);
+        ProductOrderRequestDto request = new ProductOrderRequestDto(product.productId(), 3);
 
         // when
+        when(productClient.getProduct(product.productId())).thenReturn(product);
         orderUseCase.registerOrder(member.getId(), request);
         ProductOrder result = productOrderRepository.findAll().stream().findFirst()
             .orElse(null);
 
         // then
         assertEquals(result.getOrderLines().size(), 1);
-        assertEquals(result.getOrderLines().get(0).getProduct().getPrice(), product.getPrice());
+        assertEquals(result.getOrderLines().get(0).getPrice(), product.price());
         assertEquals(result.getOrderLines().get(0).getQuantity(), 3);
     }
     
@@ -280,14 +268,14 @@ class OrderServiceTest extends IntegrationTestSupport {
         // given
         Member member = Member.builder().build();
         memberRepository.save(member);
-        Product product = Product.builder().price(1000).productImages(new ArrayList<>()).build();
-        Product product2 = Product.builder().price(3000).productImages(new ArrayList<>()).build();
-        productRepository.save(product);
-        productRepository.save(product2);
-        cartUseCase.addCart(member.getId(), product.getId());
-        cartUseCase.addCart(member.getId(), product2.getId());
-        cartUseCase.addCart(member.getId(), product2.getId());
-        CartOrderRequestDto request = new CartOrderRequestDto(List.of(product.getId(), product2.getId()));
+        ProductDto product1 = registeredProduct(1L, 2000);
+        ProductDto product2 = registeredProduct(2L, 4000);;
+        when(productClient.getProduct(product1.productId())).thenReturn(product1);
+        when(productClient.getProduct(product2.productId())).thenReturn(product2);
+        cartUseCase.addCart(member.getId(), product1.productId());
+        cartUseCase.addCart(member.getId(), product2.productId());
+        cartUseCase.addCart(member.getId(), product2.productId());
+        CartOrderRequestDto request = new CartOrderRequestDto(List.of(product1.productId(), product2.productId()));
 
         // when
         orderUseCase.registerOrderOfCart(member.getId(), request.getCartIds());
@@ -297,8 +285,8 @@ class OrderServiceTest extends IntegrationTestSupport {
         // then
         assertEquals(result.getMember().getId(), member.getId());
         assertEquals(result.getOrderLines().size(), 2);
-        assertEquals(result.getOrderLines().get(0).getProduct().getPrice(), product.getPrice());
-        assertEquals(result.getOrderLines().get(1).getProduct().getPrice(), product2.getPrice());
+        assertEquals(result.getOrderLines().get(0).getPrice(), product1.price());
+        assertEquals(result.getOrderLines().get(1).getPrice(), product2.price());
         assertEquals(result.getOrderLines().get(0).getQuantity(), 1);
         assertEquals(result.getOrderLines().get(1).getQuantity(), 2);
 
@@ -322,5 +310,9 @@ class OrderServiceTest extends IntegrationTestSupport {
             .bank(bank)
             .accountNumber(null)
             .build();
+    }
+
+    private static ProductDto registeredProduct(Long productId, int price) {
+        return new ProductDto(productId, "상품" + productId, price, "썸네일");
     }
 }

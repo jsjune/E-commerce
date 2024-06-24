@@ -2,10 +2,12 @@ package com.ecommerce.order.usecase.impl;
 
 import com.ecommerce.delivery.entity.Delivery;
 import com.ecommerce.delivery.usecase.DeliveryUseCase;
+import com.ecommerce.common.adapter.ProductClient;
 import com.ecommerce.member.entity.Cart;
 import com.ecommerce.member.entity.Member;
 import com.ecommerce.member.usecase.AuthUseCase;
 import com.ecommerce.member.usecase.CartUseCase;
+import com.ecommerce.common.adapter.dto.ProductDto;
 import com.ecommerce.order.controller.req.OrderRequest;
 import com.ecommerce.order.controller.req.ProductOrderRequestDto;
 import com.ecommerce.order.controller.res.OrderDetailResponseDto;
@@ -19,27 +21,25 @@ import com.ecommerce.order.repository.ProductOrderRepository;
 import com.ecommerce.order.usecase.OrderUseCase;
 import com.ecommerce.payment.entity.Payment;
 import com.ecommerce.payment.usecase.PaymentUseCase;
-import com.ecommerce.product.entity.Product;
-import com.ecommerce.product.usecase.ProductReadUseCase;
-import com.ecommerce.product.usecase.ProductWriteUseCase;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class OrderService implements OrderUseCase {
 
     private final ProductOrderRepository productOrderRepository;
     private final OrderLineRepository orderLineRepository;
     private final AuthUseCase authUseCase;
-    private final ProductReadUseCase productReadUseCase;
     private final PaymentUseCase paymentUseCase;
     private final DeliveryUseCase deliveryUseCase;
-    private final ProductWriteUseCase productWriteUseCase;
     private final CartUseCase cartUseCase;
+    private final ProductClient productClient;
 
     @Override
     public OrderDetailResponseDto registerOrderOfCart(Long memberId, List<Long> cartIds) {
@@ -55,10 +55,13 @@ public class OrderService implements OrderUseCase {
             productOrderRepository.save(productOrder);
             List<OrderLine> orderLines = new ArrayList<>();
             for (Cart cart : member.getCarts()) {
-                totalPrice += cart.getProduct().getPrice() * cart.getQuantity();
+                totalPrice += cart.getPrice() * cart.getQuantity();
                 OrderLine orderLine = OrderLine.builder()
-                    .product(cart.getProduct())
+                    .productId(cart.getProductId())
+                    .productName(cart.getProductName())
+                    .price(cart.getPrice())
                     .quantity(cart.getQuantity())
+                    .thumbnailUrl(cart.getThumbnailUrl())
                     .discount(0)
                     .orderLineStatus(OrderLineStatus.INITIATED)
                     .build();
@@ -83,32 +86,32 @@ public class OrderService implements OrderUseCase {
         Optional<Member> findMember = authUseCase.findById(memberId);
         if (findMember.isPresent()) {
             Member member = findMember.get();
-            Optional<Product> findProduct = productReadUseCase.findById(request.getProductId());
-            if (findProduct.isPresent()) {
-                Product product = findProduct.get();
-                ProductOrder productOrder = ProductOrder.builder()
-                    .member(member)
-                    .productOrderStatus(ProdcutOrderStatus.INITIATED)
-                    .totalPrice(product.getPrice() * request.getQuantity())
-                    .totalDiscount(0)
-                    .build();
-                productOrderRepository.save(productOrder);
-                OrderLine orderLine = OrderLine.builder()
-                    .product(product)
-                    .quantity(request.getQuantity())
-                    .discount(0)
-                    .orderLineStatus(OrderLineStatus.INITIATED)
-                    .build();
-                productOrder.addOrderLine(orderLine);
-                orderLineRepository.save(orderLine);
-                return OrderDetailResponseDto.builder()
-                    .productOrderId(productOrder.getId())
-                    .orderLines(productOrder.getOrderLines())
-                    .orderStatus(productOrder.getProductOrderStatus().name())
-                    .totalPrice(productOrder.getTotalPrice())
-                    .totalDiscount(productOrder.getTotalDiscount())
-                    .build();
-            }
+            ProductDto product = productClient.getProduct(request.getProductId());
+            ProductOrder productOrder = ProductOrder.builder()
+                .member(member)
+                .productOrderStatus(ProdcutOrderStatus.INITIATED)
+                .totalPrice(product.price() * request.getQuantity())
+                .totalDiscount(0)
+                .build();
+            productOrderRepository.save(productOrder);
+            OrderLine orderLine = OrderLine.builder()
+                .productId(product.productId())
+                .productName(product.productName())
+                .price(product.price())
+                .thumbnailUrl(product.thumbnailUrl())
+                .quantity(request.getQuantity())
+                .discount(0)
+                .orderLineStatus(OrderLineStatus.INITIATED)
+                .build();
+            productOrder.addOrderLine(orderLine);
+            orderLineRepository.save(orderLine);
+            return OrderDetailResponseDto.builder()
+                .productOrderId(productOrder.getId())
+                .orderLines(productOrder.getOrderLines())
+                .orderStatus(productOrder.getProductOrderStatus().name())
+                .totalPrice(productOrder.getTotalPrice())
+                .totalDiscount(productOrder.getTotalDiscount())
+                .build();
         }
         return null;
     }
@@ -128,7 +131,7 @@ public class OrderService implements OrderUseCase {
                 int totalDiscount = 0;
                 for (OrderLine orderLine : productOrder.getOrderLines()) {
                     totalDiscount += orderLine.getDiscount();
-                    productIds.add(orderLine.getProduct().getId());
+                    productIds.add(orderLine.getProductId());
 
                     // 결제 요청
                     Payment payment = paymentUseCase.processPayment(member, orderLine,
@@ -144,13 +147,14 @@ public class OrderService implements OrderUseCase {
                     orderLineRepository.save(orderLine);
 
                     // 재고 감소
-                    productWriteUseCase.decreaseStock(orderLine.getProduct().getId(), orderLine.getQuantity());
+                    productClient.decreaseStock(orderLine.getProductId(), orderLine.getQuantity());
                 }
 
                 // 장바구니 비우기
                 cartUseCase.clearCart(memberId, productIds);
 
-                productOrder.finalizeOrder(ProdcutOrderStatus.COMPLETED, finalTotalPrice, totalDiscount);
+                productOrder.finalizeOrder(ProdcutOrderStatus.COMPLETED, finalTotalPrice,
+                    totalDiscount);
                 productOrderRepository.save(productOrder);
             }
         }
@@ -158,8 +162,9 @@ public class OrderService implements OrderUseCase {
 
     @Override
     public OrderDetailResponseDto getOrder(Long memberId, Long orderId) {
-        Optional<ProductOrder> findProductOrder = productOrderRepository.findByIdAndMemberId(orderId, memberId);
-        if(findProductOrder.isPresent()) {
+        Optional<ProductOrder> findProductOrder = productOrderRepository.findByIdAndMemberId(
+            orderId, memberId);
+        if (findProductOrder.isPresent()) {
             ProductOrder productOrder = findProductOrder.get();
             return OrderDetailResponseDto.builder()
                 .productOrderId(productOrder.getId())
@@ -183,9 +188,9 @@ public class OrderService implements OrderUseCase {
         orderLineRepository.findById(orderLineId).ifPresent(orderLine -> {
             deliveryUseCase.deliveryStatusCheck(orderLine.getDeliveryId());
             orderLine.cancelOrderLine();
-            productWriteUseCase.incrementStock(orderLine.getProduct().getId(), orderLine.getQuantity());
+            productClient.incrementStock(orderLine.getProductId(), orderLine.getQuantity());
             ProductOrder productOrder = orderLine.getProductOrder();
-            int price = orderLine.getProduct().getPrice() * orderLine.getQuantity();
+            int price = orderLine.getPrice() * orderLine.getQuantity();
             productOrder.cancelOrder(price, orderLine.getDiscount());
             orderLineRepository.save(orderLine);
         });

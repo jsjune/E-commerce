@@ -1,7 +1,6 @@
 package com.ecommerce.member.entity;
 
 import com.ecommerce.common.BaseTimeEntity;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -48,7 +47,7 @@ public class Member extends BaseTimeEntity {
 
     public void addCart(Cart cart) {
         for (Cart existCart : carts) {
-            if(existCart.getProduct().getId().equals(cart.getProduct().getId())) {
+            if(existCart.getProductId().equals(cart.getProductId())) {
                 existCart.increaseQuantity(cart.getQuantity());
                 return;
             }

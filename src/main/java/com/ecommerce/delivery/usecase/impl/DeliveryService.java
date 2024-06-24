@@ -39,13 +39,15 @@ public class DeliveryService implements DeliveryUseCase {
             String alias = deliveryAddress.getAddress().getAlias();
 
             // 배송 요청
-            String referenceCode = deliveryAdapter.processDelivery(orderLine.getProduct().getName(),
+            String referenceCode = deliveryAdapter.processDelivery(orderLine.getProductName(),
                 orderLine.getQuantity(), street, detailAddress, zipCode, alias);
             if(referenceCode == null) {
                 throw new GlobalException(ErrorCode.DELIVERY_FAILED);
             }
             Delivery delivery = Delivery.builder()
-                .product(orderLine.getProduct())
+                .productId(orderLine.getProductId())
+                .productName(orderLine.getProductName())
+                .quantity(orderLine.getQuantity())
                 .deliveryAddress(deliveryAddress)
                 .orderLine(orderLine)
                 .status(DeliveryStatus.REQUESTED)

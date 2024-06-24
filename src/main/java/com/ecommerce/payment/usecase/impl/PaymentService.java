@@ -36,7 +36,7 @@ public class PaymentService implements PaymentUseCase {
                 () -> new GlobalException(ErrorCode.PAYMENT_METHOD_NOT_FOUND)
             );
 
-        int totalPrice = orderLine.getQuantity() * orderLine.getProduct().getPrice();
+        int totalPrice = orderLine.getQuantity() * orderLine.getPrice();
         String bank = aesUtil.aesDecode(paymentMethod.getBank());
         String accountNumber = aesUtil.aesDecode(paymentMethod.getAccountNumber());
         String creditCardNumber = aesUtil.aesDecode(paymentMethod.getCreditCardNumber());

@@ -2,29 +2,30 @@ package com.ecommerce.member.usecase.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 import com.ecommerce.IntegrationTestSupport;
+import com.ecommerce.common.adapter.ProductClient;
+import com.ecommerce.common.adapter.dto.ProductDto;
 import com.ecommerce.member.controller.res.CartResponseDto;
 import com.ecommerce.member.entity.Cart;
 import com.ecommerce.member.entity.Member;
 import com.ecommerce.member.repository.CartRepository;
 import com.ecommerce.member.repository.MemberRepository;
 import com.ecommerce.member.usecase.CartUseCase;
-import com.ecommerce.product.entity.Product;
-import com.ecommerce.product.repository.ProductRepository;
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 class CartServiceTest extends IntegrationTestSupport {
 
     @Autowired
     private CartUseCase cartUseCase;
-    @Autowired
-    private ProductRepository productRepository;
+    @MockBean
+    private ProductClient productClient;
     @Autowired
     private MemberRepository memberRepository;
     @Autowired
@@ -34,7 +35,6 @@ class CartServiceTest extends IntegrationTestSupport {
     void setUp() {
         cartRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
-        productRepository.deleteAllInBatch();
     }
 
     @DisplayName("장바구니 비우기")
@@ -43,14 +43,15 @@ class CartServiceTest extends IntegrationTestSupport {
         // given
         Member member = Member.builder().build();
         memberRepository.save(member);
-        Product product = Product.builder().build();
-        Product product2 = Product.builder().build();
-        productRepository.save(product);
-        productRepository.save(product2);
-        cartUseCase.addCart(member.getId(), product.getId());
-        cartUseCase.addCart(member.getId(), product2.getId());
-        cartUseCase.addCart(member.getId(), product2.getId());
-        List<Long> productId = List.of(product.getId(), product2.getId());
+
+        ProductDto product1 = registeredProduct(1L);
+        ProductDto product2 = registeredProduct(2L);
+        when(productClient.getProduct(product1.productId())).thenReturn(product1);
+        when(productClient.getProduct(product2.productId())).thenReturn(product2);
+        cartUseCase.addCart(member.getId(), product1.productId());
+        cartUseCase.addCart(member.getId(), product2.productId());
+        cartUseCase.addCart(member.getId(), product2.productId());
+        List<Long> productId = List.of(product1.productId(), product2.productId());
 
         // when
         cartRepository.deleteAllByMemberIdAndProductIdIn(member.getId(), productId);
@@ -67,9 +68,10 @@ class CartServiceTest extends IntegrationTestSupport {
         // given
         Member member = Member.builder().build();
         memberRepository.save(member);
-        Product product = Product.builder().build();
-        productRepository.save(product);
-        cartUseCase.addCart(member.getId(), product.getId());
+
+        ProductDto product = registeredProduct(1L);
+        when(productClient.getProduct(product.productId())).thenReturn(product);
+        cartUseCase.addCart(member.getId(), product.productId());
         Cart cart = cartRepository.findAll().stream().findFirst().get();
 
         // when
@@ -86,18 +88,21 @@ class CartServiceTest extends IntegrationTestSupport {
         // given
         Member member = Member.builder().build();
         memberRepository.save(member);
-        Product product = Product.builder().productImages(new ArrayList<>()).build();
-        Product product2 = Product.builder().productImages(new ArrayList<>()).build();
-        productRepository.save(product);
-        productRepository.save(product2);
-        cartUseCase.addCart(member.getId(), product.getId());
-        cartUseCase.addCart(member.getId(), product2.getId());
+        ProductDto product1 = registeredProduct(1L);
+        ProductDto product2 = registeredProduct(2L);
+
+        when(productClient.getProduct(product1.productId())).thenReturn(product1);
+        when(productClient.getProduct(product2.productId())).thenReturn(product2);
+        cartUseCase.addCart(member.getId(), product1.productId());
+        cartUseCase.addCart(member.getId(), product2.productId());
 
         // when
         CartResponseDto cartList = cartUseCase.getCartList(member.getId());
 
         // then
         assertEquals(cartList.getCarts().size(), 2);
+        assertEquals(cartList.getCarts().get(0).getProductId(), product1.productId());
+        assertEquals(cartList.getCarts().get(1).getProductId(), product2.productId());
     }
 
     @DisplayName("장바구니 삭제")
@@ -106,9 +111,10 @@ class CartServiceTest extends IntegrationTestSupport {
         // given
         Member member = Member.builder().build();
         memberRepository.save(member);
-        Product product = Product.builder().build();
-        productRepository.save(product);
-        cartUseCase.addCart(member.getId(), product.getId());
+        ProductDto product = registeredProduct(1L);
+
+        when(productClient.getProduct(product.productId())).thenReturn(product);
+        cartUseCase.addCart(member.getId(), product.productId());
         Cart cart = cartRepository.findAll().stream().findFirst().get();
 
         // when
@@ -126,20 +132,17 @@ class CartServiceTest extends IntegrationTestSupport {
             .username("abc")
             .build();
         memberRepository.save(member);
-        Product product = Product.builder()
-            .name("iPone")
-            .seller(Member.builder().build())
-            .build();
-        productRepository.save(product);
+        ProductDto product = registeredProduct(1L);
 
         // when
-        cartUseCase.addCart(member.getId(), product.getId());
-        cartUseCase.addCart(member.getId(), product.getId());
+        when(productClient.getProduct(product.productId())).thenReturn(product);
+        cartUseCase.addCart(member.getId(), product.productId());
+        cartUseCase.addCart(member.getId(), product.productId());
 
         // then
         assertEquals(member.getCarts().size(), 1);
         assertEquals(member.getCarts().get(0).getQuantity(), 2);
-        assertEquals(member.getCarts().get(0).getProduct(), product);
+        assertEquals(member.getCarts().get(0).getProductName(), product.productName());
 
     }
 
@@ -151,17 +154,18 @@ class CartServiceTest extends IntegrationTestSupport {
             .username("abc")
             .build();
         memberRepository.save(member);
-        Product product = Product.builder()
-            .name("iPone")
-            .seller(Member.builder().build())
-            .build();
-        productRepository.save(product);
+        ProductDto product = registeredProduct(1L);
 
         // when
-        cartUseCase.addCart(member.getId(), product.getId());
+        when(productClient.getProduct(product.productId())).thenReturn(product);
+        cartUseCase.addCart(member.getId(), product.productId());
 
         // then
         assertEquals(member.getCarts().size(), 1);
-        assertEquals(member.getCarts().get(0).getProduct(), product);
+        assertEquals(member.getCarts().get(0).getProductName(), product.productName());
+    }
+
+    private static ProductDto registeredProduct(Long productId) {
+        return new ProductDto(productId, "상품" + productId, 1000, "썸네일");
     }
 }

@@ -1,15 +1,13 @@
 package com.ecommerce.member.entity;
 
 import com.ecommerce.common.BaseTimeEntity;
-import com.ecommerce.product.entity.Product;
-import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -21,15 +19,21 @@ public class Cart extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private Long productId;
+    private String productName;
+    private int price;
+    private String thumbnailUrl;
     private int quantity;
-    @ManyToOne
-    private Product product;
     @ManyToOne
     private Member member;
 
-    public Cart(int quantity, Product product, Member member) {
+    @Builder
+    public Cart(int quantity, Long productId, String productName, int price, String thumbnailUrl,Member member) {
         this.quantity = quantity;
-        this.product = product;
+        this.productId = productId;
+        this.productName = productName;
+        this.price = price;
+        this.thumbnailUrl = thumbnailUrl;
         this.member = member;
     }
 
