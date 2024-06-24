@@ -35,7 +35,7 @@ public class ProductController {
     }
 
     @GetMapping("/{productId}")
-    public Response<ProductResponseDto> getProduct(@PathVariable Long productId) {
+    public Response<ProductResponseDto> getProduct(@PathVariable Long productId) throws Exception {
         return Response.success(HttpStatus.OK.value(), productReadUseCase.getProduct(productId));
     }
 

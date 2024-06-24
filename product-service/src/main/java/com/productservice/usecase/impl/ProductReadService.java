@@ -1,6 +1,8 @@
 package com.productservice.usecase.impl;
 
 import com.productservice.adapter.dto.ProductDto;
+import com.productservice.utils.AesUtil;
+import com.productservice.utils.ExceptionWrapper;
 import com.productservice.utils.error.ErrorCode;
 import com.productservice.utils.error.GlobalException;
 import com.productservice.controller.res.ProductListDto;
@@ -24,14 +26,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ProductReadService implements ProductReadUseCase {
     private final ProductRepository productRepository;
+    private final AesUtil aesUtil;
 
     @Override
-    public ProductResponseDto getProduct(Long productId) {
-        return productRepository.findById(productId)
-            .map(product -> ProductResponseDto.builder()
+    public ProductResponseDto getProduct(Long productId) throws Exception {
+        Optional<Product> findProduct = productRepository.findById(productId);
+        if (findProduct.isPresent()) {
+            Product product = findProduct.get();
+            return ProductResponseDto.builder()
                 .sellerId(product.getSellerId())
                 .company(product.getCompany())
-                .phoneNumber(product.getPhoneNumber())
+                .phoneNumber(aesUtil.aesDecode(product.getPhoneNumber()))
                 .name(product.getName())
                 .description(product.getDescription())
                 .price(product.getPrice())
@@ -39,31 +44,31 @@ public class ProductReadService implements ProductReadUseCase {
                 .orgProductImages(product.getProductImages().stream()
                     .map(ProductImage::getOrgImageUrl)
                     .collect(Collectors.toList()))
-                .build())
-            .orElseThrow(() -> new GlobalException(ErrorCode.PRODUCT_NOT_FOUND));
+                .build();
+        }
+        return null;
     }
 
     @Override
     public ProductListResponseDto getProducts(Pageable pageable) {
         Page<Product> products = productRepository.findAll(pageable);
         List<ProductListDto> response = products.getContent().stream()
-            .map(this::mapToProductResponse)
+            .map(ExceptionWrapper.wrap(this::mapToProductResponse))
             .collect(Collectors.toList());
         return new ProductListResponseDto(response, products.getNumber(), products.getTotalPages());
     }
 
     @Override
     public ProductDto findProductById(Long productId) {
-        return productRepository.findById(productId).map(ProductDto::new)
-            .orElseThrow(() -> new GlobalException(ErrorCode.PRODUCT_NOT_FOUND));
+        return productRepository.findById(productId).map(ProductDto::new).orElse(null);
     }
 
-    private ProductListDto mapToProductResponse(Product product) {
+    private ProductListDto mapToProductResponse(Product product) throws Exception {
         return ProductListDto.builder()
             .productId(product.getId())
             .sellerId(product.getSellerId())
             .company(product.getCompany())
-            .phoneNumber(product.getPhoneNumber())
+            .phoneNumber(aesUtil.aesDecode(product.getPhoneNumber()))
             .name(product.getName())
             .description(product.getDescription())
             .price(product.getPrice())
