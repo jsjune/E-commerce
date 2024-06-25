@@ -3,6 +3,7 @@ package com.productservice.entity;
 import com.productservice.utils.BaseTimeEntity;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -31,9 +32,8 @@ public class Product extends BaseTimeEntity {
     private int price;
     private int totalStock;
     private int soldQuantity;
-    private Long sellerId;
-    private String phoneNumber;
-    private String company;
+    @Embedded
+    private Seller seller;
     @ElementCollection
     @CollectionTable(
         name = "product_tags",

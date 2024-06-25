@@ -1,15 +1,19 @@
 package com.memberservice.controller.req;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import com.memberservice.usecase.dto.UserInfoDto;
 
-@Getter
-@AllArgsConstructor
-@Builder
-public class UserInfoRequestDto {
-    private String username;
-    private String phoneNumber;
-    private String email;
-    private String company;
+public record UserInfoRequestDto(
+    String username,
+    String phoneNumber,
+    String email,
+    String company
+) {
+    public UserInfoDto mapToCommand() {
+        return UserInfoDto.builder()
+            .username(username())
+            .phoneNumber(phoneNumber())
+            .email(email())
+            .company(company())
+            .build();
+    }
 }

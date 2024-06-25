@@ -1,6 +1,6 @@
-package com.productservice.adapter;
+package com.productservice.controller.internal;
 
-import com.productservice.adapter.dto.ProductDto;
+import com.productservice.controller.internal.res.ProductDto;
 import com.productservice.usecase.ProductReadUseCase;
 import com.productservice.usecase.ProductWriteUseCase;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/internal/products")
-public class ProductAdapterController {
+public class ProductInternalController {
     private final ProductReadUseCase productReadUseCase;
     private final ProductWriteUseCase productWriteUseCase;
 

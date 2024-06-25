@@ -1,7 +1,7 @@
 package com.memberservice.usecase.impl;
 
 
-import com.memberservice.adapter.dto.MemberDto;
+import com.memberservice.controller.internal.res.MemberDto;
 import com.memberservice.auth.LoginUser;
 import com.memberservice.config.jwt.JwtUtils;
 import com.memberservice.controller.req.LoginRequestDto;
@@ -12,6 +12,10 @@ import com.memberservice.controller.res.MemberInfoResponseDto;
 import com.memberservice.entity.Member;
 import com.memberservice.repository.MemberRepository;
 import com.memberservice.usecase.AuthUseCase;
+import com.memberservice.usecase.dto.LoginDto;
+import com.memberservice.usecase.dto.PasswordDto;
+import com.memberservice.usecase.dto.SignupDto;
+import com.memberservice.usecase.dto.UserInfoDto;
 import com.memberservice.utils.AesUtil;
 import com.memberservice.utils.EmailValidator;
 import com.memberservice.utils.error.ErrorCode;
@@ -38,26 +42,26 @@ public class AuthService implements AuthUseCase {
     private final AesUtil aesUtil;
 
     @Override
-    public void signup(SignupRequestDto request) throws Exception {
-        memberRepository.findByEmailOrUsername(request.getEmail(), request.getUsername())
+    public void signup(SignupDto command) throws Exception {
+        memberRepository.findByEmailOrUsername(command.email(), command.username())
             .ifPresent(member -> {
                 throw new GlobalException(ErrorCode.EXIST_MEMBER);
             });
         Member member = Member.builder()
-            .username(request.getUsername())
-            .phoneNumber(aesUtil.aesEncode(request.getPhoneNumber()))
-            .email(request.getEmail())
-            .password(bCryptPasswordEncoder.encode(request.getPassword()))
-            .role(request.getRole())
-            .company(request.getCompany())
+            .username(command.username())
+            .phoneNumber(aesUtil.aesEncode(command.phoneNumber()))
+            .email(command.email())
+            .password(bCryptPasswordEncoder.encode(command.password()))
+            .role(command.role())
+            .company(command.company())
             .build();
         memberRepository.save(member);
     }
 
     @Override
-    public LoginResponseDto login(LoginRequestDto request) {
+    public LoginResponseDto login(LoginDto command) {
         UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(
-            request.getAccount(), request.getPassword());
+            command.account(), command.password());
         Authentication authentication = authenticationManager.authenticate(authRequest);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
@@ -85,13 +89,13 @@ public class AuthService implements AuthUseCase {
     }
 
     @Override
-    public boolean updatePw(String currentPw, String newPw, Long memberId) {
+    public boolean updatePw(PasswordDto command, Long memberId) {
         Optional<Member> findMember = memberRepository.findById(memberId);
         if (findMember.isPresent()) {
             Member m = findMember.get();
-            boolean matches = bCryptPasswordEncoder.matches(currentPw, m.getPassword());
+            boolean matches = bCryptPasswordEncoder.matches(command.currentPw(), m.getPassword());
             if (matches) {
-                m.updatePassword(bCryptPasswordEncoder.encode(newPw));
+                m.updatePassword(bCryptPasswordEncoder.encode(command.newPw()));
                 memberRepository.save(m);
                 return true;
             }
@@ -116,13 +120,13 @@ public class AuthService implements AuthUseCase {
     }
 
     @Override
-    public MemberInfoResponseDto updateUserInfo(Long memberId, UserInfoRequestDto request)
+    public MemberInfoResponseDto updateUserInfo(Long memberId, UserInfoDto command)
         throws Exception {
         Optional<Member> findMember = memberRepository.findById(memberId);
         if (findMember.isPresent()) {
             Member member = findMember.get();
-            member.updateInfo(request.getUsername(), aesUtil.aesEncode(request.getPhoneNumber()),
-                request.getEmail(), request.getCompany());
+            member.updateInfo(command.username(), aesUtil.aesEncode(command.phoneNumber()),
+                command.email(), command.company());
             memberRepository.save(member);
             return MemberInfoResponseDto.builder()
                 .memberId(member.getId())

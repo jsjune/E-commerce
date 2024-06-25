@@ -1,17 +1,23 @@
 package com.deliveryservice.controller.req;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import com.deliveryservice.usecase.dto.RegisterAddress;
 
-@Getter
-@AllArgsConstructor
-@Builder
-public class AddressRequestDto {
-    private String street;
-    private String detailAddress;
-    private String zipCode;
-    private String alias;
-    private String receiver;
-    private boolean isMainAddress;
+public record AddressRequestDto(
+    String street,
+    String detailAddress,
+    String zipCode,
+    String alias,
+    String receiver,
+    boolean isMainAddress
+) {
+    public RegisterAddress mapToCommand() {
+        return RegisterAddress.builder()
+            .street(street)
+            .detailAddress(detailAddress)
+            .zipCode(zipCode)
+            .alias(alias)
+            .receiver(receiver)
+            .isMainAddress(isMainAddress)
+            .build();
+    }
 }

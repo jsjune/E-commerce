@@ -10,7 +10,7 @@ import com.paymentservice.entity.PaymentStatus;
 import com.paymentservice.repository.PaymentMethodRepository;
 import com.paymentservice.repository.PaymentRepository;
 import com.paymentservice.usecase.PaymentUseCase;
-import com.paymentservice.usecase.dto.ProcessPayment;
+import com.paymentservice.usecase.dto.ProcessPaymentDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ class PaymentServiceTest extends IntegrationTestSupport {
         // given
         PaymentMethod paymentMethod = PaymentMethod.builder().build();
         paymentMethodRepository.save(paymentMethod);
-        ProcessPayment payment = ProcessPayment.builder()
+        ProcessPaymentDto payment = ProcessPaymentDto.builder()
             .memberId(1L)
             .orderLineId(1L)
             .paymentMethodId(paymentMethod.getId())

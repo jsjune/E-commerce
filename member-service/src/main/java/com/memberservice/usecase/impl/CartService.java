@@ -2,7 +2,7 @@ package com.memberservice.usecase.impl;
 
 
 import com.memberservice.adapter.ProductClient;
-import com.memberservice.adapter.dto.CartDto;
+import com.memberservice.controller.internal.res.CartDto;
 import com.memberservice.adapter.dto.ProductDto;
 import com.memberservice.controller.res.CartListDto;
 import com.memberservice.controller.res.CartResponseDto;

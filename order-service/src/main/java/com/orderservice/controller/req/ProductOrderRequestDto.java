@@ -1,13 +1,12 @@
 package com.orderservice.controller.req;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import com.orderservice.usecase.dto.RegisterOrderOfProductDto;
 
-@Getter
-@AllArgsConstructor
-@Builder
-public class ProductOrderRequestDto {
-    private Long productId;
-    private int quantity;
+public record ProductOrderRequestDto(
+    Long productId,
+    int quantity
+) {
+    public RegisterOrderOfProductDto mapToCommand() {
+        return new RegisterOrderOfProductDto(productId, quantity);
+    }
 }

@@ -1,14 +1,17 @@
 package com.orderservice.controller.req;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import com.orderservice.usecase.dto.OrderDto;
 
-@Getter
-@AllArgsConstructor
-@Builder
-public class OrderRequest {
-    private Long orderId;
-    private Long paymentMethodId;
-    private Long deliveryAddressId;
+public record OrderRequest(
+    Long orderId,
+    Long paymentMethodId,
+    Long deliveryAddressId
+) {
+    public OrderDto mapToCommand() {
+        return OrderDto.builder()
+            .orderId(orderId)
+            .paymentMethodId(paymentMethodId)
+            .deliveryAddressId(deliveryAddressId)
+            .build();
+    }
 }

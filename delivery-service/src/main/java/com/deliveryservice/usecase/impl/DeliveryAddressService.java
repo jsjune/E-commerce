@@ -1,13 +1,13 @@
 package com.deliveryservice.usecase.impl;
 
 
-import com.deliveryservice.controller.req.AddressRequestDto;
 import com.deliveryservice.controller.res.DeliveryAddressListDto;
 import com.deliveryservice.controller.res.DeliveryAddressListResponseDto;
 import com.deliveryservice.entity.Address;
 import com.deliveryservice.entity.DeliveryAddress;
 import com.deliveryservice.repository.DeliveryAddressRepository;
 import com.deliveryservice.usecase.DeliveryAddressUseCase;
+import com.deliveryservice.usecase.dto.RegisterAddress;
 import com.deliveryservice.utils.AesUtil;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -25,20 +25,20 @@ public class DeliveryAddressService implements DeliveryAddressUseCase {
     private final AesUtil aesUtil;
 
     @Override
-    public void registerAddress(Long memberId, AddressRequestDto request) throws Exception {
+    public void registerAddress(Long memberId, RegisterAddress command) throws Exception {
         deliveryAddressRepository.findByMemberIdAndIsMainAddress(memberId, true)
             .ifPresent(deliveryAddress -> deliveryAddress.setMainAddress(false));
         Address address = Address.builder()
-            .street(aesUtil.aesEncode(request.getStreet()))
-            .detailAddress(aesUtil.aesEncode(request.getDetailAddress()))
-            .zipCode(aesUtil.aesEncode(request.getZipCode()))
-            .alias(request.getAlias())
+            .street(aesUtil.aesEncode(command.street()))
+            .detailAddress(aesUtil.aesEncode(command.detailAddress()))
+            .zipCode(aesUtil.aesEncode(command.zipCode()))
+            .alias(command.alias())
             .build();
         DeliveryAddress deliveryAddress = DeliveryAddress.builder()
             .memberId(memberId)
             .address(address)
-            .receiver(request.getReceiver())
-            .isMainAddress(request.isMainAddress())
+            .receiver(command.receiver())
+            .isMainAddress(command.isMainAddress())
             .build();
         deliveryAddressRepository.save(deliveryAddress);
     }

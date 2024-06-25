@@ -7,10 +7,10 @@ import static org.mockito.Mockito.when;
 import com.productservice.IntegrationTestSupport;
 import com.productservice.adapter.MemberClient;
 import com.productservice.adapter.dto.MemberDto;
-import com.productservice.controller.req.ProductRequestDto;
 import com.productservice.entity.Product;
 import com.productservice.repository.ProductRepository;
 import com.productservice.usecase.ProductWriteUseCase;
+import com.productservice.usecase.dto.RegisterProductDto;
 import com.productservice.utils.S3Utils;
 import java.util.List;
 import java.util.Set;
@@ -76,7 +76,7 @@ class ProductWriteServiceTest extends IntegrationTestSupport {
     void createProduct() throws Exception {
         // given
         MemberDto member = registerMember();
-        ProductRequestDto request = ProductRequestDto.builder()
+        RegisterProductDto command = RegisterProductDto.builder()
             .name("abc")
             .description("상품 설명")
             .price(10000)
@@ -90,13 +90,13 @@ class ProductWriteServiceTest extends IntegrationTestSupport {
         when(memberClient.getMemberInfo(any())).thenReturn(member);
         when(s3Utils.uploadThumbFile(any(), any())).thenReturn("imageUrl");
         when(s3Utils.uploadFile(any(), any())).thenReturn("s_imageUrl");
-        productWriteUseCase.createProduct(member.memberId(), request);
+        productWriteUseCase.createProduct(member.memberId(), command);
 
         // then
         productRepository.findAll().stream().findFirst().ifPresent(product -> {
-            assertEquals(product.getCompany(), member.company());
-            assertEquals(product.getName(), request.getName());
-            assertEquals(product.getTags().size(), request.getTags().size());
+            assertEquals(product.getSeller().getCompany(), member.company());
+            assertEquals(product.getName(), command.name());
+            assertEquals(product.getTags().size(), command.tags().size());
             assertEquals(product.getProductImages().size(), 1);
         });
 

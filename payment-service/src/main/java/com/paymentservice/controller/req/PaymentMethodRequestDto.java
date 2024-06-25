@@ -1,17 +1,22 @@
 package com.paymentservice.controller.req;
 
 import com.paymentservice.entity.PaymentType;
-import lombok.AllArgsConstructor;
+import com.paymentservice.usecase.dto.RegisterPaymentMethodDto;
 import lombok.Builder;
-import lombok.Getter;
 
-@Getter
-@AllArgsConstructor
 @Builder
-public class PaymentMethodRequestDto {
-    private PaymentType paymentType;
-    private String bank;
-    private String accountNumber;
-    private String creditCardNumber;
-
+public record PaymentMethodRequestDto(
+    PaymentType paymentType,
+    String bank,
+    String accountNumber,
+    String creditCardNumber
+) {
+    public RegisterPaymentMethodDto mapToCommand() {
+        return RegisterPaymentMethodDto.builder()
+            .paymentType(paymentType)
+            .bank(bank)
+            .accountNumber(accountNumber)
+            .creditCardNumber(creditCardNumber)
+            .build();
+    }
 }

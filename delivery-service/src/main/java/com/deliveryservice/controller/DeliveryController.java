@@ -23,7 +23,7 @@ public class DeliveryController {
     @PostMapping("/addresses")
     public Response<Void> registerAddress(@RequestHeader("Member-Id")Long memberId, @RequestBody AddressRequestDto request)
         throws Exception {
-        deliveryAddressUseCase.registerAddress(memberId, request);
+        deliveryAddressUseCase.registerAddress(memberId, request.mapToCommand());
         return Response.success(HttpStatus.OK.value(), null);
     }
 

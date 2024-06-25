@@ -1,7 +1,7 @@
 package com.memberservice.controller;
 
 
-import com.memberservice.controller.req.EmailDto;
+import com.memberservice.controller.req.EmailRequest;
 import com.memberservice.usecase.impl.EmailService;
 import jakarta.mail.MessagingException;
 import java.io.UnsupportedEncodingException;
@@ -19,15 +19,15 @@ public class EmailController {
     private final EmailService emailService;
 
     @PostMapping("/send")
-    public String sendEmail(@RequestBody EmailDto emailDto)
+    public String sendEmail(@RequestBody EmailRequest request)
         throws MessagingException, UnsupportedEncodingException {
-        emailService.sendEmail(emailDto.getEmail());
+        emailService.sendEmail(request.email());
         return "Email sent";
     }
 
     @PostMapping("/verify")
-    public String verifyEmail(@RequestBody EmailDto emailDto) {
-        boolean flag = emailService.verifyEmail(emailDto.getEmail(), emailDto.getVerifyCode());
+    public String verifyEmail(@RequestBody EmailRequest request) {
+        boolean flag = emailService.verifyEmail(request.mapToCommand());
         return flag ? "Email verified" : "Email not verified";
     }
 

@@ -1,7 +1,7 @@
-package com.memberservice.adapter;
+package com.memberservice.controller.internal;
 
 
-import com.memberservice.adapter.dto.CartDto;
+import com.memberservice.controller.internal.res.CartDto;
 import com.memberservice.usecase.CartUseCase;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/internal/carts")
-public class CartAdapterController {
+public class CartInternalController {
     private final CartUseCase cartUseCase;
 
     @PostMapping("/member/{memberId}")

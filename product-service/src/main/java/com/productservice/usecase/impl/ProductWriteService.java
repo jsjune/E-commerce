@@ -2,10 +2,11 @@ package com.productservice.usecase.impl;
 
 import com.productservice.adapter.MemberClient;
 import com.productservice.adapter.dto.MemberDto;
+import com.productservice.entity.Seller;
+import com.productservice.usecase.dto.RegisterProductDto;
 import com.productservice.utils.AesUtil;
 import com.productservice.utils.error.ErrorCode;
 import com.productservice.utils.error.GlobalException;
-import com.productservice.controller.req.ProductRequestDto;
 import com.productservice.entity.Product;
 import com.productservice.entity.ProductImage;
 import com.productservice.repository.ProductRepository;
@@ -35,13 +36,13 @@ public class ProductWriteService implements ProductWriteUseCase {
     private static final String UPLOAD_FOLDER = "images";
 
     @Override
-    public void createProduct(Long memberId, ProductRequestDto request) throws Exception {
+    public void createProduct(Long memberId, RegisterProductDto command) throws Exception {
         MemberDto member = memberClient.getMemberInfo(memberId);
         if(member == null) {
             throw new GlobalException(ErrorCode.MEMBER_NOT_FOUND);
         }
         List<ProductImage> images = new ArrayList<>();
-        for (MultipartFile image : request.getProductImages()) {
+        for (MultipartFile image : command.productImages()) {
             if (!image.isEmpty()) {
                 ImageValidator.validateImageFile(image);
                 String datePath = LocalDateTime.now()
@@ -57,16 +58,19 @@ public class ProductWriteService implements ProductWriteUseCase {
             }
         }
 
-        Product product = Product.builder()
-            .name(request.getName())
-            .description(request.getDescription())
-            .price(request.getPrice())
-            .totalStock(request.getStock())
-            .soldQuantity(0)
+        Seller seller = Seller.builder()
             .sellerId(member.memberId())
-            .phoneNumber(aesUtil.aesEncode(member.phoneNumber()))
             .company(member.company())
-            .tags(request.getTags())
+            .phoneNumber(aesUtil.aesEncode(member.phoneNumber()))
+            .build();
+        Product product = Product.builder()
+            .name(command.name())
+            .description(command.description())
+            .price(command.price())
+            .totalStock(command.stock())
+            .soldQuantity(0)
+            .seller(seller)
+            .tags(command.tags())
             .productImages(images)
             .build();
         productRepository.save(product);

@@ -21,6 +21,9 @@ import com.orderservice.entity.OrderLineStatus;
 import com.orderservice.repository.OrderLineRepository;
 import com.orderservice.repository.ProductOrderRepository;
 import com.orderservice.usecase.OrderUseCase;
+import com.orderservice.usecase.dto.OrderDto;
+import com.orderservice.usecase.dto.RegisterOrderOfCartDto;
+import com.orderservice.usecase.dto.RegisterOrderOfProductDto;
 import com.orderservice.utils.error.ErrorCode;
 import com.orderservice.utils.error.GlobalException;
 import java.util.ArrayList;
@@ -43,7 +46,7 @@ public class OrderService implements OrderUseCase {
     private final DeliveryClient deliveryClient;
 
     @Override
-    public OrderDetailResponseDto registerOrderOfCart(Long memberId, List<Long> cartIds) {
+    public OrderDetailResponseDto registerOrderOfCart(Long memberId, RegisterOrderOfCartDto command) {
         int totalPrice = 0;
         ProductOrder productOrder = ProductOrder.builder()
             .memberId(memberId)
@@ -52,7 +55,7 @@ public class OrderService implements OrderUseCase {
             .build();
         productOrderRepository.save(productOrder);
         List<OrderLine> orderLines = new ArrayList<>();
-        List<CartDto> cartList = memberClient.getCartList(memberId, cartIds);
+        List<CartDto> cartList = memberClient.getCartList(memberId, command.cartIds());
         for (CartDto cart : cartList) {
             totalPrice += cart.price() * cart.quantity();
             OrderLine orderLine = OrderLine.builder()
@@ -80,15 +83,15 @@ public class OrderService implements OrderUseCase {
     }
 
     @Override
-    public OrderDetailResponseDto registerOrder(Long memberId, ProductOrderRequestDto request) {
-        ProductDto product = productClient.getProduct(request.getProductId());
+    public OrderDetailResponseDto registerOrder(Long memberId, RegisterOrderOfProductDto command) {
+        ProductDto product = productClient.getProduct(command.productId());
         if (product == null) {
             throw new GlobalException(ErrorCode.PRODUCT_NOT_FOUND);
         }
         ProductOrder productOrder = ProductOrder.builder()
             .memberId(memberId)
             .productOrderStatus(ProdcutOrderStatus.INITIATED)
-            .totalPrice(product.price() * request.getQuantity())
+            .totalPrice(product.price() * command.quantity())
             .totalDiscount(0)
             .build();
         productOrderRepository.save(productOrder);
@@ -97,7 +100,7 @@ public class OrderService implements OrderUseCase {
             .productName(product.productName())
             .price(product.price())
             .thumbnailUrl(product.thumbnailUrl())
-            .quantity(request.getQuantity())
+            .quantity(command.quantity())
             .discount(0)
             .orderLineStatus(OrderLineStatus.INITIATED)
             .build();
@@ -113,9 +116,9 @@ public class OrderService implements OrderUseCase {
     }
 
     @Override
-    public void submitOrder(Long memberId, OrderRequest request) throws Exception {
+    public void submitOrder(Long memberId, OrderDto command) throws Exception {
         Optional<ProductOrder> findProductOrder = productOrderRepository.findById(
-            request.getOrderId());
+            command.orderId());
         if (findProductOrder.isPresent()) {
             ProductOrder productOrder = findProductOrder.get();
 
@@ -130,7 +133,7 @@ public class OrderService implements OrderUseCase {
                 ProcessPaymentRequest paymentRequest = ProcessPaymentRequest.builder()
                     .memberId(memberId)
                     .orderLineId(orderLine.getId())
-                    .paymentMethodId(request.getPaymentMethodId())
+                    .paymentMethodId(command.paymentMethodId())
                     .totalPrice(orderLine.getPrice() * orderLine.getQuantity())
                     .discount(orderLine.getDiscount())
                     .build();
@@ -148,7 +151,7 @@ public class OrderService implements OrderUseCase {
                     .productId(orderLine.getProductId())
                     .productName(orderLine.getProductName())
                     .quantity(orderLine.getQuantity())
-                    .deliveryAddressId(request.getDeliveryAddressId())
+                    .deliveryAddressId(command.deliveryAddressId())
                     .build();
                 Long deliveryId = deliveryClient.processDelivery(deliveryRequest);
                 if (deliveryId == null) {

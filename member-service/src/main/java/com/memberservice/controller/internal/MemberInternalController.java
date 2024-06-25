@@ -1,7 +1,7 @@
-package com.memberservice.adapter;
+package com.memberservice.controller.internal;
 
 
-import com.memberservice.adapter.dto.MemberDto;
+import com.memberservice.controller.internal.res.MemberDto;
 import com.memberservice.usecase.AuthUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/internal/auth")
-public class MemberAdapterController {
+public class MemberInternalController {
 
     private final AuthUseCase authUseCase;
 

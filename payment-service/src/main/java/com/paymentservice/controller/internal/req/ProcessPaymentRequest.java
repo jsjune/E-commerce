@@ -1,6 +1,6 @@
 package com.paymentservice.controller.internal.req;
 
-import com.paymentservice.usecase.dto.ProcessPayment;
+import com.paymentservice.usecase.dto.ProcessPaymentDto;
 
 public record ProcessPaymentRequest(
     Long memberId,
@@ -10,8 +10,8 @@ public record ProcessPaymentRequest(
     int discount
 ) {
 
-    public ProcessPayment mapToCommand() {
-        return ProcessPayment.builder()
+    public ProcessPaymentDto mapToCommand() {
+        return ProcessPaymentDto.builder()
             .memberId(memberId)
             .orderLineId(orderLineId)
             .paymentMethodId(paymentMethodId)

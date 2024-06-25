@@ -29,7 +29,7 @@ public class OrderController {
     public Response<OrderDetailResponseDto> registerOrderOfCart(@RequestHeader("Member-Id")Long memberId,
         @RequestBody CartOrderRequestDto request) {
         OrderDetailResponseDto data = orderUseCase.registerOrderOfCart(memberId,
-            request.getCartIds());
+            request.mapToCommand());
         return Response.success(HttpStatus.OK.value(), data);
     }
 
@@ -37,14 +37,14 @@ public class OrderController {
     public Response<OrderDetailResponseDto> registerOrder(@RequestHeader("Member-Id")Long memberId,
         @RequestBody ProductOrderRequestDto request) {
         OrderDetailResponseDto data = orderUseCase.registerOrder(memberId,
-            request);
+            request.mapToCommand());
         return Response.success(HttpStatus.OK.value(), data);
     }
 
     @PostMapping("/submit")
     public Response<Void> submitOrder(@RequestHeader("Member-Id")Long memberId,
         @RequestBody OrderRequest request) throws Exception {
-        orderUseCase.submitOrder(memberId, request);
+        orderUseCase.submitOrder(memberId, request.mapToCommand());
         return Response.success(HttpStatus.OK.value(), null);
     }
 

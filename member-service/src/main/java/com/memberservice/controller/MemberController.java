@@ -27,32 +27,31 @@ public class MemberController {
 
     @PostMapping("/mailCheck")
     public Response<Boolean> mailCheck(@RequestBody UserValidationRequestDto request) {
-        return Response.success(HttpStatus.OK.value(), authUseCase.mailCheck(request.getEmail()));
+        return Response.success(HttpStatus.OK.value(), authUseCase.mailCheck(request.email()));
     }
 
     @PostMapping("/usernameCheck")
     public Response<Boolean> usernameCheck(@RequestBody UserValidationRequestDto request) {
         return Response.success(HttpStatus.OK.value(),
-            authUseCase.usernameCheck(request.getUsername()));
+            authUseCase.usernameCheck(request.username()));
     }
 
     @PostMapping("/signup")
     public Response<Void> signup(@RequestBody SignupRequestDto request) throws Exception {
-        authUseCase.signup(request);
+        authUseCase.signup(request.mapToCommand());
         return Response.success(HttpStatus.OK.value(), null);
     }
 
     @PostMapping("/login")
     public Response<LoginResponseDto> login(@RequestBody LoginRequestDto request) {
-        return Response.success(HttpStatus.OK.value(), authUseCase.login(request));
+        return Response.success(HttpStatus.OK.value(), authUseCase.login(request.mapToCommand()));
     }
 
     @PostMapping("/pw")
     public Response<Boolean> updatePw(@RequestHeader("Member-Id")Long memberId,
         @RequestBody PasswordRequestDto request) {
         return Response.success(HttpStatus.OK.value(),
-            authUseCase.updatePw(request.getCurrentPw(), request.getNewPw(),
-                memberId)
+            authUseCase.updatePw(request.mapToCommand(), memberId)
         );
     }
 
@@ -68,7 +67,7 @@ public class MemberController {
         @RequestHeader("Member-Id")Long memberId, @RequestBody UserInfoRequestDto request)
         throws Exception {
         return Response.success(HttpStatus.OK.value(),
-            authUseCase.updateUserInfo(memberId, request));
+            authUseCase.updateUserInfo(memberId, request.mapToCommand()));
 
     }
 }

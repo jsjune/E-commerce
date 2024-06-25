@@ -1,7 +1,7 @@
 package com.memberservice.usecase;
 
 
-import com.memberservice.adapter.dto.CartDto;
+import com.memberservice.controller.internal.res.CartDto;
 import com.memberservice.controller.res.CartResponseDto;
 import java.util.List;
 

@@ -16,7 +16,8 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class    OrderLine extends BaseTimeEntity {
+public class OrderLine extends BaseTimeEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,8 +35,9 @@ public class    OrderLine extends BaseTimeEntity {
     private Long deliveryId;
 
     @Builder
-    public OrderLine(Long id, ProductOrder productOrder, Long productId,String productName,int price, int quantity,String thumbnailUrl,
-        int discount, OrderLineStatus orderLineStatus,Long paymentId, Long deliveryId) {
+    public OrderLine(Long id, ProductOrder productOrder, Long productId, String productName,
+        int price, int quantity, String thumbnailUrl,
+        int discount, OrderLineStatus orderLineStatus, Long paymentId, Long deliveryId) {
         this.id = id;
         this.productOrder = productOrder;
         this.productId = productId;
@@ -49,7 +51,8 @@ public class    OrderLine extends BaseTimeEntity {
         this.deliveryId = deliveryId;
     }
 
-    public void finalizeOrderLine(OrderLineStatus orderLineStatus, Long paymentId, Long deliveryId) {
+    public void finalizeOrderLine(OrderLineStatus orderLineStatus, Long paymentId,
+        Long deliveryId) {
         this.orderLineStatus = orderLineStatus;
         this.paymentId = paymentId;
         this.deliveryId = deliveryId;

@@ -8,10 +8,8 @@ import com.paymentservice.entity.PaymentStatus;
 import com.paymentservice.repository.PaymentMethodRepository;
 import com.paymentservice.repository.PaymentRepository;
 import com.paymentservice.usecase.PaymentUseCase;
-import com.paymentservice.usecase.dto.ProcessPayment;
+import com.paymentservice.usecase.dto.ProcessPaymentDto;
 import com.paymentservice.utils.AesUtil;
-import com.paymentservice.utils.error.ErrorCode;
-import com.paymentservice.utils.error.GlobalException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,7 +26,7 @@ public class PaymentService implements PaymentUseCase {
     private final AesUtil aesUtil;
 
     @Override
-    public PaymentDto processPayment(ProcessPayment command) throws Exception {
+    public PaymentDto processPayment(ProcessPaymentDto command) throws Exception {
         Optional<PaymentMethod> findPaymentMethod = paymentMethodRepository.findById(command.paymentMethodId());
         if (findPaymentMethod.isPresent()) {
             PaymentMethod paymentMethod = findPaymentMethod.get();

@@ -1,10 +1,8 @@
 package com.productservice.usecase.impl;
 
-import com.productservice.adapter.dto.ProductDto;
+import com.productservice.controller.internal.res.ProductDto;
 import com.productservice.utils.AesUtil;
 import com.productservice.utils.ExceptionWrapper;
-import com.productservice.utils.error.ErrorCode;
-import com.productservice.utils.error.GlobalException;
 import com.productservice.controller.res.ProductListDto;
 import com.productservice.controller.res.ProductListResponseDto;
 import com.productservice.controller.res.ProductResponseDto;
@@ -34,9 +32,9 @@ public class ProductReadService implements ProductReadUseCase {
         if (findProduct.isPresent()) {
             Product product = findProduct.get();
             return ProductResponseDto.builder()
-                .sellerId(product.getSellerId())
-                .company(product.getCompany())
-                .phoneNumber(aesUtil.aesDecode(product.getPhoneNumber()))
+                .sellerId(product.getSeller().getSellerId())
+                .company(product.getSeller().getCompany())
+                .phoneNumber(aesUtil.aesDecode(product.getSeller().getPhoneNumber()))
                 .name(product.getName())
                 .description(product.getDescription())
                 .price(product.getPrice())
@@ -66,9 +64,9 @@ public class ProductReadService implements ProductReadUseCase {
     private ProductListDto mapToProductResponse(Product product) throws Exception {
         return ProductListDto.builder()
             .productId(product.getId())
-            .sellerId(product.getSellerId())
-            .company(product.getCompany())
-            .phoneNumber(aesUtil.aesDecode(product.getPhoneNumber()))
+            .sellerId(product.getSeller().getSellerId())
+            .company(product.getSeller().getCompany())
+            .phoneNumber(aesUtil.aesDecode(product.getSeller().getPhoneNumber()))
             .name(product.getName())
             .description(product.getDescription())
             .price(product.getPrice())

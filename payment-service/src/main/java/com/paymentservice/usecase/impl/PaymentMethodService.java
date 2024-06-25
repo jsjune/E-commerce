@@ -1,13 +1,12 @@
 package com.paymentservice.usecase.impl;
 
 
-
-import com.paymentservice.controller.req.PaymentMethodRequestDto;
-import com.paymentservice.controller.res.PaymentMethodResponseDto;
 import com.paymentservice.controller.res.PaymentMethodListDto;
+import com.paymentservice.controller.res.PaymentMethodResponseDto;
 import com.paymentservice.entity.PaymentMethod;
 import com.paymentservice.repository.PaymentMethodRepository;
 import com.paymentservice.usecase.PaymentMethodUseCase;
+import com.paymentservice.usecase.dto.RegisterPaymentMethodDto;
 import com.paymentservice.utils.AesUtil;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,14 +23,14 @@ public class PaymentMethodService implements PaymentMethodUseCase {
     private final AesUtil aesUtil;
 
     @Override
-    public void registerPaymentMethod(Long memberId, PaymentMethodRequestDto request)
+    public void registerPaymentMethod(Long memberId, RegisterPaymentMethodDto command)
         throws Exception {
         PaymentMethod paymentMethod = PaymentMethod.builder()
             .memberId(memberId)
-            .paymentType(request.getPaymentType())
-            .bank(aesUtil.aesEncode(request.getBank()))
-            .accountNumber(aesUtil.aesEncode(request.getAccountNumber()))
-            .creditCardNumber(aesUtil.aesEncode(request.getCreditCardNumber()))
+            .paymentType(command.paymentType())
+            .bank(aesUtil.aesEncode(command.bank()))
+            .accountNumber(aesUtil.aesEncode(command.accountNumber()))
+            .creditCardNumber(aesUtil.aesEncode(command.creditCardNumber()))
             .build();
         paymentMethodRepository.save(paymentMethod);
     }

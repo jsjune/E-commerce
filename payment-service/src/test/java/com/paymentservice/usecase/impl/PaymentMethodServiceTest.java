@@ -10,6 +10,7 @@ import com.paymentservice.entity.PaymentMethod;
 import com.paymentservice.entity.PaymentType;
 import com.paymentservice.repository.PaymentMethodRepository;
 import com.paymentservice.usecase.PaymentMethodUseCase;
+import com.paymentservice.usecase.dto.RegisterPaymentMethodDto;
 import com.paymentservice.utils.AesUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,11 +37,11 @@ class PaymentMethodServiceTest extends IntegrationTestSupport {
         // given
         Long memberId = 1L;
         String bank = "bank";
-        PaymentMethodRequestDto request = getPaymentMethodRequestDto(bank);
+        RegisterPaymentMethodDto command = getPaymentMethodRequestDto(bank);
 
         // when
-        paymentMethodUseCase.registerPaymentMethod(memberId, request);
-        paymentMethodUseCase.registerPaymentMethod(memberId, request);
+        paymentMethodUseCase.registerPaymentMethod(memberId, command);
+        paymentMethodUseCase.registerPaymentMethod(memberId, command);
         PaymentMethodResponseDto result = paymentMethodUseCase.getPaymentMethods(
             memberId);
 
@@ -55,20 +56,20 @@ class PaymentMethodServiceTest extends IntegrationTestSupport {
     void register_paymentMethod() throws Exception {
         // given
         Long memberId = 1L;
-        PaymentMethodRequestDto request = getPaymentMethodRequestDto("bank");
+        RegisterPaymentMethodDto command = getPaymentMethodRequestDto("bank");
 
         // when
-        paymentMethodUseCase.registerPaymentMethod(memberId, request);
+        paymentMethodUseCase.registerPaymentMethod(memberId, command);
         PaymentMethod result = paymentMethodRepository.findAll().stream().findFirst()
             .orElse(null);
 
         // then
-        assertEquals(result.getPaymentType(), request.getPaymentType());
-        assertEquals(aesUtil.aesDecode(result.getCreditCardNumber()), request.getCreditCardNumber());
+        assertEquals(result.getPaymentType(), command.paymentType());
+        assertEquals(aesUtil.aesDecode(result.getCreditCardNumber()), command.creditCardNumber());
     }
 
-    private static PaymentMethodRequestDto getPaymentMethodRequestDto(String bank) {
-        return PaymentMethodRequestDto.builder()
+    private static RegisterPaymentMethodDto getPaymentMethodRequestDto(String bank) {
+        return RegisterPaymentMethodDto.builder()
             .paymentType(PaymentType.CREDIT_CARD)
             .creditCardNumber("1234-1234-1234-1234")
             .bank(bank)

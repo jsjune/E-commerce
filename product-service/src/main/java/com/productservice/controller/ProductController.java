@@ -30,7 +30,7 @@ public class ProductController {
     public Response<Void> createProduct(
         @RequestHeader("Member-Id")Long memberId,
         @ModelAttribute ProductRequestDto request) throws Exception {
-        productWriteUseCase.createProduct(memberId, request);
+        productWriteUseCase.createProduct(memberId, request.mapToCommand());
         return Response.success(HttpStatus.OK.value(), null);
     }
 

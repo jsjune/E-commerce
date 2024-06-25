@@ -23,7 +23,7 @@ public class PaymentController {
     @PostMapping("/methods")
     public Response<Void> registerPaymentMethod(@RequestHeader("Member-Id")Long memberId,
         @RequestBody PaymentMethodRequestDto request) throws Exception {
-        paymentMethodUseCase.registerPaymentMethod(memberId, request);
+        paymentMethodUseCase.registerPaymentMethod(memberId, request.mapToCommand());
         return Response.success(HttpStatus.OK.value(), null);
     }
 

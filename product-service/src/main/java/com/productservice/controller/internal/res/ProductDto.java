@@ -1,4 +1,4 @@
-package com.productservice.adapter.dto;
+package com.productservice.controller.internal.res;
 
 import com.productservice.entity.Product;
 import com.productservice.entity.ProductImage;

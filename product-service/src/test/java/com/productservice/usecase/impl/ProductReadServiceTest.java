@@ -1,6 +1,7 @@
 package com.productservice.usecase.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -12,6 +13,7 @@ import com.productservice.controller.res.ProductListResponseDto;
 import com.productservice.controller.res.ProductResponseDto;
 import com.productservice.entity.Product;
 import com.productservice.entity.ProductImage;
+import com.productservice.entity.Seller;
 import com.productservice.repository.ProductRepository;
 import com.productservice.usecase.ProductReadUseCase;
 import com.productservice.utils.error.ErrorCode;
@@ -46,13 +48,13 @@ class ProductReadServiceTest extends IntegrationTestSupport {
     @Test
     void get_products() throws Exception {
         // given
-        MemberDto member = registerMember();
+        MemberDto member = registerMember("331672794abf3e48bea635a008d36aec");
+        Seller seller = new Seller(member.memberId(), member.phoneNumber(), null);
         List<Product> products = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             Product product = Product.builder()
                 .name("abc")
-                .sellerId(member.memberId())
-                .company(member.phoneNumber())
+                .seller(seller)
                 .productImages(
                     List.of(new ProductImage("image", "imagePath", "thumbnail", "thumbnailPath")))
                 .build();
@@ -69,42 +71,42 @@ class ProductReadServiceTest extends IntegrationTestSupport {
         assertEquals(response.getProducts().size(), products.size());
     }
 
-    @DisplayName("상품 조회시 존재하지 않는 경우 에러 발생")
+    @DisplayName("상품 조회시 존재하지 않는 경우 null")
     @Test
-    void not_find_product() {
+    void none_find_product() throws Exception {
         // given
         Long id = 1L;
 
         // when then
-        GlobalException exception = assertThrows(GlobalException.class,
-            () -> productReadUseCase.getProduct(id));
-        assertEquals(exception.getErrorCode(), ErrorCode.PRODUCT_NOT_FOUND);
+        ProductResponseDto product = productReadUseCase.getProduct(id);
+
+        assertNull(product);
     }
 
     @DisplayName("상품 상세 조회")
     @Test
     void get_product() throws Exception {
         // given
-        MemberDto member = registerMember();
+        MemberDto member = registerMember("010-1234-5678");
+        Seller seller = new Seller(member.memberId(), "e7c3b80abeb68b5f886523c42c0677a4", null);
         Product product = Product.builder()
             .name("가나다")
-            .sellerId(member.memberId())
-            .phoneNumber(member.phoneNumber())
+            .seller(seller)
             .productImages(
                 List.of(new ProductImage("image", "imagePath", "thumbnail", "thumbnailPath")))
             .build();
         productRepository.save(product);
 
         // when
-        when(memberClient.getMemberInfo(any())).thenReturn(member);
         ProductResponseDto response = productReadUseCase.getProduct(product.getId());
 
         // then
         assertEquals(response.getName(), product.getName());
         assertEquals(response.getPhoneNumber(), member.phoneNumber());
+
     }
 
-    private MemberDto registerMember() {
-        return new MemberDto(1L, "seller", "samsung");
+    private MemberDto registerMember(String phoneNumber) {
+        return new MemberDto(1L, phoneNumber, "samsung");
     }
 }

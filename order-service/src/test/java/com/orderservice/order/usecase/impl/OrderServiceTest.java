@@ -14,7 +14,6 @@ import com.orderservice.adapter.res.CartDto;
 import com.orderservice.adapter.res.MemberDto;
 import com.orderservice.adapter.res.PaymentDto;
 import com.orderservice.adapter.res.ProductDto;
-import com.orderservice.delivery.controller.req.AddressRequestDto;
 import com.orderservice.controller.req.CartOrderRequestDto;
 import com.orderservice.controller.req.OrderRequest;
 import com.orderservice.controller.req.ProductOrderRequestDto;
@@ -27,6 +26,9 @@ import com.orderservice.entity.ProductOrder;
 import com.orderservice.repository.OrderLineRepository;
 import com.orderservice.repository.ProductOrderRepository;
 import com.orderservice.usecase.OrderUseCase;
+import com.orderservice.usecase.dto.OrderDto;
+import com.orderservice.usecase.dto.RegisterOrderOfCartDto;
+import com.orderservice.usecase.dto.RegisterOrderOfProductDto;
 import com.orderservice.utils.error.ErrorCode;
 import com.orderservice.utils.error.GlobalException;
 import java.util.ArrayList;
@@ -197,25 +199,24 @@ class OrderServiceTest extends IntegrationTestSupport {
         MemberDto member = new MemberDto(1L, "010-1234-5678", "회사");
         ProductDto product = registeredProduct(1L, 2000);
         int quantity = 3;
-        ProductOrderRequestDto registerRequest = new ProductOrderRequestDto(product.productId(),
+        RegisterOrderOfProductDto registerCommand = new RegisterOrderOfProductDto(product.productId(),
             quantity);
 
         when(productClient.getProduct(product.productId())).thenReturn(product);
-        orderUseCase.registerOrder(member.memberId(), registerRequest);
+        orderUseCase.registerOrder(member.memberId(), registerCommand);
         ProductOrder productOrder = productOrderRepository.findAll().stream().findFirst()
             .orElse(null);
 
         // when
-        OrderRequest orderRequest = OrderRequest.builder()
+        OrderDto orderCommand = OrderDto.builder()
             .orderId(productOrder.getId())
             .paymentMethodId(1L)
             .deliveryAddressId(1L)
             .build();
-        when(paymentClient.processPayment(any())).thenReturn(
-            new PaymentDto(1L, product.price() * quantity));
+        when(paymentClient.processPayment(any())).thenReturn(new PaymentDto(1L, product.price() * quantity, 0));
         when(deliveryClient.processDelivery(any())).thenReturn(1L);
         when(productClient.decreaseStock(product.productId(), quantity)).thenReturn(true);
-        orderUseCase.submitOrder(member.memberId(), orderRequest);
+        orderUseCase.submitOrder(member.memberId(), orderCommand);
         ProductOrder result = productOrderRepository.findById(productOrder.getId()).get();
 
         // then
@@ -231,11 +232,11 @@ class OrderServiceTest extends IntegrationTestSupport {
         MemberDto member = new MemberDto(1L, "010-1234-5678", "회사");
         ProductDto product = registeredProduct(1L, 2000);
         int quantity = 3;
-        ProductOrderRequestDto request = new ProductOrderRequestDto(product.productId(), quantity);
+        RegisterOrderOfProductDto command = new RegisterOrderOfProductDto(product.productId(), quantity);
 
         // when
         when(productClient.getProduct(product.productId())).thenReturn(product);
-        orderUseCase.registerOrder(member.memberId(), request);
+        orderUseCase.registerOrder(member.memberId(), command);
         ProductOrder result = productOrderRepository.findAll().stream().findFirst()
             .orElse(null);
 
@@ -259,11 +260,11 @@ class OrderServiceTest extends IntegrationTestSupport {
             new CartDto(product2.productId(), product1.productName(), product2.price(), "썸네일", 2)
         );
         when(memberClient.getCartList(member.memberId(), List.of(1L, 2L))).thenReturn(carts);
-        CartOrderRequestDto request = new CartOrderRequestDto(
+        RegisterOrderOfCartDto command = new RegisterOrderOfCartDto(
             List.of(product1.productId(), product2.productId()));
 
         // when
-        orderUseCase.registerOrderOfCart(member.memberId(), request.getCartIds());
+        orderUseCase.registerOrderOfCart(member.memberId(), command);
         ProductOrder result = productOrderRepository.findAll().stream().findFirst()
             .orElse(null);
 
@@ -275,17 +276,6 @@ class OrderServiceTest extends IntegrationTestSupport {
         assertEquals(result.getOrderLines().get(1).getPrice(), product2.price());
         assertEquals(result.getOrderLines().get(1).getQuantity(), 2);
 
-    }
-
-    private static AddressRequestDto getAddressRequest(boolean isMainAddress) {
-        return AddressRequestDto.builder()
-            .street("서울시 강남구")
-            .detailAddress("역삼동")
-            .zipCode("12345")
-            .alias("집")
-            .receiver("홍길동")
-            .isMainAddress(isMainAddress)
-            .build();
     }
 
     private static ProductDto registeredProduct(Long productId, int price) {

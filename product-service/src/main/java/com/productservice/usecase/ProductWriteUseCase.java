@@ -1,9 +1,9 @@
 package com.productservice.usecase;
 
-import com.productservice.controller.req.ProductRequestDto;
+import com.productservice.usecase.dto.RegisterProductDto;
 
 public interface ProductWriteUseCase {
-    void createProduct(Long memberId, ProductRequestDto request) throws Exception;
+    void createProduct(Long memberId, RegisterProductDto command) throws Exception;
 
     Boolean decreaseStock(Long productId, int quantity);
 

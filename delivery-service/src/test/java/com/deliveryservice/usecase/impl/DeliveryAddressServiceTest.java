@@ -4,17 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 import com.deliveryservice.IntegrationTestSupport;
 import com.deliveryservice.controller.req.AddressRequestDto;
 import com.deliveryservice.controller.res.DeliveryAddressListResponseDto;
-import com.deliveryservice.entity.Delivery;
 import com.deliveryservice.entity.DeliveryAddress;
 import com.deliveryservice.repository.DeliveryAddressRepository;
 import com.deliveryservice.usecase.DeliveryAddressUseCase;
-import com.deliveryservice.usecase.DeliveryUseCase;
+import com.deliveryservice.usecase.dto.RegisterAddress;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -40,10 +37,10 @@ class DeliveryAddressServiceTest extends IntegrationTestSupport {
     void get_member_addresses() throws Exception {
         // given
         long memberId = 1L;
-        AddressRequestDto request = getAddressRequest(false);
-        deliveryAddressUseCase.registerAddress(memberId,request);
-        AddressRequestDto request2 = getAddressRequest(true);
-        deliveryAddressUseCase.registerAddress(memberId,request2);
+        RegisterAddress command = getAddressRequest(false);
+        deliveryAddressUseCase.registerAddress(memberId,command);
+        RegisterAddress command2 = getAddressRequest(true);
+        deliveryAddressUseCase.registerAddress(memberId,command2);
 
         // when
         DeliveryAddressListResponseDto result = deliveryAddressUseCase.getAddresses(
@@ -51,7 +48,7 @@ class DeliveryAddressServiceTest extends IntegrationTestSupport {
 
         // then
         assertEquals(result.getDeliveryAddresses().size(), 2);
-        assertEquals(result.getDeliveryAddresses().get(0).getStreet(), request2.getStreet());
+        assertEquals(result.getDeliveryAddresses().get(0).getStreet(), command2.street());
         assertTrue(result.getDeliveryAddresses().get(0).isMainAddress());
     }
 
@@ -61,11 +58,11 @@ class DeliveryAddressServiceTest extends IntegrationTestSupport {
         // given
         long memberId = 1L;
         boolean isMainAddress = true;
-        AddressRequestDto request = getAddressRequest(isMainAddress);
+        RegisterAddress command = getAddressRequest(isMainAddress);
 
         // when
-        deliveryAddressUseCase.registerAddress(memberId, request);
-        deliveryAddressUseCase.registerAddress(memberId, request);
+        deliveryAddressUseCase.registerAddress(memberId, command);
+        deliveryAddressUseCase.registerAddress(memberId, command);
 
         // then
         List<DeliveryAddress> result = deliveryAddressRepository.findAllByMemberId(
@@ -81,21 +78,21 @@ class DeliveryAddressServiceTest extends IntegrationTestSupport {
         // given
         long memberId = 1L;
         boolean isMainAddress = true;
-        AddressRequestDto request = getAddressRequest(isMainAddress);
+        RegisterAddress command = getAddressRequest(isMainAddress);
 
         // when
-        deliveryAddressUseCase.registerAddress(memberId, request);
+        deliveryAddressUseCase.registerAddress(memberId, command);
         DeliveryAddress deliveryAddress = deliveryAddressRepository.findAllByMemberId(memberId)
             .stream().findFirst().orElse(null);
 
         // then
         assertNotNull(deliveryAddress);
-        assertEquals(deliveryAddress.isMainAddress(), request.isMainAddress());
+        assertEquals(deliveryAddress.isMainAddress(), command.isMainAddress());
 
     }
 
-    private static AddressRequestDto getAddressRequest(boolean isMainAddress) {
-        return AddressRequestDto.builder()
+    private static RegisterAddress getAddressRequest(boolean isMainAddress) {
+        return RegisterAddress.builder()
             .street("서울시 강남구")
             .detailAddress("역삼동")
             .zipCode("12345")

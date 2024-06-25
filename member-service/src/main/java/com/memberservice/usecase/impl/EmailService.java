@@ -1,6 +1,7 @@
 package com.memberservice.usecase.impl;
 
 
+import com.memberservice.usecase.dto.EmailDto;
 import com.memberservice.utils.EmailValidator;
 import com.memberservice.utils.RedisUtils;
 import com.memberservice.utils.error.ErrorCode;
@@ -76,12 +77,12 @@ public class EmailService {
         return code.toString();
     }
 
-    public boolean verifyEmail(String email, String verifyCode) {
-        String findCode = redisUtils.getCode(email);
+    public boolean verifyEmail(EmailDto command) {
+        String findCode = redisUtils.getCode(command.email());
         if (findCode == null) {
             return false;
         }
-        return findCode.equals(verifyCode);
+        return findCode.equals(command.verifyCode());
     }
 
 }

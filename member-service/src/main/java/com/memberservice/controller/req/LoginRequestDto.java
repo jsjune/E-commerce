@@ -1,13 +1,12 @@
 package com.memberservice.controller.req;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import com.memberservice.usecase.dto.LoginDto;
 
-@Getter
-@AllArgsConstructor
-@Builder
-public class LoginRequestDto {
-    private String account;
-    private String password;
+public record LoginRequestDto (
+    String account,
+    String password
+){
+    public LoginDto mapToCommand() {
+        return new LoginDto(account(), password());
+    }
 }

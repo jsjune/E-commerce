@@ -1,6 +1,7 @@
 package com.memberservice.usecase.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -18,6 +19,10 @@ import com.memberservice.entity.Member;
 import com.memberservice.entity.UserRole;
 import com.memberservice.repository.MemberRepository;
 import com.memberservice.usecase.AuthUseCase;
+import com.memberservice.usecase.dto.LoginDto;
+import com.memberservice.usecase.dto.PasswordDto;
+import com.memberservice.usecase.dto.SignupDto;
+import com.memberservice.usecase.dto.UserInfoDto;
 import com.memberservice.utils.AesUtil;
 import com.memberservice.utils.error.ErrorCode;
 import com.memberservice.utils.error.GlobalException;
@@ -127,13 +132,13 @@ class AuthServiceTest extends IntegrationTestSupport {
             .username(username)
             .build();
         memberRepository.save(member);
-        SignupRequestDto request = SignupRequestDto.builder()
+        SignupDto command = SignupDto.builder()
             .username(username)
             .build();
 
         // when then
         GlobalException exception = assertThrows(GlobalException.class,
-            () -> authUseCase.signup(request));
+            () -> authUseCase.signup(command));
         assertEquals(ErrorCode.EXIST_MEMBER, exception.getErrorCode());
     }
 
@@ -146,13 +151,13 @@ class AuthServiceTest extends IntegrationTestSupport {
             .email(email)
             .build();
         memberRepository.save(member);
-        SignupRequestDto request = SignupRequestDto.builder()
+        SignupDto command = SignupDto.builder()
             .email(email)
             .build();
 
         // when then
         GlobalException exception = assertThrows(GlobalException.class,
-            () -> authUseCase.signup(request));
+            () -> authUseCase.signup(command));
         assertEquals(ErrorCode.EXIST_MEMBER, exception.getErrorCode());
     }
 
@@ -162,7 +167,7 @@ class AuthServiceTest extends IntegrationTestSupport {
         // given
         String email = "aaa@naver.com";
         String username = "abc";
-        SignupRequestDto request = SignupRequestDto.builder()
+        SignupDto command = SignupDto.builder()
             .username(username)
             .phoneNumber("010-1234-5678")
             .email(email)
@@ -172,7 +177,7 @@ class AuthServiceTest extends IntegrationTestSupport {
             .build();
 
         // when
-        authUseCase.signup(request);
+        authUseCase.signup(command);
 
         // then
         Optional<Member> findMember = memberRepository.findByEmail(email);
@@ -185,14 +190,11 @@ class AuthServiceTest extends IntegrationTestSupport {
     @Test
     void not_exist_member_login_fail() {
         // given
-        LoginRequestDto request = LoginRequestDto.builder()
-            .account("aaa")
-            .password("1234")
-            .build();
+        LoginDto command = new LoginDto("aaa", "1234");
 
         // when then
         AuthenticationException exception = assertThrows(AuthenticationException.class,
-            () -> authUseCase.login(request));
+            () -> authUseCase.login(command));
         assertEquals(ErrorCode.USER_NOT_FOUND.getMessage(), exception.getMessage());
     }
 
@@ -202,18 +204,15 @@ class AuthServiceTest extends IntegrationTestSupport {
         String username = "가나다";
         Member member = Member.builder()
             .username(username)
-            .password(encoder.encode("1234"))
+            .password(encoder.encode("234"))
             .build();
         memberRepository.save(member);
         // given
-        LoginRequestDto request = LoginRequestDto.builder()
-            .account(username)
-            .password("12345")
-            .build();
+        LoginDto command = new LoginDto(username, "1234");
 
         // when then
         AuthenticationException exception = assertThrows(AuthenticationException.class,
-            () -> authUseCase.login(request));
+            () -> authUseCase.login(command));
         assertEquals("자격 증명에 실패하였습니다.", exception.getMessage());
     }
 
@@ -228,13 +227,10 @@ class AuthServiceTest extends IntegrationTestSupport {
             .role(UserRole.USER)
             .build();
         memberRepository.save(member);
-        LoginRequestDto request = LoginRequestDto.builder()
-            .account(username)
-            .password("1234")
-            .build();
+        LoginDto command = new LoginDto(username, "1234");
 
         // when
-        LoginResponseDto response = authUseCase.login(request);
+        LoginResponseDto response = authUseCase.login(command);
 
         // then
         assertNotNull(response.getAccessToken());
@@ -255,13 +251,10 @@ class AuthServiceTest extends IntegrationTestSupport {
             .role(UserRole.USER)
             .build();
         memberRepository.save(member);
-        LoginRequestDto request = LoginRequestDto.builder()
-            .account(email)
-            .password("1234")
-            .build();
+        LoginDto command = new LoginDto(email, "1234");
 
         // when
-        LoginResponseDto response = authUseCase.login(request);
+        LoginResponseDto response = authUseCase.login(command);
 
         // then
         assertNotNull(response.getAccessToken());
@@ -277,17 +270,13 @@ class AuthServiceTest extends IntegrationTestSupport {
             .password(encoder.encode(currentPw))
             .build();
         memberRepository.save(member);
-        PasswordRequestDto request = PasswordRequestDto.builder()
-            .currentPw("12345")
-            .newPw("123456")
-            .build();
+        PasswordDto command = new PasswordDto("12345", "123456");
 
         // when
-        boolean result = authUseCase.updatePw(request.getCurrentPw(), request.getNewPw(),
-            member.getId());
+        boolean result = authUseCase.updatePw(command, member.getId());
 
         // then
-        assertEquals(result, false);
+        assertFalse(result);
     }
 
     @DisplayName("비밀번호 수정 성공")
@@ -299,17 +288,13 @@ class AuthServiceTest extends IntegrationTestSupport {
             .password(encoder.encode(currentPw))
             .build();
         memberRepository.save(member);
-        PasswordRequestDto request = PasswordRequestDto.builder()
-            .currentPw(currentPw)
-            .newPw("123456")
-            .build();
+        PasswordDto command = new PasswordDto(currentPw, "123456");
 
         // when
-        boolean result = authUseCase.updatePw(request.getCurrentPw(), request.getNewPw(),
-            member.getId());
+        boolean result = authUseCase.updatePw(command, member.getId());
 
         // then
-        assertEquals(result, true);
+        assertTrue(result);
 
     }
 
@@ -349,7 +334,7 @@ class AuthServiceTest extends IntegrationTestSupport {
             .build();
         memberRepository.save(member);
         String username = "aaa";
-        UserInfoRequestDto request = UserInfoRequestDto.builder()
+        UserInfoDto command = UserInfoDto.builder()
             .email("abc@naver.com")
             .username(username)
             .phoneNumber("010-1234-5678")
@@ -359,7 +344,7 @@ class AuthServiceTest extends IntegrationTestSupport {
 
         // when
         MemberInfoResponseDto result = authUseCase.updateUserInfo(
-            loginUser.getMember().getId(), request);
+            loginUser.getMember().getId(), command);
 
         // then
         assertEquals(result.getUsername(), username);
