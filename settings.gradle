@@ -5,4 +5,5 @@ include 'product-service'
 include 'order-service'
 include 'member-service'
 include 'payment-service'
+include 'delivery-service'
 
