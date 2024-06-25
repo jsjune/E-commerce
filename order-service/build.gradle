@@ -41,11 +41,6 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.1.0'
 }
 
-test {
-    useJUnitPlatform()
-}
-
-
 // QueryDsl 디렉토리 경로
 def querydslSrcDir = 'src/main/generated/querydsl'
 

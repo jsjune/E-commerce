@@ -3,26 +3,23 @@ package com.orderservice.order.usecase.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import com.orderservice.IntegrationTestSupport;
+import com.orderservice.adapter.DeliveryClient;
 import com.orderservice.adapter.MemberClient;
+import com.orderservice.adapter.PaymentClient;
 import com.orderservice.adapter.ProductClient;
-import com.orderservice.adapter.dto.CartDto;
-import com.orderservice.adapter.dto.MemberDto;
-import com.orderservice.adapter.dto.ProductDto;
+import com.orderservice.adapter.res.CartDto;
+import com.orderservice.adapter.res.MemberDto;
+import com.orderservice.adapter.res.PaymentDto;
+import com.orderservice.adapter.res.ProductDto;
 import com.orderservice.delivery.controller.req.AddressRequestDto;
-import com.orderservice.delivery.entity.Delivery;
-import com.orderservice.delivery.entity.DeliveryAddress;
-import com.orderservice.delivery.entity.DeliveryStatus;
-import com.orderservice.delivery.repository.DeliveryAddressRepository;
-import com.orderservice.delivery.repository.DeliveryRepository;
-import com.orderservice.delivery.usecase.DeliveryAddressUseCase;
 import com.orderservice.order.controller.req.CartOrderRequestDto;
 import com.orderservice.order.controller.req.OrderRequest;
 import com.orderservice.order.controller.req.ProductOrderRequestDto;
 import com.orderservice.order.controller.res.OrderDetailResponseDto;
+import com.orderservice.order.controller.res.OrderListResponseDto;
 import com.orderservice.order.entity.OrderLine;
 import com.orderservice.order.entity.OrderLineStatus;
 import com.orderservice.order.entity.ProdcutOrderStatus;
@@ -30,15 +27,9 @@ import com.orderservice.order.entity.ProductOrder;
 import com.orderservice.order.repository.OrderLineRepository;
 import com.orderservice.order.repository.ProductOrderRepository;
 import com.orderservice.order.usecase.OrderUseCase;
-import com.orderservice.payment.controller.req.PaymentMethodRequestDto;
-import com.orderservice.payment.entity.Payment;
-import com.orderservice.payment.entity.PaymentMethod;
-import com.orderservice.payment.entity.PaymentType;
-import com.orderservice.payment.repository.PaymentMethodRepository;
-import com.orderservice.payment.repository.PaymentRepository;
-import com.orderservice.payment.usecase.PaymentMethodUseCase;
 import com.orderservice.utils.error.ErrorCode;
 import com.orderservice.utils.error.GlobalException;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -54,141 +45,149 @@ class OrderServiceTest extends IntegrationTestSupport {
     private ProductOrderRepository productOrderRepository;
     @Autowired
     private OrderLineRepository orderLineRepository;
-    @Autowired
-    private PaymentRepository paymentRepository;
-    @Autowired
-    private PaymentMethodRepository paymentMethodRepository;
-    @Autowired
-    private DeliveryRepository deliveryRepository;
-    @Autowired
-    private DeliveryAddressRepository deliveryAddressRepository;
-    @Autowired
-    private PaymentMethodUseCase paymentMethodUseCase;
-    @Autowired
-    private DeliveryAddressUseCase deliveryAddressUseCase;
     @MockBean
     private ProductClient productClient;
     @MockBean
     private MemberClient memberClient;
+    @MockBean
+    private PaymentClient paymentClient;
+    @MockBean
+    private DeliveryClient deliveryClient;
 
     @BeforeEach
     void setUp() {
-        deliveryRepository.deleteAllInBatch();
-        paymentRepository.deleteAllInBatch();
         orderLineRepository.deleteAllInBatch();
         productOrderRepository.deleteAllInBatch();
-        deliveryAddressRepository.deleteAllInBatch();
-        paymentMethodRepository.deleteAllInBatch();
     }
 
-    @DisplayName("배송 중 주문 취소시 실패")
+    @DisplayName("배송 중일 때 주문 취소 시 실패")
     @Test
-    void in_delivery_order_cancel_fail() {
+    void in_delivery_cancel_order_fail() {
         // given
-        OrderLine orderline = OrderLine.builder()
+        long memberId = 1L;
+        ProductOrder productOrder = ProductOrder.builder()
+            .memberId(memberId)
+            .productOrderStatus(ProdcutOrderStatus.COMPLETED)
+            .totalPrice(2000)
+            .totalDiscount(0)
             .build();
-        orderLineRepository.save(orderline);
-        Delivery delivery = Delivery.builder()
-            .orderLine(orderline)
-            .status(DeliveryStatus.IN_DELIVERY)
+        productOrderRepository.save(productOrder);
+        OrderLine orderLine = OrderLine.builder()
+            .productId(1L)
+            .productName("상품")
+            .price(1000)
+            .orderLineStatus(OrderLineStatus.PAYMENT_COMPLETED)
+            .discount(0)
+            .quantity(2)
             .build();
-        deliveryRepository.save(delivery);
-        orderline.finalizeOrderLine(null,null,delivery.getId());
+        orderLine.assignToOrder(productOrder);
+        productOrder.addOrderLine(orderLine);
+        OrderLine saveOrderLine = orderLineRepository.save(orderLine);
 
         // when then
-        GlobalException exception = assertThrows(GlobalException.class,
-            () -> orderUseCase.cancelOrder(1L, orderline.getId()));
-        assertEquals(exception.getErrorCode(), ErrorCode.DELIVERY_STATUS_NOT_REQUESTED);
+        when(deliveryClient.deliveryStatusCheck(saveOrderLine.getDeliveryId())).thenReturn(false);
+        GlobalException result = assertThrows(GlobalException.class,
+            () -> orderUseCase.cancelOrder(memberId, saveOrderLine.getId()));
+        assertEquals(result.getErrorCode(), ErrorCode.DELIVERY_STATUS_NOT_REQUESTED);
     }
 
     @DisplayName("주문 취소 성공")
     @Test
-    void cancel_order() throws Exception {
+    void cancel_order() {
         // given
-        MemberDto member = new MemberDto(1L, "010-1234-5678", "회사");
-        when(memberClient.getMemberInfo(member.memberId())).thenReturn(member);
-
-        PaymentMethodRequestDto paymentMethodRequest = getPaymentMethodRequestDto("bank");
-        paymentMethodUseCase.registerPaymentMethod(member.memberId(), paymentMethodRequest);
-        PaymentMethod paymentMethod = paymentMethodRepository.findAll().stream().findFirst().get();
-
-        boolean isMainAddress = true;
-        AddressRequestDto deliveryRequest = getAddressRequest(isMainAddress);
-        deliveryAddressUseCase.registerAddress(member.memberId(), deliveryRequest);
-        DeliveryAddress deliveryAddress = deliveryAddressRepository.findAllByMemberId(member.memberId())
-            .stream().findFirst().get();
-
-        ProductDto product = registeredProduct(1L, 1000);
-        when(productClient.getProduct(product.productId())).thenReturn(product);
-        List<CartDto> carts = List.of(
-            new CartDto(product.productId(), product.productName(), product.price(), "썸네일",3)
-        );
-        when(memberClient.getCartList(member.memberId(), List.of(1L))).thenReturn(carts);
-        orderUseCase.registerOrderOfCart(member.memberId(), List.of(product.productId()));
-        ProductOrder productOrder = productOrderRepository.findById(product.productId()).get();
-
-        OrderRequest request = OrderRequest.builder()
-            .orderId(productOrder.getId())
-            .paymentMethodId(paymentMethod.getId())
-            .deliveryAddressId(deliveryAddress.getId())
+        long memberId = 1L;
+        ProductOrder productOrder = ProductOrder.builder()
+            .memberId(memberId)
+            .productOrderStatus(ProdcutOrderStatus.COMPLETED)
+            .totalPrice(2000)
+            .totalDiscount(0)
             .build();
-        orderUseCase.submitOrder(member.memberId(), request);
+        productOrderRepository.save(productOrder);
+        OrderLine orderLine = OrderLine.builder()
+            .productId(1L)
+            .productName("상품")
+            .price(1000)
+            .orderLineStatus(OrderLineStatus.PAYMENT_COMPLETED)
+            .discount(0)
+            .quantity(2)
+            .build();
+        orderLine.assignToOrder(productOrder);
+        productOrder.addOrderLine(orderLine);
+        orderLineRepository.save(orderLine);
 
         // when
-        orderUseCase.cancelOrder(member.memberId(), productOrder.getOrderLines().get(0).getId());
-        OrderLine orderLineResult = orderLineRepository.findById(
-            productOrder.getOrderLines().get(0).getId()).get();
+        when(deliveryClient.deliveryStatusCheck(any())).thenReturn(true);
+        orderUseCase.cancelOrder(memberId, productOrder.getId());
+        OrderLine result = orderLineRepository.findAll().stream().findFirst().get();
 
         // then
-        assertEquals(orderLineResult.getOrderLineStatus(), OrderLineStatus.CANCELLED);
+        assertEquals(result.getOrderLineStatus(),OrderLineStatus.CANCELLED);
+    }
+
+    @DisplayName("주문 목록 조회")
+    @Test
+    void test() {
+        // given
+        Long memberId = 1L;
+        ProductOrder productOrder = ProductOrder.builder()
+            .memberId(memberId)
+            .productOrderStatus(ProdcutOrderStatus.COMPLETED)
+            .build();
+        productOrderRepository.save(productOrder);
+        for (int i = 0; i < 3; i++) {
+            OrderLine orderLine = OrderLine.builder()
+                .productOrder(productOrder)
+                .orderLineStatus(OrderLineStatus.PAYMENT_COMPLETED)
+                .build();
+            productOrder.addOrderLine(orderLine);
+            orderLineRepository.save(orderLine);
+        }
+
+        // when
+        OrderListResponseDto result = orderUseCase.getOrders(memberId);
+
+        // then
+        assertEquals(result.getOrders().size(), 1);
+        assertEquals(result.getOrders().get(0).getOrderLines().size(), 3);
+
     }
 
     @DisplayName("주문서 상세 조회")
     @Test
-    void get_product_order() throws Exception {
+    void get_product_order() {
         // given
-        MemberDto member = new MemberDto(1L, "010-1234-5678", "회사");
-
-        PaymentMethodRequestDto paymentMethodRequest = getPaymentMethodRequestDto("bank");
-        paymentMethodUseCase.registerPaymentMethod(member.memberId(), paymentMethodRequest);
-        PaymentMethod paymentMethod = paymentMethodRepository.findAll().stream().findFirst().get();
-
-        boolean isMainAddress = true;
-        AddressRequestDto deliveryRequest = getAddressRequest(isMainAddress);
-        when(memberClient.getMemberInfo(member.memberId())).thenReturn(member);
-        deliveryAddressUseCase.registerAddress(member.memberId(), deliveryRequest);
-        DeliveryAddress deliveryAddress = deliveryAddressRepository.findAllByMemberId(member.memberId())
-            .stream().findFirst().get();
-
-        ProductDto product1 = registeredProduct(1L, 2000);
-        ProductDto product2 = registeredProduct(2L, 4000);;
-        when(productClient.getProduct(product1.productId())).thenReturn(product1);
-        when(productClient.getProduct(product2.productId())).thenReturn(product2);
-        List<CartDto> carts = List.of(
-            new CartDto(product1.productId(), product1.productName(), product1.price(), "썸네일",3),
-            new CartDto(product2.productId(), product1.productName(), product2.price(), "썸네일",2)
-        );
-        when(memberClient.getCartList(member.memberId(), List.of(1L,2L))).thenReturn(carts);
-        orderUseCase.registerOrderOfCart(member.memberId(), List.of(product1.productId(), product2.productId()));
-        ProductOrder productOrder = productOrderRepository.findAll().stream().findFirst().get();
-
-        OrderRequest request = OrderRequest.builder()
-            .orderId(productOrder.getId())
-            .paymentMethodId(paymentMethod.getId())
-            .deliveryAddressId(deliveryAddress.getId())
+        long memberId = 1L;
+        ProductOrder productOrder = ProductOrder.builder()
+            .memberId(memberId)
+            .productOrderStatus(ProdcutOrderStatus.COMPLETED)
+            .totalPrice(14000)
+            .totalDiscount(0)
             .build();
+        productOrderRepository.save(productOrder);
+        List<OrderLine> orderLines = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            OrderLine orderLine = OrderLine.builder()
+                .productId((long) i)
+                .productName("상품" + i)
+                .price(1000 * (i + 1))
+                .orderLineStatus(OrderLineStatus.PAYMENT_COMPLETED)
+                .quantity(i + 1)
+                .build();
+            orderLine.assignToOrder(productOrder);
+            orderLines.add(orderLine);
+            productOrder.addOrderLine(orderLine);
+        }
+        orderLineRepository.saveAll(orderLines);
 
         // when
-        orderUseCase.submitOrder(member.memberId(), request);
-        OrderDetailResponseDto result = orderUseCase.getOrder(member.memberId(), productOrder.getId());
+        OrderDetailResponseDto result = orderUseCase.getOrder(memberId, productOrder.getId());
 
         // then
-        assertEquals(result.getOrderLines().size(), 2);
-        assertEquals(result.getOrderLines().get(0).getPrice(), product1.price());
-        assertEquals(result.getOrderLines().get(0).getQuantity(), 3);
-        assertEquals(result.getOrderLines().get(1).getPrice(), product2.price());
-        assertEquals(result.getOrderLines().get(1).getQuantity(), 2);
+        assertEquals(result.getProductOrderId(), productOrder.getId());
+        assertEquals(result.getOrderLines().size(), 3);
         assertEquals(result.getTotalPrice(), 14000);
+        assertEquals(result.getOrderLines().get(0).getPrice(), 1000);
+        assertEquals(result.getOrderLines().get(1).getPrice(), 2000);
     }
 
     @DisplayName("주문 하기")
@@ -196,51 +195,33 @@ class OrderServiceTest extends IntegrationTestSupport {
     void order() throws Exception {
         // given
         MemberDto member = new MemberDto(1L, "010-1234-5678", "회사");
-        when(memberClient.getMemberInfo(member.memberId())).thenReturn(member);
+        ProductDto product = registeredProduct(1L, 2000);
+        int quantity = 3;
+        ProductOrderRequestDto registerRequest = new ProductOrderRequestDto(product.productId(),
+            quantity);
 
-        PaymentMethodRequestDto paymentMethodRequest = getPaymentMethodRequestDto("bank");
-        paymentMethodUseCase.registerPaymentMethod(member.memberId(), paymentMethodRequest);
-        PaymentMethod paymentMethod = paymentMethodRepository.findAll().stream().findFirst().get();
-
-        boolean isMainAddress = true;
-        AddressRequestDto deliveryRequest = getAddressRequest(isMainAddress);
-        deliveryAddressUseCase.registerAddress(member.memberId(), deliveryRequest);
-        DeliveryAddress deliveryAddress = deliveryAddressRepository.findAllByMemberId(member.memberId())
-            .stream().findFirst().get();
-
-        ProductDto product1 = registeredProduct(1L, 2000);
-        ProductDto product2 = registeredProduct(2L, 4000);;
-        when(productClient.getProduct(product1.productId())).thenReturn(product1);
-        when(productClient.getProduct(product2.productId())).thenReturn(product2);
-        List<CartDto> carts = List.of(
-            new CartDto(product1.productId(), product1.productName(), product1.price(), "썸네일",3),
-            new CartDto(product2.productId(), product1.productName(), product2.price(), "썸네일",2)
-        );
-        when(memberClient.getCartList(member.memberId(), List.of(1L,2L))).thenReturn(carts);
-        orderUseCase.registerOrderOfCart(member.memberId(), List.of(product1.productId(), product2.productId()));
-        ProductOrder productOrder = productOrderRepository.findAll().stream().findFirst().get();
-
-        OrderRequest request = OrderRequest.builder()
-            .orderId(productOrder.getId())
-            .paymentMethodId(paymentMethod.getId())
-            .deliveryAddressId(deliveryAddress.getId())
-            .build();
+        when(productClient.getProduct(product.productId())).thenReturn(product);
+        orderUseCase.registerOrder(member.memberId(), registerRequest);
+        ProductOrder productOrder = productOrderRepository.findAll().stream().findFirst()
+            .orElse(null);
 
         // when
-        doNothing().when(productClient).decreaseStock(product1.productId(), 3);
-        doNothing().when(productClient).decreaseStock(product2.productId(), 2);
-        when(productClient.getProduct(product2.productId())).thenReturn(product2);
-        orderUseCase.submitOrder(member.memberId(), request);
-
-        ProductOrder orderResult = productOrderRepository.findAll().stream().findFirst().get();
-        List<Payment> paymentResult = paymentRepository.findAll();
-        List<Delivery> deliveryResult = deliveryRepository.findAll();
+        OrderRequest orderRequest = OrderRequest.builder()
+            .orderId(productOrder.getId())
+            .paymentMethodId(1L)
+            .deliveryAddressId(1L)
+            .build();
+        when(paymentClient.processPayment(any())).thenReturn(
+            new PaymentDto(1L, product.price() * quantity));
+        when(deliveryClient.processDelivery(any())).thenReturn(1L);
+        when(productClient.decreaseStock(product.productId(), quantity)).thenReturn(true);
+        orderUseCase.submitOrder(member.memberId(), orderRequest);
+        ProductOrder result = productOrderRepository.findById(productOrder.getId()).get();
 
         // then
-        assertEquals(deliveryResult.size(), 2);
-        assertEquals(paymentResult.size(), 2);
-        assertEquals(orderResult.getProductOrderStatus(), ProdcutOrderStatus.COMPLETED);
-        assertEquals(orderResult.getTotalPrice(), paymentResult.stream().mapToInt(Payment::getTotalPrice).sum());
+        assertEquals(result.getProductOrderStatus(), ProdcutOrderStatus.COMPLETED);
+        assertEquals(result.getTotalPrice(), 6000);
+
     }
 
     @DisplayName("상품 상세보기에서 주문서 작성")
@@ -249,7 +230,8 @@ class OrderServiceTest extends IntegrationTestSupport {
         // given
         MemberDto member = new MemberDto(1L, "010-1234-5678", "회사");
         ProductDto product = registeredProduct(1L, 2000);
-        ProductOrderRequestDto request = new ProductOrderRequestDto(product.productId(), 3);
+        int quantity = 3;
+        ProductOrderRequestDto request = new ProductOrderRequestDto(product.productId(), quantity);
 
         // when
         when(productClient.getProduct(product.productId())).thenReturn(product);
@@ -260,22 +242,25 @@ class OrderServiceTest extends IntegrationTestSupport {
         // then
         assertEquals(result.getOrderLines().size(), 1);
         assertEquals(result.getOrderLines().get(0).getPrice(), product.price());
-        assertEquals(result.getOrderLines().get(0).getQuantity(), 3);
+        assertEquals(result.getOrderLines().get(0).getQuantity(), quantity);
+        assertEquals(result.getTotalPrice(), 6000);
     }
-    
+
     @DisplayName("장바구니에서 주문서 작성")
     @Test
     void register_product_order_from_cart() throws Exception {
         // given
         MemberDto member = new MemberDto(1L, "010-1234-5678", "회사");
         ProductDto product1 = registeredProduct(1L, 2000);
-        ProductDto product2 = registeredProduct(2L, 4000);;
+        ProductDto product2 = registeredProduct(2L, 4000);
+        ;
         List<CartDto> carts = List.of(
-            new CartDto(product1.productId(), product1.productName(), product1.price(), "썸네일",1),
-            new CartDto(product2.productId(), product1.productName(), product2.price(), "썸네일",2)
+            new CartDto(product1.productId(), product1.productName(), product1.price(), "썸네일", 1),
+            new CartDto(product2.productId(), product1.productName(), product2.price(), "썸네일", 2)
         );
-        when(memberClient.getCartList(member.memberId(),List.of(1L,2L))).thenReturn(carts);
-        CartOrderRequestDto request = new CartOrderRequestDto(List.of(product1.productId(), product2.productId()));
+        when(memberClient.getCartList(member.memberId(), List.of(1L, 2L))).thenReturn(carts);
+        CartOrderRequestDto request = new CartOrderRequestDto(
+            List.of(product1.productId(), product2.productId()));
 
         // when
         orderUseCase.registerOrderOfCart(member.memberId(), request.getCartIds());
@@ -286,8 +271,8 @@ class OrderServiceTest extends IntegrationTestSupport {
         assertEquals(result.getMemberId(), member.memberId());
         assertEquals(result.getOrderLines().size(), 2);
         assertEquals(result.getOrderLines().get(0).getPrice(), product1.price());
-        assertEquals(result.getOrderLines().get(1).getPrice(), product2.price());
         assertEquals(result.getOrderLines().get(0).getQuantity(), 1);
+        assertEquals(result.getOrderLines().get(1).getPrice(), product2.price());
         assertEquals(result.getOrderLines().get(1).getQuantity(), 2);
 
     }
@@ -300,15 +285,6 @@ class OrderServiceTest extends IntegrationTestSupport {
             .alias("집")
             .receiver("홍길동")
             .isMainAddress(isMainAddress)
-            .build();
-    }
-
-    private static PaymentMethodRequestDto getPaymentMethodRequestDto(String bank) {
-        return PaymentMethodRequestDto.builder()
-            .paymentType(PaymentType.CREDIT_CARD)
-            .creditCardNumber("1234-1234-1234-1234")
-            .bank(bank)
-            .accountNumber(null)
             .build();
     }
 

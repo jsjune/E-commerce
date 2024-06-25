@@ -1,12 +1,15 @@
 package com.orderservice.order.usecase.impl;
 
 
+import com.orderservice.adapter.DeliveryClient;
 import com.orderservice.adapter.MemberClient;
+import com.orderservice.adapter.PaymentClient;
 import com.orderservice.adapter.ProductClient;
-import com.orderservice.adapter.dto.CartDto;
-import com.orderservice.adapter.dto.ProductDto;
-import com.orderservice.delivery.entity.Delivery;
-import com.orderservice.delivery.usecase.DeliveryUseCase;
+import com.orderservice.adapter.req.ProcessDeliveryRequest;
+import com.orderservice.adapter.res.CartDto;
+import com.orderservice.adapter.res.PaymentDto;
+import com.orderservice.adapter.res.ProductDto;
+import com.orderservice.adapter.req.ProcessPaymentRequest;
 import com.orderservice.order.controller.req.OrderRequest;
 import com.orderservice.order.controller.req.ProductOrderRequestDto;
 import com.orderservice.order.controller.res.OrderDetailResponseDto;
@@ -18,8 +21,6 @@ import com.orderservice.order.entity.ProductOrder;
 import com.orderservice.order.repository.OrderLineRepository;
 import com.orderservice.order.repository.ProductOrderRepository;
 import com.orderservice.order.usecase.OrderUseCase;
-import com.orderservice.payment.entity.Payment;
-import com.orderservice.payment.usecase.PaymentUseCase;
 import com.orderservice.utils.error.ErrorCode;
 import com.orderservice.utils.error.GlobalException;
 import java.util.ArrayList;
@@ -36,10 +37,10 @@ public class OrderService implements OrderUseCase {
 
     private final ProductOrderRepository productOrderRepository;
     private final OrderLineRepository orderLineRepository;
-    private final PaymentUseCase paymentUseCase;
-    private final DeliveryUseCase deliveryUseCase;
+    private final PaymentClient paymentClient;
     private final MemberClient memberClient;
     private final ProductClient productClient;
+    private final DeliveryClient deliveryClient;
 
     @Override
     public OrderDetailResponseDto registerOrderOfCart(Long memberId, List<Long> cartIds) {
@@ -126,15 +127,27 @@ public class OrderService implements OrderUseCase {
                 productIds.add(orderLine.getProductId());
 
                 // 결제 요청
-                Payment payment = paymentUseCase.processPayment(memberId, orderLine,
-                    request.getPaymentMethodId());
+                ProcessPaymentRequest paymentRequest = ProcessPaymentRequest.builder()
+                    .memberId(memberId)
+                    .orderLineId(orderLine.getId())
+                    .paymentMethodId(request.getPaymentMethodId())
+                    .totalPrice(orderLine.getPrice() * orderLine.getQuantity())
+                    .discount(orderLine.getDiscount())
+                    .build();
+                PaymentDto payment = paymentClient.processPayment(paymentRequest);
+                finalTotalPrice += payment.totalPrice();
 
-                finalTotalPrice += payment.getTotalPrice();
-                Delivery delivery = deliveryUseCase.processDelivery(orderLine,
-                    request.getDeliveryAddressId());
+                // 배송 요청
+                ProcessDeliveryRequest deliveryRequest = ProcessDeliveryRequest.builder()
+                    .orderLineId(orderLine.getId())
+                    .productId(orderLine.getProductId())
+                    .productName(orderLine.getProductName())
+                    .quantity(orderLine.getQuantity())
+                    .deliveryAddressId(request.getDeliveryAddressId())
+                    .build();
+                Long deliveryId = deliveryClient.processDelivery(deliveryRequest);
 
-                orderLine.finalizeOrderLine(OrderLineStatus.PAYMENT_COMPLETED, payment.getId(),
-                    delivery.getId());
+                orderLine.finalizeOrderLine(OrderLineStatus.PAYMENT_COMPLETED, payment.paymentId(), deliveryId);
 
                 orderLineRepository.save(orderLine);
 
@@ -183,7 +196,10 @@ public class OrderService implements OrderUseCase {
     @Override
     public void cancelOrder(Long memberId, Long orderLineId) {
         orderLineRepository.findById(orderLineId).ifPresent(orderLine -> {
-            deliveryUseCase.deliveryStatusCheck(orderLine.getDeliveryId());
+            Boolean check = deliveryClient.deliveryStatusCheck(orderLine.getDeliveryId());
+            if (!check) {
+                throw new GlobalException(ErrorCode.DELIVERY_STATUS_NOT_REQUESTED);
+            }
             orderLine.cancelOrderLine();
             Boolean incrementStock = productClient.incrementStock(orderLine.getProductId(),
                 orderLine.getQuantity());
