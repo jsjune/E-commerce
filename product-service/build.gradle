@@ -53,14 +53,6 @@ dependencies {
     // https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-zipkin
     implementation 'org.springframework.cloud:spring-cloud-starter-zipkin:2.2.8.RELEASE'
 
-    // zipkin
-    implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
-    implementation 'io.github.openfeign:feign-micrometer:13.3'
-    implementation 'io.micrometer:micrometer-tracing-bridge-brave'
-
-    // actuator
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-
     implementation project(':logging-producer')
 
 }
