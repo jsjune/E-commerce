@@ -1,5 +1,5 @@
 package com.orderservice.adapter.res;
 
-public record PaymentDto(Long paymentId, int totalPrice, int status) {
+public record PaymentDto(Long paymentId, Long totalPrice, Long status) {
 
 }

@@ -16,7 +16,7 @@ public class ProductListDto {
     private String phoneNumber;
     private String name;
     private String description;
-    private int price;
+    private Long price;
     private Set<String> tags;
     private List<String> orgProductImages;
 }

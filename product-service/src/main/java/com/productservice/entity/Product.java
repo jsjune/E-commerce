@@ -29,9 +29,9 @@ public class Product extends BaseTimeEntity {
     private Long id;
     private String name;
     private String description;
-    private int price;
-    private int totalStock;
-    private int soldQuantity;
+    private Long price;
+    private Long totalStock;
+    private Long soldQuantity;
     @Embedded
     private Seller seller;
     @ElementCollection
@@ -46,12 +46,12 @@ public class Product extends BaseTimeEntity {
     @BatchSize(size = 100)
     private List<ProductImage> productImages;
 
-    public void decreaseStock(int quantity) {
+    public void decreaseStock(Long quantity) {
         this.totalStock -= quantity;
         this.soldQuantity += quantity;
     }
 
-    public void incrementStock(int quantity) {
+    public void incrementStock(Long quantity) {
         this.totalStock += quantity;
         this.soldQuantity -= quantity;
     }

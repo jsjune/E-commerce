@@ -1,5 +1,5 @@
 package com.paymentservice.entity;
 
 public enum PaymentStatus {
-    REQUESTED, COMPLETED, FAILED
+    REQUESTED, COMPLETED, CANCELED, FAILED
 }

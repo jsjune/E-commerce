@@ -1,6 +1,8 @@
 package com.paymentservice.adapter;
 
 public interface PaymentAdapter {
-    String processPayment(int totalPrice, String creditCardNumber, String accountNumber,
+    String processPayment(Long totalPrice, String creditCardNumber, String accountNumber,
         String cardNumber);
+
+    String cancelPayment(Long totalPrice, String bank, String accountNumber, String creditCardNumber);
 }

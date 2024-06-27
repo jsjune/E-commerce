@@ -25,10 +25,10 @@ public class OrderLine extends BaseTimeEntity {
     private ProductOrder productOrder;
     private Long productId;
     private String productName;
-    private int price;
-    private int quantity;
+    private Long price;
+    private Long quantity;
     private String thumbnailUrl;
-    private int discount;
+    private Long discount;
     @Enumerated(EnumType.STRING)
     private OrderLineStatus orderLineStatus;
     private Long paymentId;
@@ -36,8 +36,8 @@ public class OrderLine extends BaseTimeEntity {
 
     @Builder
     public OrderLine(Long id, ProductOrder productOrder, Long productId, String productName,
-        int price, int quantity, String thumbnailUrl,
-        int discount, OrderLineStatus orderLineStatus, Long paymentId, Long deliveryId) {
+        Long price, Long quantity, String thumbnailUrl,
+        Long discount, OrderLineStatus orderLineStatus, Long paymentId, Long deliveryId) {
         this.id = id;
         this.productOrder = productOrder;
         this.productId = productId;
@@ -51,18 +51,21 @@ public class OrderLine extends BaseTimeEntity {
         this.deliveryId = deliveryId;
     }
 
-    public void finalizeOrderLine(OrderLineStatus orderLineStatus, Long paymentId,
-        Long deliveryId) {
-        this.orderLineStatus = orderLineStatus;
-        this.paymentId = paymentId;
-        this.deliveryId = deliveryId;
-    }
-
     public void assignToOrder(ProductOrder productOrder) {
         this.productOrder = productOrder;
     }
 
     public void cancelOrderLine() {
         this.orderLineStatus = OrderLineStatus.CANCELLED;
+    }
+
+    public void assignPayment(Long paymentId) {
+        this.orderLineStatus = OrderLineStatus.PAYMENT_COMPLETED;
+        this.paymentId = paymentId;
+    }
+
+    public void assignDelivery(Long deliveryId) {
+        this.orderLineStatus = OrderLineStatus.DELIVERY_REQUESTED;
+        this.deliveryId = deliveryId;
     }
 }

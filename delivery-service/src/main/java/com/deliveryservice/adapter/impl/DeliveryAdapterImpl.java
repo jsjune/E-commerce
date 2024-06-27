@@ -8,9 +8,16 @@ import org.springframework.stereotype.Service;
 public class DeliveryAdapterImpl implements DeliveryAdapter {
 
     @Override
-    public String processDelivery(String productName, int quantity, String street,
+    public String processDelivery(String productName, Long quantity, String street,
         String detailAddress, String zipCode, String alias) {
-        // 배송 요청
+        // actual delivery with external system
+        return UUID.randomUUID().toString();
+    }
+
+    @Override
+    public String cancelDelivery(String productName, Long quantity, String street,
+        String detailAddress, String zipCode, String alias) {
+        // actual delivery cancel with external system
         return UUID.randomUUID().toString();
     }
 }

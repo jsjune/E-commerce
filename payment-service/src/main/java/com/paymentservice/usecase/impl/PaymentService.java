@@ -1,7 +1,6 @@
 package com.paymentservice.usecase.impl;
 
 import com.paymentservice.adapter.PaymentAdapter;
-import com.paymentservice.controller.internal.res.PaymentDto;
 import com.paymentservice.entity.Payment;
 import com.paymentservice.entity.PaymentMethod;
 import com.paymentservice.entity.PaymentStatus;
@@ -26,18 +25,19 @@ public class PaymentService implements PaymentUseCase {
     private final AesUtil aesUtil;
 
     @Override
-    public PaymentDto processPayment(ProcessPaymentDto command) throws Exception {
-        Optional<PaymentMethod> findPaymentMethod = paymentMethodRepository.findById(command.paymentMethodId());
+    public Long processPayment(ProcessPaymentDto command) throws Exception {
+        Optional<PaymentMethod> findPaymentMethod = paymentMethodRepository.findById(
+            command.paymentMethodId());
         if (findPaymentMethod.isPresent()) {
             PaymentMethod paymentMethod = findPaymentMethod.get();
-            int totalPrice = command.totalPrice();
+            Long totalPrice = command.totalPrice();
             String bank = aesUtil.aesDecode(paymentMethod.getBank());
             String accountNumber = aesUtil.aesDecode(paymentMethod.getAccountNumber());
             String creditCardNumber = aesUtil.aesDecode(paymentMethod.getCreditCardNumber());
             String referenceCode = paymentAdapter.processPayment(totalPrice, bank, accountNumber,
                 creditCardNumber);
             if (referenceCode == null) {
-                return new PaymentDto(null, 0, -1);
+                return -1L;
             }
 
             Payment payment = Payment.builder()
@@ -49,9 +49,10 @@ public class PaymentService implements PaymentUseCase {
                 .paymentStatus(PaymentStatus.COMPLETED)
                 .referenceCode(referenceCode)
                 .build();
-            Payment savePayment = paymentRepository.save(payment);
-            return new PaymentDto(savePayment.getId(), savePayment.getTotalPrice(), 0);
+            Payment savedPayment = paymentRepository.save(payment);
+            return savedPayment.getId();
         }
-        return null;
+        return -1L;
     }
+
 }

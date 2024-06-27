@@ -28,10 +28,13 @@ public class Payment extends BaseTimeEntity {
     private Long memberId;
     @ManyToOne
     private PaymentMethod paymentMethod;
-    private int totalPrice;
-    private int discountPrice;
+    private Long totalPrice;
+    private Long discountPrice;
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
     private String referenceCode;
 
+    public void rollbackCancel() {
+        this.paymentStatus = PaymentStatus.CANCELED;
+    }
 }

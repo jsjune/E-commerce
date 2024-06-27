@@ -10,8 +10,6 @@ import com.orderservice.adapter.res.CartDto;
 import com.orderservice.adapter.res.PaymentDto;
 import com.orderservice.adapter.res.ProductDto;
 import com.orderservice.adapter.req.ProcessPaymentRequest;
-import com.orderservice.controller.req.OrderRequest;
-import com.orderservice.controller.req.ProductOrderRequestDto;
 import com.orderservice.entity.ProdcutOrderStatus;
 import com.orderservice.entity.ProductOrder;
 import com.orderservice.controller.res.OrderDetailResponseDto;
@@ -20,10 +18,13 @@ import com.orderservice.entity.OrderLine;
 import com.orderservice.entity.OrderLineStatus;
 import com.orderservice.repository.OrderLineRepository;
 import com.orderservice.repository.ProductOrderRepository;
+import com.orderservice.usecase.kafka.OrderKafkaProducer;
 import com.orderservice.usecase.OrderUseCase;
 import com.orderservice.usecase.dto.OrderDto;
 import com.orderservice.usecase.dto.RegisterOrderOfCartDto;
 import com.orderservice.usecase.dto.RegisterOrderOfProductDto;
+import com.orderservice.usecase.kafka.event.OrderLineEvent;
+import com.orderservice.usecase.kafka.event.ProductOrderEvent;
 import com.orderservice.utils.error.ErrorCode;
 import com.orderservice.utils.error.GlobalException;
 import java.util.ArrayList;
@@ -40,18 +41,18 @@ public class OrderService implements OrderUseCase {
 
     private final ProductOrderRepository productOrderRepository;
     private final OrderLineRepository orderLineRepository;
-    private final PaymentClient paymentClient;
     private final MemberClient memberClient;
     private final ProductClient productClient;
     private final DeliveryClient deliveryClient;
+    private final OrderKafkaProducer orderKafkaProducer;
 
     @Override
     public OrderDetailResponseDto registerOrderOfCart(Long memberId, RegisterOrderOfCartDto command) {
-        int totalPrice = 0;
+        long totalPrice = 0L;
         ProductOrder productOrder = ProductOrder.builder()
             .memberId(memberId)
             .productOrderStatus(ProdcutOrderStatus.INITIATED)
-            .totalDiscount(0)
+            .totalDiscount(0L)
             .build();
         productOrderRepository.save(productOrder);
         List<OrderLine> orderLines = new ArrayList<>();
@@ -64,7 +65,7 @@ public class OrderService implements OrderUseCase {
                 .price(cart.price())
                 .quantity(cart.quantity())
                 .thumbnailUrl(cart.thumbnailUrl())
-                .discount(0)
+                .discount(0L)
                 .orderLineStatus(OrderLineStatus.INITIATED)
                 .build();
             orderLines.add(orderLine);
@@ -92,7 +93,7 @@ public class OrderService implements OrderUseCase {
             .memberId(memberId)
             .productOrderStatus(ProdcutOrderStatus.INITIATED)
             .totalPrice(product.price() * command.quantity())
-            .totalDiscount(0)
+            .totalDiscount(0L)
             .build();
         productOrderRepository.save(productOrder);
         OrderLine orderLine = OrderLine.builder()
@@ -101,7 +102,7 @@ public class OrderService implements OrderUseCase {
             .price(product.price())
             .thumbnailUrl(product.thumbnailUrl())
             .quantity(command.quantity())
-            .discount(0)
+            .discount(0L)
             .orderLineStatus(OrderLineStatus.INITIATED)
             .build();
         productOrder.addOrderLine(orderLine);
@@ -123,54 +124,29 @@ public class OrderService implements OrderUseCase {
             ProductOrder productOrder = findProductOrder.get();
 
             List<Long> productIds = new ArrayList<>();
-            int finalTotalPrice = 0;
-            int totalDiscount = 0;
+            long finalTotalPrice = 0L;
+            long totalDiscount = 0L;
             for (OrderLine orderLine : productOrder.getOrderLines()) {
                 totalDiscount += orderLine.getDiscount();
+                finalTotalPrice += orderLine.getPrice() * orderLine.getQuantity();
                 productIds.add(orderLine.getProductId());
 
-                // 결제 요청
-                ProcessPaymentRequest paymentRequest = ProcessPaymentRequest.builder()
-                    .memberId(memberId)
-                    .orderLineId(orderLine.getId())
-                    .paymentMethodId(command.paymentMethodId())
-                    .totalPrice(orderLine.getPrice() * orderLine.getQuantity())
-                    .discount(orderLine.getDiscount())
-                    .build();
-                PaymentDto payment = paymentClient.processPayment(paymentRequest);
-                if (payment == null) {
-                    throw new GlobalException(ErrorCode.PAYMENT_METHOD_NOT_FOUND);
-                } else if (payment.status() == -1) {
-                    throw new GlobalException(ErrorCode.PAYMENT_FAILED);
-                }
-                finalTotalPrice += payment.totalPrice();
-
-                // 배송 요청
-                ProcessDeliveryRequest deliveryRequest = ProcessDeliveryRequest.builder()
+                OrderLineEvent orderLineEvent = OrderLineEvent.builder()
                     .orderLineId(orderLine.getId())
                     .productId(orderLine.getProductId())
                     .productName(orderLine.getProductName())
+                    .price(orderLine.getPrice())
+                    .discount(orderLine.getDiscount())
                     .quantity(orderLine.getQuantity())
+                    .build();
+                ProductOrderEvent productOrderEvent = ProductOrderEvent.builder()
+                    .productOrderId(productOrder.getId())
+                    .orderLine(orderLineEvent)
+                    .memberId(memberId)
+                    .paymentMethodId(command.paymentMethodId())
                     .deliveryAddressId(command.deliveryAddressId())
                     .build();
-                Long deliveryId = deliveryClient.processDelivery(deliveryRequest);
-                if (deliveryId == null) {
-                    throw new GlobalException(ErrorCode.DELIVERY_ADDRESS_NOT_FOUND);
-                } else if(deliveryId == -1) {
-                    throw new GlobalException(ErrorCode.DELIVERY_FAILED);
-                }
-
-                orderLine.finalizeOrderLine(OrderLineStatus.PAYMENT_COMPLETED, payment.paymentId(), deliveryId);
-                orderLineRepository.save(orderLine);
-
-                // 재고 감소
-                Boolean checkStock = productClient.decreaseStock(orderLine.getProductId(),
-                    orderLine.getQuantity());
-                if (checkStock == null) {
-                    throw new GlobalException(ErrorCode.PRODUCT_NOT_FOUND);
-                }else if(!checkStock) {
-                    throw new GlobalException(ErrorCode.PRODUCT_STOCK_NOT_ENOUGH);
-                }
+                orderKafkaProducer.occurPaymentEvent(productOrderEvent);
             }
 
             // 장바구니 비우기
@@ -218,7 +194,7 @@ public class OrderService implements OrderUseCase {
                 throw new GlobalException(ErrorCode.PRODUCT_NOT_FOUND);
             }
             ProductOrder productOrder = orderLine.getProductOrder();
-            int price = orderLine.getPrice() * orderLine.getQuantity();
+            Long price = orderLine.getPrice() * orderLine.getQuantity();
             productOrder.cancelOrder(price, orderLine.getDiscount());
             orderLineRepository.save(orderLine);
         });

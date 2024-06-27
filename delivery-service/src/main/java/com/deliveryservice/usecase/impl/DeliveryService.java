@@ -55,7 +55,7 @@ public class DeliveryService implements DeliveryUseCase {
             deliveryRepository.save(delivery);
             return delivery.getId();
         }
-        return null;
+        return -1L;
     }
 
     @Override
@@ -64,4 +64,5 @@ public class DeliveryService implements DeliveryUseCase {
             .map(delivery -> delivery.getStatus().name().equals(DeliveryStatus.REQUESTED.name()))
             .orElse(null);
     }
+
 }

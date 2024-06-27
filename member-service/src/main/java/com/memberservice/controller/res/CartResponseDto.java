@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 public class CartResponseDto {
-    List<CartListDto> carts;
+    private List<CartListDto> carts;
 
     public CartResponseDto(List<CartListDto> carts) {
         this.carts = carts;

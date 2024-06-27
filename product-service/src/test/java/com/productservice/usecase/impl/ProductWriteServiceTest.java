@@ -42,11 +42,11 @@ class ProductWriteServiceTest extends IntegrationTestSupport {
     @Test
     void increment_stock() {
         // given
-        Product product = Product.builder().totalStock(90).soldQuantity(10).build();
+        Product product = Product.builder().totalStock(90L).soldQuantity(10L).build();
         productRepository.save(product);
 
         // when
-        productWriteUseCase.incrementStock(product.getId(), 10);
+        productWriteUseCase.incrementStock(product.getId(), 10L);
         Product result = productRepository.findById(product.getId()).get();
 
         // then
@@ -59,11 +59,11 @@ class ProductWriteServiceTest extends IntegrationTestSupport {
     @Test
     void decrease_stock() {
         // given
-        Product product = Product.builder().totalStock(100).soldQuantity(0).build();
+        Product product = Product.builder().totalStock(100L).soldQuantity(0L).build();
         productRepository.save(product);
 
         // when
-        productWriteUseCase.decreaseStock(product.getId(), 10);
+        productWriteUseCase.decreaseStock(product.getId(), 10L);
         Product result = productRepository.findById(product.getId()).get();
 
         // then
@@ -79,8 +79,8 @@ class ProductWriteServiceTest extends IntegrationTestSupport {
         RegisterProductDto command = RegisterProductDto.builder()
             .name("abc")
             .description("상품 설명")
-            .price(10000)
-            .stock(100)
+            .price(10000L)
+            .stock(100L)
             .tags(Set.of("태그1", "태그2"))
             .productImages(List.of(
                 new MockMultipartFile("image", "image.jpg", "image/jpeg", "image".getBytes())))

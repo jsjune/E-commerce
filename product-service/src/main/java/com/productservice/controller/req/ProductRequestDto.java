@@ -10,8 +10,8 @@ import org.springframework.web.multipart.MultipartFile;
 public record ProductRequestDto(
     String name,
     String description,
-    int price,
-    int stock,
+    Long price,
+    Long stock,
     Set<String>tags,
     List<MultipartFile>productImages
 ) {

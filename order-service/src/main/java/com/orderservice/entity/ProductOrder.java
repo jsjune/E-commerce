@@ -28,12 +28,12 @@ public class ProductOrder extends BaseTimeEntity {
     private ProdcutOrderStatus productOrderStatus;
     @OneToMany(mappedBy = "productOrder")
     private List<OrderLine> orderLines;
-    private int totalPrice;
-    private int totalDiscount;
+    private Long totalPrice;
+    private Long totalDiscount;
 
     @Builder
     public ProductOrder(Long id, Long memberId, ProdcutOrderStatus productOrderStatus, List<OrderLine> orderLines,
-        int totalPrice, int totalDiscount) {
+        Long totalPrice, Long totalDiscount) {
         this.id = id;
         this.memberId = memberId;
         this.productOrderStatus = productOrderStatus;
@@ -47,19 +47,24 @@ public class ProductOrder extends BaseTimeEntity {
         orderLine.assignToOrder(this);
     }
 
-    public void finalizeOrder(ProdcutOrderStatus prodcutOrderStatus, int finalTotalPrice,
-        int finalTotalDiscount) {
+    public void finalizeOrder(ProdcutOrderStatus prodcutOrderStatus, Long finalTotalPrice,
+        Long finalTotalDiscount) {
         this.productOrderStatus = prodcutOrderStatus;
         this.totalPrice = finalTotalPrice;
         this.totalDiscount = finalTotalDiscount;
     }
 
-    public void cancelOrder(int price, int discount) {
+    public void cancelOrder(Long price, Long discount) {
         this.totalPrice -= price;
         this.totalDiscount -= discount;
     }
 
-    public void assignTotalPrice(int totalPrice) {
+    public void assignTotalPrice(Long totalPrice) {
         this.totalPrice = totalPrice;
+    }
+
+    public void rollback(Long totalPrice, Long totalDiscount) {
+        this.totalPrice -= totalPrice;
+        this.totalDiscount -= totalDiscount;
     }
 }

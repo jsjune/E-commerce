@@ -68,7 +68,7 @@ public class ProductWriteService implements ProductWriteUseCase {
             .description(command.description())
             .price(command.price())
             .totalStock(command.stock())
-            .soldQuantity(0)
+            .soldQuantity(0L)
             .seller(seller)
             .tags(command.tags())
             .productImages(images)
@@ -77,21 +77,21 @@ public class ProductWriteService implements ProductWriteUseCase {
     }
 
     @Override
-    public Boolean decreaseStock(Long productId, int quantity) {
+    public int decreaseStock(Long productId, Long quantity) {
         Optional<Product> findProduct = productRepository.findById(productId);
         if (findProduct.isPresent()) {
             Product product = findProduct.get();
             if (product.getTotalStock() < quantity) {
-                return false;
+                return -1;
             }
             product.decreaseStock(quantity);
-            return true;
+            return 0;
         }
-        return null;
+        return -1;
     }
 
     @Override
-    public Boolean incrementStock(Long productId, int quantity) {
+    public Boolean incrementStock(Long productId, Long quantity) {
         Optional<Product> findProduct = productRepository.findById(productId);
         if (findProduct.isPresent()) {
             Product product = findProduct.get();

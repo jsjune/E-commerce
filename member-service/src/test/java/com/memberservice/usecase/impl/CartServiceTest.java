@@ -75,7 +75,7 @@ class CartServiceTest extends IntegrationTestSupport {
         Cart cart = cartRepository.findAll().stream().findFirst().get();
 
         // when
-        cartUseCase.updateCartQuantity(member.getId(), cart.getId(), 3);
+        cartUseCase.updateCartQuantity(member.getId(), cart.getId(), 3L);
         Cart result = cartRepository.findById(cart.getId()).get();
 
         // then
@@ -166,6 +166,6 @@ class CartServiceTest extends IntegrationTestSupport {
     }
 
     private static ProductDto registeredProduct(Long productId) {
-        return new ProductDto(productId, "상품" + productId, 1000, "썸네일");
+        return new ProductDto(productId, "상품" + productId, 1000L, "썸네일");
     }
 }

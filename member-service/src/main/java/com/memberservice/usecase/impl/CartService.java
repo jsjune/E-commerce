@@ -37,7 +37,7 @@ public class CartService implements CartUseCase {
             }
             for (Cart cart : member.getCarts()) {
                 if (cart.getProductId().equals(productId)) {
-                    cart.increaseQuantity(1);
+                    cart.increaseQuantity(1L);
                     return;
                 }
             }
@@ -47,7 +47,7 @@ public class CartService implements CartUseCase {
                 .productName(product.productName())
                 .price(product.price())
                 .thumbnailUrl(product.thumbnailUrl())
-                .quantity(1)
+                .quantity(1L)
                 .build();
             member.addCart(cart);
             cartRepository.save(cart);
@@ -80,7 +80,7 @@ public class CartService implements CartUseCase {
     }
 
     @Override
-    public void updateCartQuantity(Long memberId, Long cartId, int quantity) {
+    public void updateCartQuantity(Long memberId, Long cartId, Long quantity) {
         memberRepository.findById(memberId).ifPresent(member -> {
             member.getCarts().stream()
                 .filter(cart -> cart.getId().equals(cartId))

@@ -6,8 +6,8 @@ public record ProcessPaymentRequest(
     Long memberId,
     Long orderLineId,
     Long paymentMethodId,
-    int totalPrice,
-    int discount
+    Long totalPrice,
+    Long discount
 ) {
 
     public ProcessPaymentDto mapToCommand() {

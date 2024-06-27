@@ -2,7 +2,7 @@ package com.orderservice.usecase.dto;
 
 public record RegisterOrderOfProductDto(
     Long productId,
-    int quantity
+    Long quantity
 ) {
 
 }

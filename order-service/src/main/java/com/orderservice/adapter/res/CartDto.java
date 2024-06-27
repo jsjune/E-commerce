@@ -3,9 +3,9 @@ package com.orderservice.adapter.res;
 public record CartDto(
     Long productId,
     String productName,
-    int price,
+    Long price,
     String thumbnailUrl,
-    int quantity
+    Long quantity
 ) {
 
 }

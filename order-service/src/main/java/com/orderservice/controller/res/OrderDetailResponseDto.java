@@ -12,12 +12,12 @@ public class OrderDetailResponseDto {
     private Long productOrderId;
     private List<OrderLineDto> orderLines;
     private String orderStatus;
-    private int totalPrice;
-    private int totalDiscount;
+    private Long totalPrice;
+    private Long totalDiscount;
 
     @Builder
-    public OrderDetailResponseDto(Long productOrderId, List<OrderLine> orderLines, String orderStatus, int totalPrice,
-        int totalDiscount) {
+    public OrderDetailResponseDto(Long productOrderId, List<OrderLine> orderLines, String orderStatus, Long totalPrice,
+        Long totalDiscount) {
         this.productOrderId = productOrderId;
         this.orderLines = orderLines.stream().map(OrderLineDto::new).toList();
         this.orderStatus = orderStatus;

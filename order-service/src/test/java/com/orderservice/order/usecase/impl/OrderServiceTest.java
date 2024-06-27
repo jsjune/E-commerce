@@ -70,17 +70,17 @@ class OrderServiceTest extends IntegrationTestSupport {
         ProductOrder productOrder = ProductOrder.builder()
             .memberId(memberId)
             .productOrderStatus(ProdcutOrderStatus.COMPLETED)
-            .totalPrice(2000)
-            .totalDiscount(0)
+            .totalPrice(2000L)
+            .totalDiscount(0L)
             .build();
         productOrderRepository.save(productOrder);
         OrderLine orderLine = OrderLine.builder()
             .productId(1L)
             .productName("상품")
-            .price(1000)
+            .price(1000L)
             .orderLineStatus(OrderLineStatus.PAYMENT_COMPLETED)
-            .discount(0)
-            .quantity(2)
+            .discount(0L)
+            .quantity(2L)
             .build();
         orderLine.assignToOrder(productOrder);
         productOrder.addOrderLine(orderLine);
@@ -101,17 +101,17 @@ class OrderServiceTest extends IntegrationTestSupport {
         ProductOrder productOrder = ProductOrder.builder()
             .memberId(memberId)
             .productOrderStatus(ProdcutOrderStatus.COMPLETED)
-            .totalPrice(2000)
-            .totalDiscount(0)
+            .totalPrice(2000L)
+            .totalDiscount(0L)
             .build();
         productOrderRepository.save(productOrder);
         OrderLine orderLine = OrderLine.builder()
             .productId(1L)
             .productName("상품")
-            .price(1000)
+            .price(1000L)
             .orderLineStatus(OrderLineStatus.PAYMENT_COMPLETED)
-            .discount(0)
-            .quantity(2)
+            .discount(0L)
+            .quantity(2L)
             .build();
         orderLine.assignToOrder(productOrder);
         productOrder.addOrderLine(orderLine);
@@ -162,8 +162,8 @@ class OrderServiceTest extends IntegrationTestSupport {
         ProductOrder productOrder = ProductOrder.builder()
             .memberId(memberId)
             .productOrderStatus(ProdcutOrderStatus.COMPLETED)
-            .totalPrice(14000)
-            .totalDiscount(0)
+            .totalPrice(14000L)
+            .totalDiscount(0L)
             .build();
         productOrderRepository.save(productOrder);
         List<OrderLine> orderLines = new ArrayList<>();
@@ -171,9 +171,9 @@ class OrderServiceTest extends IntegrationTestSupport {
             OrderLine orderLine = OrderLine.builder()
                 .productId((long) i)
                 .productName("상품" + i)
-                .price(1000 * (i + 1))
+                .price(1000L * (i + 1))
                 .orderLineStatus(OrderLineStatus.PAYMENT_COMPLETED)
-                .quantity(i + 1)
+                .quantity(i + 1L)
                 .build();
             orderLine.assignToOrder(productOrder);
             orderLines.add(orderLine);
@@ -197,8 +197,8 @@ class OrderServiceTest extends IntegrationTestSupport {
     void order() throws Exception {
         // given
         MemberDto member = new MemberDto(1L, "010-1234-5678", "회사");
-        ProductDto product = registeredProduct(1L, 2000);
-        int quantity = 3;
+        ProductDto product = registeredProduct(1L, 2000L);
+        Long quantity = 3L;
         RegisterOrderOfProductDto registerCommand = new RegisterOrderOfProductDto(product.productId(),
             quantity);
 
@@ -213,7 +213,7 @@ class OrderServiceTest extends IntegrationTestSupport {
             .paymentMethodId(1L)
             .deliveryAddressId(1L)
             .build();
-        when(paymentClient.processPayment(any())).thenReturn(new PaymentDto(1L, product.price() * quantity, 0));
+        when(paymentClient.processPayment(any())).thenReturn(new PaymentDto(1L, product.price() * quantity, 0L));
         when(deliveryClient.processDelivery(any())).thenReturn(1L);
         when(productClient.decreaseStock(product.productId(), quantity)).thenReturn(true);
         orderUseCase.submitOrder(member.memberId(), orderCommand);
@@ -230,8 +230,8 @@ class OrderServiceTest extends IntegrationTestSupport {
     void register_product_order_from_product() {
         // given
         MemberDto member = new MemberDto(1L, "010-1234-5678", "회사");
-        ProductDto product = registeredProduct(1L, 2000);
-        int quantity = 3;
+        ProductDto product = registeredProduct(1L, 2000L);
+        Long quantity = 3L;
         RegisterOrderOfProductDto command = new RegisterOrderOfProductDto(product.productId(), quantity);
 
         // when
@@ -252,12 +252,12 @@ class OrderServiceTest extends IntegrationTestSupport {
     void register_product_order_from_cart() throws Exception {
         // given
         MemberDto member = new MemberDto(1L, "010-1234-5678", "회사");
-        ProductDto product1 = registeredProduct(1L, 2000);
-        ProductDto product2 = registeredProduct(2L, 4000);
+        ProductDto product1 = registeredProduct(1L, 2000L);
+        ProductDto product2 = registeredProduct(2L, 4000L);
         ;
         List<CartDto> carts = List.of(
-            new CartDto(product1.productId(), product1.productName(), product1.price(), "썸네일", 1),
-            new CartDto(product2.productId(), product1.productName(), product2.price(), "썸네일", 2)
+            new CartDto(product1.productId(), product1.productName(), product1.price(), "썸네일", 1L),
+            new CartDto(product2.productId(), product1.productName(), product2.price(), "썸네일", 2L)
         );
         when(memberClient.getCartList(member.memberId(), List.of(1L, 2L))).thenReturn(carts);
         RegisterOrderOfCartDto command = new RegisterOrderOfCartDto(
@@ -278,7 +278,7 @@ class OrderServiceTest extends IntegrationTestSupport {
 
     }
 
-    private static ProductDto registeredProduct(Long productId, int price) {
+    private static ProductDto registeredProduct(Long productId, Long price) {
         return new ProductDto(productId, "상품" + productId, price, "썸네일");
     }
 }

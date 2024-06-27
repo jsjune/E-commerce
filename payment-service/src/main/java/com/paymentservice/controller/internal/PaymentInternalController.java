@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class PaymentInternalController {
 
     private final PaymentUseCase paymentUseCase;
-    @PostMapping("process")
-    public PaymentDto processPayment(@RequestBody ProcessPaymentRequest request) throws Exception {
-        return paymentUseCase.processPayment(request.mapToCommand());
-    }
+//    @PostMapping("process")
+//    public PaymentDto processPayment(@RequestBody ProcessPaymentRequest request) throws Exception {
+//        return paymentUseCase.processPayment(request.mapToCommand());
+//    }
 }

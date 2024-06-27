@@ -1,5 +1,5 @@
 package com.orderservice.adapter.res;
 
-public record ProductDto(Long productId, String productName, int price, String thumbnailUrl) {
+public record ProductDto(Long productId, String productName, Long price, String thumbnailUrl) {
 
 }

@@ -6,7 +6,7 @@ import lombok.Builder;
 public record ProcessDelivery(
     Long productId,
     String productName,
-    int quantity,
+    Long quantity,
     Long orderLineId,
     Long deliveryAddressId
 ) {

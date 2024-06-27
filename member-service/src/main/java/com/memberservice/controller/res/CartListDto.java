@@ -8,11 +8,11 @@ public class CartListDto {
     private Long cartId;
     private Long productId;
     private String productName;
-    private int price;
-    private int quantity;
+    private Long price;
+    private Long quantity;
     private String thumbnailImageUrl;
 
-    public CartListDto(Long cartId, Long productId, String productName, int price, int quantity,
+    public CartListDto(Long cartId, Long productId, String productName, Long price, Long quantity,
         String imageUrl) {
         this.cartId = cartId;
         this.productId = productId;

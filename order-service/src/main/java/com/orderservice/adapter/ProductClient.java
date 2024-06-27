@@ -12,7 +12,7 @@ public interface ProductClient {
     @GetMapping("/internal/products/{productId}")
     ProductDto getProduct(@PathVariable Long productId);
     @PostMapping("/internal/products/{productId}/decrease")
-    Boolean decreaseStock(@PathVariable Long productId,@RequestParam int quantity);
+    Boolean decreaseStock(@PathVariable Long productId,@RequestParam Long quantity);
     @PostMapping("/internal/products/{productId}/increment")
-    Boolean incrementStock(@PathVariable Long productId,@RequestParam int quantity);
+    Boolean incrementStock(@PathVariable Long productId,@RequestParam Long quantity);
 }

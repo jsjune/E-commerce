@@ -7,5 +7,5 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class PaymentMethodResponseDto {
-    List<PaymentMethodListDto> paymentMethods;
+    private List<PaymentMethodListDto> paymentMethods;
 }

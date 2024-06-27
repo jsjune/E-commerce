@@ -13,7 +13,7 @@ public interface CartUseCase {
 
     CartResponseDto getCartList(Long memberId);
 
-    void updateCartQuantity(Long memberId, Long cartId, int quantity);
+    void updateCartQuantity(Long memberId, Long cartId, Long quantity);
 
     void clearCart(Long memberId, List<Long> productIds);
 

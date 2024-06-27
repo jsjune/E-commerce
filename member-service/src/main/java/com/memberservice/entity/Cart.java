@@ -22,14 +22,14 @@ public class Cart extends BaseTimeEntity {
     private Long id;
     private Long productId;
     private String productName;
-    private int price;
+    private Long price;
     private String thumbnailUrl;
-    private int quantity;
+    private Long quantity;
     @ManyToOne
     private Member member;
 
     @Builder
-    public Cart(int quantity, Long productId, String productName, int price, String thumbnailUrl,Member member) {
+    public Cart(Long quantity, Long productId, String productName, Long price, String thumbnailUrl,Member member) {
         this.quantity = quantity;
         this.productId = productId;
         this.productName = productName;
@@ -42,11 +42,11 @@ public class Cart extends BaseTimeEntity {
         this.member = member;
     }
 
-    public void increaseQuantity(int quantity) {
+    public void increaseQuantity(Long quantity) {
         this.quantity += quantity;
     }
 
-    public void updateQuantity(int quantity) {
+    public void updateQuantity(Long quantity) {
         this.quantity = quantity;
     }
 }

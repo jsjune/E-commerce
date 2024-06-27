@@ -23,7 +23,7 @@ public class Delivery extends BaseTimeEntity {
     private Long id;
     private Long productId;
     private String productName;
-    private int quantity;
+    private Long quantity;
     @ManyToOne
     private DeliveryAddress deliveryAddress;
     private Long orderLineId;
@@ -32,7 +32,7 @@ public class Delivery extends BaseTimeEntity {
     private String referenceCode;
 
     @Builder
-    public Delivery(Long id, Long productId, String productName, int quantity, DeliveryAddress deliveryAddress, Long orderLineId,
+    public Delivery(Long id, Long productId, String productName, Long quantity, DeliveryAddress deliveryAddress, Long orderLineId,
         DeliveryStatus status, String referenceCode) {
         this.id = id;
         this.productId = productId;
@@ -41,6 +41,11 @@ public class Delivery extends BaseTimeEntity {
         this.deliveryAddress = deliveryAddress;
         this.orderLineId = orderLineId;
         this.status = status;
+        this.referenceCode = referenceCode;
+    }
+
+    public void rollbackCancel(String referenceCode) {
+        this.status = DeliveryStatus.CANCELED;
         this.referenceCode = referenceCode;
     }
 }

@@ -9,8 +9,8 @@ public class OrderLineDto {
     private Long orderLineId;
     private Long productId;
     private String productName;
-    private int price;
-    private int quantity;
+    private Long price;
+    private Long quantity;
     private String thumbnailUrl;
     private String status;
     private Long paymentId;

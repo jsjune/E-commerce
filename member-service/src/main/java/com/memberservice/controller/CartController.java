@@ -39,7 +39,7 @@ public class CartController {
     }
 
     @PostMapping("/{cartId}")
-    public Response<Void> updateCartQuantity(@RequestHeader("Member-Id")Long memberId, @PathVariable Long cartId,@RequestParam int quantity){
+    public Response<Void> updateCartQuantity(@RequestHeader("Member-Id")Long memberId, @PathVariable Long cartId,@RequestParam Long quantity){
         cartUseCase.updateCartQuantity(memberId,cartId,quantity);
         return Response.success(HttpStatus.OK.value(), null);
     }

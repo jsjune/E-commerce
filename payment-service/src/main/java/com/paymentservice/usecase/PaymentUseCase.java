@@ -6,6 +6,6 @@ import com.paymentservice.usecase.dto.ProcessPaymentDto;
 
 public interface PaymentUseCase {
 
-    PaymentDto processPayment(ProcessPaymentDto command)
+    Long processPayment(ProcessPaymentDto command)
         throws Exception;
 }
