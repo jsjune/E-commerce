@@ -1,4 +1,4 @@
-package com.loggingproducer;
+package com.ecommerce;
 
 import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;

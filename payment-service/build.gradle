@@ -37,7 +37,7 @@ dependencies {
     // kafka
     implementation 'org.springframework.kafka:spring-kafka'
 
-    implementation project(':logging-producer')
+    implementation project(':common')
 }
 
 // QueryDsl 디렉토리 경로

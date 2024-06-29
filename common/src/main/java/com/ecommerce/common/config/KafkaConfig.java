@@ -1,4 +1,4 @@
-package com.loggingproducer;
+package com.ecommerce.common.config;
 
 import java.util.HashMap;
 import java.util.Map;

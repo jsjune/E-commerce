@@ -19,3 +19,33 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://127.0.0.1:8761/eureka
+
+---
+#resilience4j:
+#  retry:
+#    configs:
+#      default:
+#        maxAttempts: 3
+#        waitDuration: 1000
+#    instances:
+#      memberClient:
+#        baseConfig: default
+#
+#  circuitbreaker:
+#    configs:
+#      default:
+#        slidingWindowType: COUNT_BASED
+#        minimumNumberOfCalls: 7
+#        slidingWindowSize: 10
+#        waitDurationInOpenState: 10s
+#        failureRateThreshold: 40
+#        slowCallDurationThreshold: 3000
+#        slowCallRateThreshold: 60
+#        permittedNumberOfCallsInHalfOpenState: 5
+#        automaticTransitionFromOpenToHalfOpenEnabled: true
+#        eventConsumerBufferSize: 10
+#        recordExceptions:
+#          - feign.RetryableException
+#    instances:
+#      memberClient:
+#        baseConfig: default

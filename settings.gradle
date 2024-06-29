@@ -6,6 +6,6 @@ include 'order-service'
 include 'member-service'
 include 'payment-service'
 include 'delivery-service'
-include 'logging-producer'
+include 'common'
 include 'logging-consumer'
 

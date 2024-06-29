@@ -1,6 +1,7 @@
 package com.memberservice.controller.internal.res;
 
 
+import com.ecommerce.common.cache.CartListDto;
 import com.memberservice.entity.Cart;
 
 public record CartDto(
@@ -18,6 +19,16 @@ public record CartDto(
             cart.getPrice(),
             cart.getThumbnailUrl(),
             cart.getQuantity()
+        );
+    }
+
+    public CartDto(CartListDto cartListDto) {
+        this(
+            cartListDto.productId(),
+            cartListDto.productName(),
+            cartListDto.price(),
+            cartListDto.thumbnailImageUrl(),
+            cartListDto.quantity()
         );
     }
 }

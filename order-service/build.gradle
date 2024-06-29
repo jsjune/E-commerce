@@ -43,7 +43,12 @@ dependencies {
     // kafka
     implementation 'org.springframework.kafka:spring-kafka'
 
-    implementation project(':logging-producer')
+    // https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-circuitbreaker-resilience4j
+    implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j:3.1.1'
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    implementation project(':common')
 }
 
 // QueryDsl 디렉토리 경로

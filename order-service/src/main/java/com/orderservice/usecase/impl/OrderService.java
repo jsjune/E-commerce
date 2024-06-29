@@ -1,36 +1,35 @@
 package com.orderservice.usecase.impl;
 
-
+import com.ecommerce.common.cache.CartListDto;
 import com.orderservice.adapter.DeliveryClient;
 import com.orderservice.adapter.MemberClient;
-import com.orderservice.adapter.PaymentClient;
 import com.orderservice.adapter.ProductClient;
-import com.orderservice.adapter.req.ProcessDeliveryRequest;
 import com.orderservice.adapter.res.CartDto;
-import com.orderservice.adapter.res.PaymentDto;
 import com.orderservice.adapter.res.ProductDto;
-import com.orderservice.adapter.req.ProcessPaymentRequest;
-import com.orderservice.entity.ProdcutOrderStatus;
-import com.orderservice.entity.ProductOrder;
 import com.orderservice.controller.res.OrderDetailResponseDto;
 import com.orderservice.controller.res.OrderListResponseDto;
 import com.orderservice.entity.OrderLine;
 import com.orderservice.entity.OrderLineStatus;
+import com.orderservice.entity.ProdcutOrderStatus;
+import com.orderservice.entity.ProductOrder;
 import com.orderservice.repository.OrderLineRepository;
 import com.orderservice.repository.ProductOrderRepository;
-import com.orderservice.usecase.kafka.OrderKafkaProducer;
 import com.orderservice.usecase.OrderUseCase;
 import com.orderservice.usecase.dto.OrderDto;
 import com.orderservice.usecase.dto.RegisterOrderOfCartDto;
 import com.orderservice.usecase.dto.RegisterOrderOfProductDto;
+import com.orderservice.usecase.kafka.OrderKafkaProducer;
 import com.orderservice.usecase.kafka.event.OrderLineEvent;
 import com.orderservice.usecase.kafka.event.ProductOrderEvent;
+import com.orderservice.utils.RedisUtils;
 import com.orderservice.utils.error.ErrorCode;
 import com.orderservice.utils.error.GlobalException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,9 +44,12 @@ public class OrderService implements OrderUseCase {
     private final ProductClient productClient;
     private final DeliveryClient deliveryClient;
     private final OrderKafkaProducer orderKafkaProducer;
+    private final CircuitBreakerFactory circuitBreakerFactory;
+    private final RedisUtils redisUtils;
 
     @Override
-    public OrderDetailResponseDto registerOrderOfCart(Long memberId, RegisterOrderOfCartDto command) {
+    public OrderDetailResponseDto registerOrderOfCart(Long memberId,
+        RegisterOrderOfCartDto command) {
         long totalPrice = 0L;
         ProductOrder productOrder = ProductOrder.builder()
             .memberId(memberId)
@@ -56,7 +58,8 @@ public class OrderService implements OrderUseCase {
             .build();
         productOrderRepository.save(productOrder);
         List<OrderLine> orderLines = new ArrayList<>();
-        List<CartDto> cartList = memberClient.getCartList(memberId, command.cartIds());
+
+        List<CartDto> cartList = fetchCartDtosWithFallback(memberId, command);
         for (CartDto cart : cartList) {
             totalPrice += cart.price() * cart.quantity();
             OrderLine orderLine = OrderLine.builder()
@@ -74,13 +77,33 @@ public class OrderService implements OrderUseCase {
         }
         productOrder.assignTotalPrice(totalPrice);
         orderLineRepository.saveAll(orderLines);
-        return OrderDetailResponseDto.builder()
-            .productOrderId(productOrder.getId())
-            .orderLines(productOrder.getOrderLines())
-            .orderStatus(productOrder.getProductOrderStatus().name())
-            .totalPrice(productOrder.getTotalPrice())
-            .totalDiscount(productOrder.getTotalDiscount())
-            .build();
+        return new OrderDetailResponseDto(productOrder);
+    }
+
+    private List<CartDto> fetchCartDtosWithFallback(Long memberId, RegisterOrderOfCartDto command) {
+        CircuitBreaker circuitBreaker = circuitBreakerFactory.create("memberClient");
+        return circuitBreaker.run(
+            () -> memberClient.getCartList(memberId, command.cartIds()),
+            throwable -> retrieveCartListFromRedis(memberId, command)
+        );
+    }
+
+    private List<CartDto> retrieveCartListFromRedis(Long memberId, RegisterOrderOfCartDto command) {
+        List<CartDto> cartDtos = new ArrayList<>();
+        List<CartListDto> cartListDtos = redisUtils.getCartList(memberId);
+        if (cartListDtos != null) {
+            for (CartListDto cartListDto : cartListDtos) {
+                if (command.cartIds().contains(cartListDto.cartId())) {
+                    CartDto cartDto = new CartDto(cartListDto.productId(),
+                        cartListDto.productName(),
+                        cartListDto.price(), cartListDto.thumbnailImageUrl(),
+                        cartListDto.quantity());
+                    cartDtos.add(cartDto);
+                }
+            }
+            return cartDtos;
+        }
+        return cartDtos;
     }
 
     @Override
@@ -107,13 +130,7 @@ public class OrderService implements OrderUseCase {
             .build();
         productOrder.addOrderLine(orderLine);
         orderLineRepository.save(orderLine);
-        return OrderDetailResponseDto.builder()
-            .productOrderId(productOrder.getId())
-            .orderLines(productOrder.getOrderLines())
-            .orderStatus(productOrder.getProductOrderStatus().name())
-            .totalPrice(productOrder.getTotalPrice())
-            .totalDiscount(productOrder.getTotalDiscount())
-            .build();
+        return new OrderDetailResponseDto(productOrder);
     }
 
     @Override
@@ -152,7 +169,8 @@ public class OrderService implements OrderUseCase {
             // 장바구니 비우기
             memberClient.clearCart(memberId, productIds);
 
-            productOrder.finalizeOrder(ProdcutOrderStatus.COMPLETED, finalTotalPrice, totalDiscount);
+            productOrder.finalizeOrder(ProdcutOrderStatus.COMPLETED, finalTotalPrice,
+                totalDiscount);
             productOrderRepository.save(productOrder);
         }
     }
@@ -163,13 +181,7 @@ public class OrderService implements OrderUseCase {
             orderId, memberId);
         if (findProductOrder.isPresent()) {
             ProductOrder productOrder = findProductOrder.get();
-            return OrderDetailResponseDto.builder()
-                .productOrderId(productOrder.getId())
-                .orderLines(productOrder.getOrderLines())
-                .orderStatus(productOrder.getProductOrderStatus().name())
-                .totalPrice(productOrder.getTotalPrice())
-                .totalDiscount(productOrder.getTotalDiscount())
-                .build();
+            return new OrderDetailResponseDto(productOrder);
         }
         return null;
     }
@@ -190,7 +202,7 @@ public class OrderService implements OrderUseCase {
             orderLine.cancelOrderLine();
             Boolean incrementStock = productClient.incrementStock(orderLine.getProductId(),
                 orderLine.getQuantity());
-            if(incrementStock == null) {
+            if (incrementStock == null) {
                 throw new GlobalException(ErrorCode.PRODUCT_NOT_FOUND);
             }
             ProductOrder productOrder = orderLine.getProductOrder();

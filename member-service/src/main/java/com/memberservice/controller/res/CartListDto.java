@@ -1,25 +1,39 @@
 package com.memberservice.controller.res;
 
-import lombok.Getter;
+import com.memberservice.controller.internal.res.CartDto;
+import com.memberservice.entity.Cart;
+import java.io.Serializable;
+import lombok.Builder;
 
-@Getter
-public class CartListDto {
+@Builder
+public record CartListDto (
+    Long cartId,
+    Long productId,
+    String productName,
+    Long price,
+    Long quantity,
+    String thumbnailImageUrl
+) implements Serializable {
 
-    private Long cartId;
-    private Long productId;
-    private String productName;
-    private Long price;
-    private Long quantity;
-    private String thumbnailImageUrl;
+    public static CartListDto of(Cart cart) {
+        return CartListDto.builder()
+            .cartId(cart.getId())
+            .productId(cart.getProductId())
+            .productName(cart.getProductName())
+            .price(cart.getPrice())
+            .quantity(cart.getQuantity())
+            .thumbnailImageUrl(cart.getThumbnailUrl())
+            .build();
+    }
 
-    public CartListDto(Long cartId, Long productId, String productName, Long price, Long quantity,
-        String imageUrl) {
-        this.cartId = cartId;
-        this.productId = productId;
-        this.productName = productName;
-        this.price = price;
-        this.quantity = quantity;
-        this.thumbnailImageUrl = imageUrl;
+    public CartDto toCartDto() {
+        return new CartDto(
+            productId(),
+            productName(),
+            price(),
+            thumbnailImageUrl(),
+            quantity()
+        );
     }
 
 }

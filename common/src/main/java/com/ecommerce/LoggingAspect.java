@@ -1,10 +1,9 @@
-package com.loggingproducer;
+package com.ecommerce;
 
 import io.micrometer.tracing.Span;
 import io.micrometer.tracing.Tracer;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;

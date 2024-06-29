@@ -1,5 +1,6 @@
 package com.memberservice.controller.res;
 
+import com.ecommerce.common.cache.CartListDto;
 import java.util.List;
 import lombok.Getter;
 

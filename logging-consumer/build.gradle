@@ -24,7 +24,7 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
-    implementation project(':logging-producer')
+    implementation project(':common')
 }
 
 test {
