@@ -1,5 +1,5 @@
 package com.orderservice.entity;
 
-public enum ProdcutOrderStatus {
+public enum ProductOrderStatus {
     INITIATED, COMPLETED, CANCELLED, FAILED
 }

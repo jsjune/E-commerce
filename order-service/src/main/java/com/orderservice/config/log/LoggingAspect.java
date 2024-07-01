@@ -22,10 +22,10 @@ public class LoggingAspect {
     @Before("execution(* com.*.controller..*(..)) || execution(* com.*.usecase.kafka..*(..)) || execution(* com.order.orderconsumer..*(..))")
     public void beforeMethodExecution(JoinPoint joinPoint) {
         Result result = getResult(joinPoint);
-        loggingProducer.sendMessage("logging-topic",
-            "[" + result.traceId() + "-" + result.spanId()
-                + "] Before executing method: " + result.className() + "."
-                + result.methodName());
+//        loggingProducer.sendMessage("logging-topic",
+//            "[" + result.traceId() + "-" + result.spanId()
+//                + "] Before executing method: " + result.className() + "."
+//                + result.methodName());
     }
 
     @AfterThrowing(pointcut = "execution(* com.*.controller..*(..)) || execution(* com.*.usecase.kafka..*(..)) || execution(* com.order.orderconsumer..*(..))", throwing = "exception")
@@ -35,9 +35,9 @@ public class LoggingAspect {
         PrintWriter pw = new PrintWriter(sw);
         exception.printStackTrace(pw);
         String stackTrace = sw.toString();
-        loggingProducer.sendMessage("logging-topic",
-            "[" + result.traceId + "-" + result.spanId + "] Exception thrown in method: " + result.className + "." + result.methodName + " Exception: "
-                + exception.getMessage() + "\n Stack Trace: " + stackTrace);
+//        loggingProducer.sendMessage("logging-topic",
+//            "[" + result.traceId + "-" + result.spanId + "] Exception thrown in method: " + result.className + "." + result.methodName + " Exception: "
+//                + exception.getMessage() + "\n Stack Trace: " + stackTrace);
     }
 
     private Result getResult(JoinPoint joinPoint) {

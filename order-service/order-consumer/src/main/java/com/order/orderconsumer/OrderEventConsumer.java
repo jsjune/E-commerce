@@ -2,75 +2,72 @@ package com.order.orderconsumer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.orderservice.entity.OrderLine;
-import com.orderservice.repository.OrderLineRepository;
-import com.orderservice.usecase.impl.OrderRollbackService;
-import com.orderservice.usecase.kafka.OrderKafkaProducer;
+import com.orderservice.usecase.kafka.KafkaHealthIndicator;
+import com.orderservice.usecase.kafka.OrderKafkaService;
 import com.orderservice.usecase.kafka.event.EventResult;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class OrderEventConsumer {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final OrderKafkaProducer orderKafkaProducer;
-    private final OrderRollbackService orderRollbackService;
-    private final OrderLineRepository orderLineRepository;
+    private final OrderKafkaService orderKafkaService;
+    private final KafkaHealthIndicator kafkaHealthIndicator;
 
-    @Transactional
     @KafkaListener(topics = "${consumers.topic1}", groupId = "${consumers.groupId}")
     public void consumeOrderFromPayment(ConsumerRecord<String, String> record)
         throws JsonProcessingException {
         EventResult eventResult = objectMapper.readValue(record.value(), EventResult.class);
         if (eventResult.status() == -1) {
-            orderRollbackService.rollbackOrder(eventResult.mapToOrderRollbackDto());
+            orderKafkaService.handleRollbackOrderFromPayment(eventResult);
         } else {
-            Optional<OrderLine> findOrderLine = orderLineRepository.findById(
-                eventResult.orderLine().orderLineId());
-            if (findOrderLine.isPresent()) {
-                OrderLine orderLine = findOrderLine.get();
-                orderLine.assignPayment(eventResult.paymentId());
-                orderLineRepository.save(orderLine);
-                orderKafkaProducer.occurDeliveryEvent(eventResult);
+            if (kafkaHealthIndicator.isKafkaUp()) {
+                orderKafkaService.handleOrderFromPayment(eventResult);
+            } else {
+                log.error("Failed to send payment event");
+                orderKafkaService.occurDeliveryFailure(eventResult);
             }
         }
     }
 
-    @Transactional
     @KafkaListener(topics = "${consumers.topic2}", groupId = "${consumers.groupId}")
     public void consumeOrderFromDelivery(ConsumerRecord<String, String> record)
         throws JsonProcessingException {
         EventResult eventResult = objectMapper.readValue(record.value(), EventResult.class);
         if (eventResult.status() == -1) {
-            orderKafkaProducer.occurRollbackPaymentEvent(eventResult);
-            orderRollbackService.rollbackOrder(eventResult.mapToOrderRollbackDto());
+            if (kafkaHealthIndicator.isKafkaUp()) {
+                orderKafkaService.handleRollbackOrderFromDelivery(eventResult);
+            } else {
+                log.error("Failed to send rollback payment event");
+                orderKafkaService.occurRollbackPaymentFailure(eventResult);
+            }
         } else {
-            Optional<OrderLine> findOrderLine = orderLineRepository.findById(
-                eventResult.orderLine().orderLineId());
-            if (findOrderLine.isPresent()) {
-                OrderLine orderLine = findOrderLine.get();
-                orderLine.assignDelivery(eventResult.deliveryId());
-                orderLineRepository.save(orderLine);
-                orderKafkaProducer.occurProductEvent(eventResult);
+            if (kafkaHealthIndicator.isKafkaUp()) {
+                orderKafkaService.handleOrderFromDelivery(eventResult);
+            } else {
+                log.error("Failed to send delivery event");
+                orderKafkaService.occurProductFailure(eventResult);
             }
         }
     }
 
-    @Transactional
     @KafkaListener(topics = "${consumers.topic3}", groupId = "${consumers.groupId}")
     public void consumeOrderFromProduct(ConsumerRecord<String, String> record)
         throws JsonProcessingException {
         EventResult eventResult = objectMapper.readValue(record.value(), EventResult.class);
         if (eventResult.status() == -1) {
-            orderKafkaProducer.occurRollbackDeliveryEvent(eventResult);
-            orderKafkaProducer.occurRollbackPaymentEvent(eventResult);
-            orderRollbackService.rollbackOrder(eventResult.mapToOrderRollbackDto());
+            if(kafkaHealthIndicator.isKafkaUp())
+                orderKafkaService.handleRollbackOrderFromProduct(eventResult);
+            else {
+                log.error("Failed to send rollback delivery and payment event");
+                orderKafkaService.handleRollbackOrderFailure(eventResult);
+            }
         }
     }
 }

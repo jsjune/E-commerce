@@ -1,6 +1,5 @@
 package com.orderservice.usecase.impl;
 
-import com.orderservice.entity.OrderLine;
 import com.orderservice.entity.ProductOrder;
 import com.orderservice.repository.OrderLineRepository;
 import com.orderservice.repository.ProductOrderRepository;

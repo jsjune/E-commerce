@@ -21,4 +21,16 @@ public record ProductOrderEvent(
             .build();
     }
 
+    public EventResult mapToEventResult(Long paymentId, int status) {
+        return EventResult.builder()
+            .productOrderId(productOrderId())
+            .orderLine(orderLine())
+            .memberId(memberId())
+            .paymentMethodId(paymentMethodId())
+            .deliveryAddressId(deliveryAddressId())
+            .paymentId(paymentId)
+            .status(status)
+            .build();
+    }
+
 }

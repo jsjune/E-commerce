@@ -14,14 +14,11 @@ import com.orderservice.adapter.res.CartDto;
 import com.orderservice.adapter.res.MemberDto;
 import com.orderservice.adapter.res.PaymentDto;
 import com.orderservice.adapter.res.ProductDto;
-import com.orderservice.controller.req.CartOrderRequestDto;
-import com.orderservice.controller.req.OrderRequest;
-import com.orderservice.controller.req.ProductOrderRequestDto;
 import com.orderservice.controller.res.OrderDetailResponseDto;
 import com.orderservice.controller.res.OrderListResponseDto;
 import com.orderservice.entity.OrderLine;
 import com.orderservice.entity.OrderLineStatus;
-import com.orderservice.entity.ProdcutOrderStatus;
+import com.orderservice.entity.ProductOrderStatus;
 import com.orderservice.entity.ProductOrder;
 import com.orderservice.repository.OrderLineRepository;
 import com.orderservice.repository.ProductOrderRepository;
@@ -69,7 +66,7 @@ class OrderServiceTest extends IntegrationTestSupport {
         long memberId = 1L;
         ProductOrder productOrder = ProductOrder.builder()
             .memberId(memberId)
-            .productOrderStatus(ProdcutOrderStatus.COMPLETED)
+            .productOrderStatus(ProductOrderStatus.COMPLETED)
             .totalPrice(2000L)
             .totalDiscount(0L)
             .build();
@@ -100,7 +97,7 @@ class OrderServiceTest extends IntegrationTestSupport {
         long memberId = 1L;
         ProductOrder productOrder = ProductOrder.builder()
             .memberId(memberId)
-            .productOrderStatus(ProdcutOrderStatus.COMPLETED)
+            .productOrderStatus(ProductOrderStatus.COMPLETED)
             .totalPrice(2000L)
             .totalDiscount(0L)
             .build();
@@ -133,7 +130,7 @@ class OrderServiceTest extends IntegrationTestSupport {
         Long memberId = 1L;
         ProductOrder productOrder = ProductOrder.builder()
             .memberId(memberId)
-            .productOrderStatus(ProdcutOrderStatus.COMPLETED)
+            .productOrderStatus(ProductOrderStatus.COMPLETED)
             .build();
         productOrderRepository.save(productOrder);
         for (int i = 0; i < 3; i++) {
@@ -161,7 +158,7 @@ class OrderServiceTest extends IntegrationTestSupport {
         long memberId = 1L;
         ProductOrder productOrder = ProductOrder.builder()
             .memberId(memberId)
-            .productOrderStatus(ProdcutOrderStatus.COMPLETED)
+            .productOrderStatus(ProductOrderStatus.COMPLETED)
             .totalPrice(14000L)
             .totalDiscount(0L)
             .build();
@@ -220,7 +217,7 @@ class OrderServiceTest extends IntegrationTestSupport {
         ProductOrder result = productOrderRepository.findById(productOrder.getId()).get();
 
         // then
-        assertEquals(result.getProductOrderStatus(), ProdcutOrderStatus.COMPLETED);
+        assertEquals(result.getProductOrderStatus(), ProductOrderStatus.COMPLETED);
         assertEquals(result.getTotalPrice(), 6000);
 
     }

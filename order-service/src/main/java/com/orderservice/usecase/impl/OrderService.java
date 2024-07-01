@@ -6,11 +6,12 @@ import com.orderservice.adapter.MemberClient;
 import com.orderservice.adapter.ProductClient;
 import com.orderservice.adapter.res.CartDto;
 import com.orderservice.adapter.res.ProductDto;
+import com.orderservice.usecase.kafka.KafkaHealthIndicator;
 import com.orderservice.controller.res.OrderDetailResponseDto;
 import com.orderservice.controller.res.OrderListResponseDto;
 import com.orderservice.entity.OrderLine;
 import com.orderservice.entity.OrderLineStatus;
-import com.orderservice.entity.ProdcutOrderStatus;
+import com.orderservice.entity.ProductOrderStatus;
 import com.orderservice.entity.ProductOrder;
 import com.orderservice.repository.OrderLineRepository;
 import com.orderservice.repository.ProductOrderRepository;
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.stereotype.Service;
@@ -36,6 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class OrderService implements OrderUseCase {
 
     private final ProductOrderRepository productOrderRepository;
@@ -46,6 +49,7 @@ public class OrderService implements OrderUseCase {
     private final OrderKafkaProducer orderKafkaProducer;
     private final CircuitBreakerFactory circuitBreakerFactory;
     private final RedisUtils redisUtils;
+    private final KafkaHealthIndicator kafkaHealthIndicator;
 
     @Override
     public OrderDetailResponseDto registerOrderOfCart(Long memberId,
@@ -53,7 +57,7 @@ public class OrderService implements OrderUseCase {
         long totalPrice = 0L;
         ProductOrder productOrder = ProductOrder.builder()
             .memberId(memberId)
-            .productOrderStatus(ProdcutOrderStatus.INITIATED)
+            .productOrderStatus(ProductOrderStatus.INITIATED)
             .totalDiscount(0L)
             .build();
         productOrderRepository.save(productOrder);
@@ -114,7 +118,7 @@ public class OrderService implements OrderUseCase {
         }
         ProductOrder productOrder = ProductOrder.builder()
             .memberId(memberId)
-            .productOrderStatus(ProdcutOrderStatus.INITIATED)
+            .productOrderStatus(ProductOrderStatus.INITIATED)
             .totalPrice(product.price() * command.quantity())
             .totalDiscount(0L)
             .build();
@@ -163,15 +167,19 @@ public class OrderService implements OrderUseCase {
                     .paymentMethodId(command.paymentMethodId())
                     .deliveryAddressId(command.deliveryAddressId())
                     .build();
-                orderKafkaProducer.occurPaymentEvent(productOrderEvent);
+                if (kafkaHealthIndicator.isKafkaUp()) {
+                    orderKafkaProducer.occurPaymentEvent(productOrderEvent);
+                    // 장바구니 비우기
+                    memberClient.clearCart(memberId, productIds);
+
+                    productOrder.finalizeOrder(ProductOrderStatus.COMPLETED, finalTotalPrice,
+                        totalDiscount);
+                    productOrderRepository.save(productOrder);
+                } else {
+                    log.error("Failed to send payment event");
+                    orderKafkaProducer.occurPaymentFailure(productOrderEvent);
+                }
             }
-
-            // 장바구니 비우기
-            memberClient.clearCart(memberId, productIds);
-
-            productOrder.finalizeOrder(ProdcutOrderStatus.COMPLETED, finalTotalPrice,
-                totalDiscount);
-            productOrderRepository.save(productOrder);
         }
     }
 
@@ -211,4 +219,5 @@ public class OrderService implements OrderUseCase {
             orderLineRepository.save(orderLine);
         });
     }
+
 }

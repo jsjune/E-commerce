@@ -25,14 +25,14 @@ public class ProductOrder extends BaseTimeEntity {
     private Long id;
     private Long memberId;
     @Enumerated(EnumType.STRING)
-    private ProdcutOrderStatus productOrderStatus;
+    private ProductOrderStatus productOrderStatus;
     @OneToMany(mappedBy = "productOrder")
     private List<OrderLine> orderLines;
     private Long totalPrice;
     private Long totalDiscount;
 
     @Builder
-    public ProductOrder(Long id, Long memberId, ProdcutOrderStatus productOrderStatus, List<OrderLine> orderLines,
+    public ProductOrder(Long id, Long memberId, ProductOrderStatus productOrderStatus, List<OrderLine> orderLines,
         Long totalPrice, Long totalDiscount) {
         this.id = id;
         this.memberId = memberId;
@@ -47,9 +47,9 @@ public class ProductOrder extends BaseTimeEntity {
         orderLine.assignToOrder(this);
     }
 
-    public void finalizeOrder(ProdcutOrderStatus prodcutOrderStatus, Long finalTotalPrice,
+    public void finalizeOrder(ProductOrderStatus productOrderStatus, Long finalTotalPrice,
         Long finalTotalDiscount) {
-        this.productOrderStatus = prodcutOrderStatus;
+        this.productOrderStatus = productOrderStatus;
         this.totalPrice = finalTotalPrice;
         this.totalDiscount = finalTotalDiscount;
     }

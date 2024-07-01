@@ -24,6 +24,9 @@ dependencies {
     // kafka
     implementation 'org.springframework.kafka:spring-kafka'
 
+    // actuator
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
     implementation project(':order-service')
 }
 
