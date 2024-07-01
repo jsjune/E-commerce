@@ -1,7 +1,5 @@
-package com.ecommerce;
+package com.orderservice.config.log;
 
-import io.micrometer.tracing.Span;
-import io.micrometer.tracing.Tracer;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +17,9 @@ import org.springframework.stereotype.Component;
 public class LoggingAspect {
 
     private final LoggingProducer loggingProducer;
-    private final Tracer tracer;
+//    private final Tracer tracer;
 
-    @Before("execution(* com.*.controller..*(..)) || execution(* com.*.usecase.kafka..*(..))")
+    @Before("execution(* com.*.controller..*(..)) || execution(* com.*.usecase.kafka..*(..)) || execution(* com.order.orderconsumer..*(..))")
     public void beforeMethodExecution(JoinPoint joinPoint) {
         Result result = getResult(joinPoint);
         loggingProducer.sendMessage("logging-topic",
@@ -30,7 +28,7 @@ public class LoggingAspect {
                 + result.methodName());
     }
 
-    @AfterThrowing(pointcut = "execution(* com.*.controller..*(..)) || execution(* com.*.usecase.kafka..*(..))", throwing = "exception")
+    @AfterThrowing(pointcut = "execution(* com.*.controller..*(..)) || execution(* com.*.usecase.kafka..*(..)) || execution(* com.order.orderconsumer..*(..))", throwing = "exception")
     public void afterThrowingMethodExecution(JoinPoint joinPoint, Throwable exception) {
         Result result = getResult(joinPoint);
         StringWriter sw = new StringWriter();
@@ -45,10 +43,11 @@ public class LoggingAspect {
     private Result getResult(JoinPoint joinPoint) {
         String className = joinPoint.getTarget().getClass().getName();
         String methodName = joinPoint.getSignature().getName();
-        Span currentSpan = tracer.currentSpan();
-        String traceId = currentSpan != null ? currentSpan.context().traceId() : "no-trace-id";
-        String spanId = currentSpan != null ? currentSpan.context().spanId() : "no-span-id";
-        return new Result(className, methodName, traceId, spanId);
+//        Span currentSpan = tracer.currentSpan();
+//        String traceId = currentSpan != null ? currentSpan.context().traceId() : "no-trace-id";
+//        String spanId = currentSpan != null ? currentSpan.context().spanId() : "no-span-id";
+//        return new Result(className, methodName, traceId, spanId);
+        return new Result(className, methodName, "traceId", "spanId");
     }
 
     private record Result(String className, String methodName, String traceId, String spanId) {

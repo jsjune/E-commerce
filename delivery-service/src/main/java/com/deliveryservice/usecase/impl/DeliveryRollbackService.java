@@ -8,6 +8,8 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 @Service
 @Transactional
@@ -17,6 +19,7 @@ public class DeliveryRollbackService {
     private final AesUtil aesUtil;
     private final DeliveryAdapter deliveryAdapter;
 
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void rollbackProcessDelivery(Long deliveryId) throws Exception {
         Optional<Delivery> findDelivery = deliveryRepository.findById(deliveryId);
         if (findDelivery.isPresent()) {

@@ -1,14 +1,16 @@
-package com.paymentservice.usecase.kafka;
+package com.payment.paymentconsumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentservice.usecase.PaymentUseCase;
 import com.paymentservice.usecase.impl.PaymentRollbackService;
+import com.paymentservice.usecase.kafka.PaymentKafkaProducer;
 import com.paymentservice.usecase.kafka.event.EventResult;
 import com.paymentservice.usecase.kafka.event.ProductOrderEvent;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -19,6 +21,7 @@ public class PaymentEventConsumer {
     private final PaymentUseCase paymentUseCase;
     private final PaymentRollbackService paymentRollbackService;
 
+    @Transactional
     @KafkaListener(topics = "${consumers.topic1}", groupId = "${consumers.groupId}")
     public void consumePayment(ConsumerRecord<String, String> record)
         throws Exception {
@@ -38,6 +41,7 @@ public class PaymentEventConsumer {
         paymentKafkaProducer.occurPaymentEvent(eventResult);
     }
 
+    @Transactional
     @KafkaListener(topics = "${consumers.topic2}", groupId = "${consumers.groupId}")
     public void consumeRollbackPayment(ConsumerRecord<String, String> record)
         throws Exception {

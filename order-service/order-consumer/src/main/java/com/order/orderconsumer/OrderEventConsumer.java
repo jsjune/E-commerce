@@ -1,10 +1,11 @@
-package com.orderservice.usecase.kafka;
+package com.order.orderconsumer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.orderservice.entity.OrderLine;
 import com.orderservice.repository.OrderLineRepository;
 import com.orderservice.usecase.impl.OrderRollbackService;
+import com.orderservice.usecase.kafka.OrderKafkaProducer;
 import com.orderservice.usecase.kafka.event.EventResult;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-@Transactional
 public class OrderEventConsumer {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -23,6 +23,7 @@ public class OrderEventConsumer {
     private final OrderRollbackService orderRollbackService;
     private final OrderLineRepository orderLineRepository;
 
+    @Transactional
     @KafkaListener(topics = "${consumers.topic1}", groupId = "${consumers.groupId}")
     public void consumeOrderFromPayment(ConsumerRecord<String, String> record)
         throws JsonProcessingException {
@@ -41,6 +42,7 @@ public class OrderEventConsumer {
         }
     }
 
+    @Transactional
     @KafkaListener(topics = "${consumers.topic2}", groupId = "${consumers.groupId}")
     public void consumeOrderFromDelivery(ConsumerRecord<String, String> record)
         throws JsonProcessingException {
@@ -60,6 +62,7 @@ public class OrderEventConsumer {
         }
     }
 
+    @Transactional
     @KafkaListener(topics = "${consumers.topic3}", groupId = "${consumers.groupId}")
     public void consumeOrderFromProduct(ConsumerRecord<String, String> record)
         throws JsonProcessingException {

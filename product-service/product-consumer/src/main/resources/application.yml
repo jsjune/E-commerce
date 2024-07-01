@@ -1,0 +1,21 @@
+spring.application.name: product-consumer
+server.port: 8090
+
+spring:
+  config:
+    import:
+      - classpath:/application-local.yml
+      - classpath:/application-prod.yml
+      - classpath:/application-secret.yml
+
+  profiles:
+    default: local
+
+eureka:
+  instance:
+    instance-id: ${spring.application.name}:${server.port}
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://127.0.0.1:8761/eureka

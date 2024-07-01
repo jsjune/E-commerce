@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 @Component
 @RequiredArgsConstructor
@@ -30,6 +32,7 @@ public class OrderKafkaProducer {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final KafkaTemplate<String, String> kafkaTemplate;
 
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void occurPaymentEvent(ProductOrderEvent productOrderEvent)
         throws JsonProcessingException {
         String json = objectMapper.writeValueAsString(productOrderEvent);
@@ -44,6 +47,7 @@ public class OrderKafkaProducer {
         });
     }
 
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void occurDeliveryEvent(EventResult productOrderEvent)
         throws JsonProcessingException {
         String json = objectMapper.writeValueAsString(productOrderEvent);
@@ -58,6 +62,7 @@ public class OrderKafkaProducer {
         });
     }
 
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void occurProductEvent(EventResult eventResult)
         throws JsonProcessingException {
         String json = objectMapper.writeValueAsString(eventResult);
@@ -73,6 +78,7 @@ public class OrderKafkaProducer {
 
     }
 
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void occurRollbackPaymentEvent(EventResult eventResult) throws JsonProcessingException {
         String json = objectMapper.writeValueAsString(eventResult);
         CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(ROLLBACK_PAYMENT_TOPIC, json);
@@ -85,6 +91,7 @@ public class OrderKafkaProducer {
         });
     }
 
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void occurRollbackDeliveryEvent(EventResult eventResult) throws JsonProcessingException {
         String json = objectMapper.writeValueAsString(eventResult);
         CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(ROLLBACK_DELIVERY_TOPIC, json);

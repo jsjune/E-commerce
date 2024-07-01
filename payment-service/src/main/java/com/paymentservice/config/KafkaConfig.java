@@ -1,4 +1,4 @@
-package com.ecommerce.common.config;
+package com.paymentservice.config;
 
 import java.util.HashMap;
 import java.util.Map;
