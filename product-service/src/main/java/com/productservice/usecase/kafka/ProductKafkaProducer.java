@@ -15,14 +15,12 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class ProductKafkaProducer {
     @Value(value = "${producers.topic1}")
     private String PRODUCT_TOPIC;
@@ -32,7 +30,6 @@ public class ProductKafkaProducer {
     private final KafkaHealthIndicator kafkaHealthIndicator;
     private final ProductWriteUseCase productWriteUseCase;
 
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void occurProductEvent(EventResult eventResult) throws JsonProcessingException {
         String json = objectMapper.writeValueAsString(eventResult);
         CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(PRODUCT_TOPIC,

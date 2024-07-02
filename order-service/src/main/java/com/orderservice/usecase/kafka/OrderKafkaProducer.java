@@ -50,7 +50,6 @@ public class OrderKafkaProducer {
     private final KafkaHealthIndicator kafkaHealthIndicator;
     private final OrderRollbackService orderRollbackService;
 
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void occurPaymentEvent(ProductOrderEvent productOrderEvent)
         throws JsonProcessingException {
         String json = objectMapper.writeValueAsString(productOrderEvent);
@@ -65,7 +64,7 @@ public class OrderKafkaProducer {
         });
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void occurPaymentFailure(ProductOrderEvent productOrderEvent)
         throws JsonProcessingException {
         String json = objectMapper.writeValueAsString(productOrderEvent);
@@ -77,7 +76,6 @@ public class OrderKafkaProducer {
         outBoxRepository.save(outBox);
     }
 
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void occurDeliveryEvent(EventResult productOrderEvent)
         throws JsonProcessingException {
         String json = objectMapper.writeValueAsString(productOrderEvent);
@@ -92,7 +90,7 @@ public class OrderKafkaProducer {
         });
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void occurDeliveryFailure(EventResult eventResult) throws JsonProcessingException {
         String json = objectMapper.writeValueAsString(eventResult);
         OrderOutBox outBox = OrderOutBox.builder()
@@ -103,7 +101,6 @@ public class OrderKafkaProducer {
         outBoxRepository.save(outBox);
     }
 
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void occurProductEvent(EventResult eventResult)
         throws JsonProcessingException {
         String json = objectMapper.writeValueAsString(eventResult);
@@ -119,7 +116,7 @@ public class OrderKafkaProducer {
 
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void occurProductFailure(EventResult eventResult) throws JsonProcessingException {
         String json = objectMapper.writeValueAsString(eventResult);
         OrderOutBox outBox = OrderOutBox.builder()
@@ -130,7 +127,6 @@ public class OrderKafkaProducer {
         outBoxRepository.save(outBox);
     }
 
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void occurRollbackPaymentEvent(EventResult eventResult) throws JsonProcessingException {
         String json = objectMapper.writeValueAsString(eventResult);
         CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(
@@ -144,7 +140,7 @@ public class OrderKafkaProducer {
         });
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void occurRollbackPaymentFailure(EventResult eventResult)
         throws JsonProcessingException {
         String json = objectMapper.writeValueAsString(eventResult);
@@ -156,7 +152,6 @@ public class OrderKafkaProducer {
         outBoxRepository.save(outBox);
     }
 
-    @TransactionalEventListener
     public void occurRollbackDeliveryEvent(EventResult eventResult) throws JsonProcessingException {
         String json = objectMapper.writeValueAsString(eventResult);
         CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(
@@ -170,7 +165,7 @@ public class OrderKafkaProducer {
         });
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void occurRollbackDeliveryFailure(EventResult eventResult)
         throws JsonProcessingException {
         String json = objectMapper.writeValueAsString(eventResult);
@@ -182,8 +177,8 @@ public class OrderKafkaProducer {
         outBoxRepository.save(outBox);
     }
 
-    @Transactional
     @Scheduled(fixedRate = 10000)
+    @Transactional
     public void retry() throws JsonProcessingException {
         log.info("kafka health check and retrying...");
         List<OrderOutBox> findOrderOutBoxes = outBoxRepository.findAllBySuccessFalse();

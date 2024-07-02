@@ -2,7 +2,6 @@ package com.paymentservice.usecase.kafka;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.paymentservice.usecase.PaymentUseCase;
-import com.paymentservice.usecase.kafka.PaymentKafkaProducer;
 import com.paymentservice.usecase.kafka.event.EventResult;
 import com.paymentservice.usecase.kafka.event.ProductOrderEvent;
 import lombok.RequiredArgsConstructor;

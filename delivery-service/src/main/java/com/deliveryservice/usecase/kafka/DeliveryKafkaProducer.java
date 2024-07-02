@@ -11,6 +11,7 @@ import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -32,7 +33,6 @@ public class DeliveryKafkaProducer {
     private final KafkaHealthIndicator kafkaHealthIndicator;
     private final DeliveryUseCase deliveryUseCase;
 
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void occurDeliveryEvent(EventResult eventResult) throws JsonProcessingException {
         String json = objectMapper.writeValueAsString(eventResult);
         CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(DELIVERY_TOPIC,
@@ -57,8 +57,8 @@ public class DeliveryKafkaProducer {
         outBoxRepository.save(outBox);
     }
 
-    @Transactional
     @Scheduled(fixedRate = 10000)
+    @Transactional
     public void retry() throws Exception {
         log.info("kafka health check and retrying...");
         List<DeliveryOutBox> findDeliveryBoxes = outBoxRepository.findAllBySuccessFalse();

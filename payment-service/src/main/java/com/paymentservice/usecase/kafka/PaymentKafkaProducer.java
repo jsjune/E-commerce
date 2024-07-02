@@ -17,8 +17,6 @@ import org.springframework.kafka.support.SendResult;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 @Component
 @RequiredArgsConstructor
@@ -33,7 +31,6 @@ public class PaymentKafkaProducer {
     private final KafkaHealthIndicator kafkaHealthIndicator;
     private final PaymentUseCase paymentUseCase;
 
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void occurPaymentEvent(EventResult eventResult) throws JsonProcessingException {
         String json = objectMapper.writeValueAsString(eventResult);
         CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(PAYMENT_TOPIC,
