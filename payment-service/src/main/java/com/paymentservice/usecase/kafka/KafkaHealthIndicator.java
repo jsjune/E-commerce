@@ -20,25 +20,40 @@ public class KafkaHealthIndicator implements HealthIndicator {
 
     @Override
     public Health health() {
-        try (AdminClient adminClient = AdminClient.create(kafkaAdmin.getConfigurationProperties())) {
-            DescribeClusterOptions options = new DescribeClusterOptions().timeoutMs(1000);
-            DescribeClusterResult clusterResult = adminClient.describeCluster(options);
-            KafkaFuture<Integer> nodeCountFuture = clusterResult.nodes().thenApply(Collection::size);
+        int retries = 3; // 재시도 횟수
+        int timeoutMs = 5000; // 타임아웃 설정을 5초로 증가
 
-            int nodeCount = nodeCountFuture.get();
-            if (nodeCount > 0) {
-                return Health.up()
-                    .withDetail("clusterId", clusterResult.clusterId().get())
-                    .withDetail("nodeCount", nodeCount)
-                    .build();
-            } else {
-                return Health.down()
-                    .withDetail("reason", "No nodes available in Kafka cluster")
-                    .build();
+        for (int i = 0; i < retries; i++) {
+            try (AdminClient adminClient = AdminClient.create(kafkaAdmin.getConfigurationProperties())) {
+                DescribeClusterOptions options = new DescribeClusterOptions().timeoutMs(timeoutMs);
+                DescribeClusterResult clusterResult = adminClient.describeCluster(options);
+                KafkaFuture<Integer> nodeCountFuture = clusterResult.nodes().thenApply(Collection::size);
+
+                int nodeCount = nodeCountFuture.get();
+                if (nodeCount > 0) {
+                    return Health.up()
+                        .withDetail("clusterId", clusterResult.clusterId().get())
+                        .withDetail("nodeCount", nodeCount)
+                        .build();
+                } else {
+                    return Health.down()
+                        .withDetail("reason", "No nodes available in Kafka cluster")
+                        .build();
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                if (i == retries - 1) {
+                    return Health.down(e).build(); // 재시도 후에도 실패하면 에러 반환
+                }
+                try {
+                    Thread.sleep(1000); // 재시도 전 1초 대기
+                } catch (InterruptedException ignored) {
+                    Thread.currentThread().interrupt();
+                }
             }
-        } catch (InterruptedException | ExecutionException e) {
-            return Health.down(e).build();
         }
+        return Health.down()
+            .withDetail("reason", "Failed to connect to Kafka cluster after retries")
+            .build();
     }
 
     @Override

@@ -22,6 +22,7 @@ public class KafkaConfig {
     public KafkaAdmin kafkaAdmin() {
         Map<String, Object> configs = new HashMap<>();
         configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
+        configs.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, 60000);
         return new KafkaAdmin(configs);
     }
 
