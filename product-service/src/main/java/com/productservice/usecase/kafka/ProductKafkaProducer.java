@@ -6,6 +6,7 @@ import com.productservice.entity.ProductOutBox;
 import com.productservice.repository.ProductOutBoxRepository;
 import com.productservice.usecase.ProductWriteUseCase;
 import com.productservice.usecase.kafka.event.EventResult;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
@@ -55,10 +57,11 @@ public class ProductKafkaProducer {
     }
 
     @Transactional
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedRate = 30000)
     public void retry() throws JsonProcessingException {
         log.info("kafka health check and retrying...");
-        List<ProductOutBox> findProductOutBoxes = outBoxRepository.findAllBySuccessFalse();
+        List<ProductOutBox> findProductOutBoxes = outBoxRepository.findAllBySuccessFalseNoOffset(
+            LocalDateTime.now(), 5);
         for (ProductOutBox outBox : findProductOutBoxes) {
             if (kafkaHealthIndicator.isKafkaUp()) {
                 EventResult orderEvent = objectMapper.readValue(outBox.getMessage(),

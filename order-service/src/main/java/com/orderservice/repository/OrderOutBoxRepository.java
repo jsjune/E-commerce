@@ -4,7 +4,6 @@ import com.orderservice.entity.OrderOutBox;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface OrderOutBoxRepository extends JpaRepository<OrderOutBox, Long> {
+public interface OrderOutBoxRepository extends JpaRepository<OrderOutBox, Long>,CustomOrderOutBoxRepository {
 
-    List<OrderOutBox> findAllBySuccessFalse();
 }

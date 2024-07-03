@@ -4,7 +4,6 @@ import com.productservice.entity.ProductOutBox;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ProductOutBoxRepository extends JpaRepository<ProductOutBox, Long> {
+public interface ProductOutBoxRepository extends JpaRepository<ProductOutBox, Long>,CustomProductOutBoxRepository {
 
-    List<ProductOutBox> findAllBySuccessFalse();
 }

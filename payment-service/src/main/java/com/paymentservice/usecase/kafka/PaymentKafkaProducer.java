@@ -7,6 +7,7 @@ import com.paymentservice.repository.PaymentOutBoxRepository;
 import com.paymentservice.usecase.PaymentUseCase;
 import com.paymentservice.usecase.kafka.event.EventResult;
 import com.paymentservice.usecase.kafka.event.ProductOrderEvent;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
@@ -57,10 +58,11 @@ public class PaymentKafkaProducer {
 
 
     @Transactional
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedRate = 30000)
     public void retry() throws Exception {
         log.info("kafka health check and retrying...");
-        List<PaymentOutBox> findPaymentOutBoxes = outBoxRepository.findAllBySuccessFalse();
+        List<PaymentOutBox> findPaymentOutBoxes = outBoxRepository.findAllBySuccessFalseNoOffset(
+            LocalDateTime.now(), 5);
         for (PaymentOutBox outBox : findPaymentOutBoxes) {
             if (kafkaHealthIndicator.isKafkaUp()) {
                 ProductOrderEvent orderEvent = objectMapper.readValue(

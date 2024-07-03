@@ -12,6 +12,7 @@ import com.orderservice.repository.ProductOrderRepository;
 import com.orderservice.usecase.impl.OrderRollbackService;
 import com.orderservice.usecase.kafka.event.EventResult;
 import com.orderservice.usecase.kafka.event.ProductOrderEvent;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -24,8 +25,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 @Component
 @RequiredArgsConstructor
@@ -177,11 +176,12 @@ public class OrderKafkaProducer {
         outBoxRepository.save(outBox);
     }
 
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedRate = 30000)
     @Transactional
     public void retry() throws JsonProcessingException {
         log.info("kafka health check and retrying...");
-        List<OrderOutBox> findOrderOutBoxes = outBoxRepository.findAllBySuccessFalse();
+        List<OrderOutBox> findOrderOutBoxes = outBoxRepository.findAllBySuccessFalseNoOffset(
+            LocalDateTime.now(), 5);
         for (OrderOutBox outBox : findOrderOutBoxes) {
             if (kafkaHealthIndicator.isKafkaUp()) {
                 processOutboxMessage(outBox);
@@ -198,7 +198,8 @@ public class OrderKafkaProducer {
             processDeliveryEvent(outBox);
         } else if (outBox.getTopic().equals(PRODUCT_TOPIC)) {
             processProductEvent(outBox);
-        }else if (outBox.getTopic().equals(ROLLBACK_PAYMENT_TOPIC) || outBox.getTopic().equals(ROLLBACK_DELIVERY_TOPIC)) {
+        } else if (outBox.getTopic().equals(ROLLBACK_PAYMENT_TOPIC) || outBox.getTopic()
+            .equals(ROLLBACK_DELIVERY_TOPIC)) {
             processRollbackEvent(outBox);
         }
     }
