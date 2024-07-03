@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -57,6 +58,7 @@ public class ProductReadService implements ProductReadUseCase {
     }
 
     @Override
+    @Cacheable(cacheNames = "product", key = "#productId")
     public ProductDto findProductById(Long productId) {
         return productRepository.findById(productId).map(ProductDto::new).orElse(null);
     }
