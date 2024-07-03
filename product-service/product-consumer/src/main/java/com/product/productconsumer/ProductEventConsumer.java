@@ -23,14 +23,17 @@ public class ProductEventConsumer {
     private final KafkaHealthIndicator kafkaHealthIndicator;
 
     @KafkaListener(topics = "${consumers.topic1}", groupId = "${consumers.groupId}")
-    public void consumeProduct(ConsumerRecord<String, String> record)
-        throws JsonProcessingException {
-        EventResult orderEvent = objectMapper.readValue(record.value(), EventResult.class);
-        if (kafkaHealthIndicator.isKafkaUp()) {
-            productKafkaService.handleProduct(orderEvent);
-        } else {
-            log.error("Failed to send order event");
-            productKafkaService.occurProductFailure(orderEvent);
+    public void consumeProduct(ConsumerRecord<String, String> record) {
+        try {
+            EventResult orderEvent = objectMapper.readValue(record.value(), EventResult.class);
+            if (kafkaHealthIndicator.isKafkaUp()) {
+                productKafkaService.handleProduct(orderEvent);
+            } else {
+                log.error("Failed to send order event");
+                productKafkaService.occurProductFailure(orderEvent);
+            }
+        } catch (Exception e) {
+            log.error("Failed to consume product event");
         }
     }
 }

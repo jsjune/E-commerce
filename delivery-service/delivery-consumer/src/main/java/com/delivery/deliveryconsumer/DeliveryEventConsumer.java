@@ -24,15 +24,19 @@ public class DeliveryEventConsumer {
     private final KafkaHealthIndicator kafkaHealthIndicator;
 
     @KafkaListener(topics = "${consumers.topic1}", groupId = "${consumers.groupId}")
-    public void consumeDelivery(ConsumerRecord<String, String> record)
-        throws Exception {
-        EventResult orderEvent = objectMapper.readValue(record.value(), EventResult.class);
-        if (kafkaHealthIndicator.isKafkaUp()) {
-            deliveryKafkaService.handleDelivery(orderEvent);
-        } else {
-            log.error("Failed to send delivery event");
-            deliveryKafkaService.occurDeliveryFailure(orderEvent);
+    public void consumeDelivery(ConsumerRecord<String, String> record) {
+        try {
+            EventResult orderEvent = objectMapper.readValue(record.value(), EventResult.class);
+            if (kafkaHealthIndicator.isKafkaUp()) {
+                deliveryKafkaService.handleDelivery(orderEvent);
+            } else {
+                log.error("Failed to send delivery event");
+                deliveryKafkaService.occurDeliveryFailure(orderEvent);
+            }
+        } catch (Exception e) {
+            log.error("Failed to consume delivery event");
         }
+
     }
 
     @KafkaListener(topics = "${consumers.topic2}", groupId = "${consumers.groupId}")

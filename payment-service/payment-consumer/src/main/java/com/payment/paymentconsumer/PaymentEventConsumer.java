@@ -25,15 +25,18 @@ public class PaymentEventConsumer {
     private final KafkaHealthIndicator kafkaHealthIndicator;
 
     @KafkaListener(topics = "${consumers.topic1}", groupId = "${consumers.groupId}")
-    public void consumePayment(ConsumerRecord<String, String> record)
-        throws Exception {
-        ProductOrderEvent orderEvent = objectMapper.readValue(record.value(),
-            ProductOrderEvent.class);
-        if (kafkaHealthIndicator.isKafkaUp()) {
-            paymentKafkaService.handlePayment(orderEvent);
-        } else {
-            log.error("Failed to send payment event");
-            paymentKafkaService.occurPaymentFailure(orderEvent);
+    public void consumePayment(ConsumerRecord<String, String> record) {
+        try {
+            ProductOrderEvent orderEvent = objectMapper.readValue(record.value(),
+                ProductOrderEvent.class);
+            if (kafkaHealthIndicator.isKafkaUp()) {
+                paymentKafkaService.handlePayment(orderEvent);
+            } else {
+                log.error("Failed to send payment event");
+                paymentKafkaService.occurPaymentFailure(orderEvent);
+            }
+        } catch (Exception e) {
+            log.error("Failed to consume payment event");
         }
     }
 

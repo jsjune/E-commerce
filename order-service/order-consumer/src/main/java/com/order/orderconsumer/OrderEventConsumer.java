@@ -23,53 +23,62 @@ public class OrderEventConsumer {
     private final KafkaHealthIndicator kafkaHealthIndicator;
 
     @KafkaListener(topics = "${consumers.topic1}", groupId = "${consumers.groupId}")
-    public void consumeOrderFromPayment(ConsumerRecord<String, String> record)
-        throws JsonProcessingException {
-        EventResult eventResult = objectMapper.readValue(record.value(), EventResult.class);
-        if (eventResult.status() == -1) {
-            orderKafkaService.handleRollbackOrderFromPayment(eventResult);
-        } else {
-            if (kafkaHealthIndicator.isKafkaUp()) {
-                orderKafkaService.handleOrderFromPayment(eventResult);
+    public void consumeOrderFromPayment(ConsumerRecord<String, String> record) {
+        try {
+            EventResult eventResult = objectMapper.readValue(record.value(), EventResult.class);
+            if (eventResult.status() == -1) {
+                orderKafkaService.handleRollbackOrderFromPayment(eventResult);
             } else {
-                log.error("Failed to send payment event");
-                orderKafkaService.occurDeliveryFailure(eventResult);
+                if (kafkaHealthIndicator.isKafkaUp()) {
+                    orderKafkaService.handleOrderFromPayment(eventResult);
+                } else {
+                    log.error("Failed to send payment event");
+                    orderKafkaService.occurDeliveryFailure(eventResult);
+                }
             }
+        } catch (Exception e) {
+            log.error("Failed to consume order from payment", e);
         }
     }
 
     @KafkaListener(topics = "${consumers.topic2}", groupId = "${consumers.groupId}")
-    public void consumeOrderFromDelivery(ConsumerRecord<String, String> record)
-        throws JsonProcessingException {
-        EventResult eventResult = objectMapper.readValue(record.value(), EventResult.class);
-        if (eventResult.status() == -1) {
-            if (kafkaHealthIndicator.isKafkaUp()) {
-                orderKafkaService.handleRollbackOrderFromDelivery(eventResult);
+    public void consumeOrderFromDelivery(ConsumerRecord<String, String> record) {
+        try {
+            EventResult eventResult = objectMapper.readValue(record.value(), EventResult.class);
+            if (eventResult.status() == -1) {
+                if (kafkaHealthIndicator.isKafkaUp()) {
+                    orderKafkaService.handleRollbackOrderFromDelivery(eventResult);
+                } else {
+                    log.error("Failed to send rollback payment event");
+                    orderKafkaService.occurRollbackPaymentFailure(eventResult);
+                }
             } else {
-                log.error("Failed to send rollback payment event");
-                orderKafkaService.occurRollbackPaymentFailure(eventResult);
+                if (kafkaHealthIndicator.isKafkaUp()) {
+                    orderKafkaService.handleOrderFromDelivery(eventResult);
+                } else {
+                    log.error("Failed to send delivery event");
+                    orderKafkaService.occurProductFailure(eventResult);
+                }
             }
-        } else {
-            if (kafkaHealthIndicator.isKafkaUp()) {
-                orderKafkaService.handleOrderFromDelivery(eventResult);
-            } else {
-                log.error("Failed to send delivery event");
-                orderKafkaService.occurProductFailure(eventResult);
-            }
+        } catch (Exception e) {
+            log.error("Failed to consume order from delivery", e);
         }
     }
 
     @KafkaListener(topics = "${consumers.topic3}", groupId = "${consumers.groupId}")
-    public void consumeOrderFromProduct(ConsumerRecord<String, String> record)
-        throws JsonProcessingException {
-        EventResult eventResult = objectMapper.readValue(record.value(), EventResult.class);
-        if (eventResult.status() == -1) {
-            if(kafkaHealthIndicator.isKafkaUp())
-                orderKafkaService.handleRollbackOrderFromProduct(eventResult);
-            else {
-                log.error("Failed to send rollback delivery and payment event");
-                orderKafkaService.handleRollbackOrderFailure(eventResult);
+    public void consumeOrderFromProduct(ConsumerRecord<String, String> record) {
+        try {
+            EventResult eventResult = objectMapper.readValue(record.value(), EventResult.class);
+            if (eventResult.status() == -1) {
+                if (kafkaHealthIndicator.isKafkaUp()) {
+                    orderKafkaService.handleRollbackOrderFromProduct(eventResult);
+                } else {
+                    log.error("Failed to send rollback delivery and payment event");
+                    orderKafkaService.handleRollbackOrderFailure(eventResult);
+                }
             }
+        } catch (Exception e) {
+            log.error("Failed to consume order from product", e);
         }
     }
 }
