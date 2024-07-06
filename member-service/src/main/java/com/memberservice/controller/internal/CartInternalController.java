@@ -24,8 +24,8 @@ public class CartInternalController {
     }
 
     @DeleteMapping("/member/{memberId}")
-    public void clearCart(@PathVariable Long memberId, @RequestBody List<Long> productIds){
-        cartUseCase.clearCart(memberId, productIds);
+    public void clearCart(@PathVariable Long memberId, @RequestBody List<Long> cartIds){
+        cartUseCase.clearCart(memberId, cartIds);
     }
 
 }

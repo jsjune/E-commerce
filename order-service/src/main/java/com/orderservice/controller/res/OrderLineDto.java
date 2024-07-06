@@ -6,7 +6,6 @@ import lombok.Getter;
 
 @Getter
 public class OrderLineDto {
-    private Long orderLineId;
     private Long productId;
     private String productName;
     private Long price;
@@ -17,7 +16,6 @@ public class OrderLineDto {
     private Long deliveryId;
 
     public OrderLineDto(OrderLine orderLine) {
-        this.orderLineId = orderLine.getId();
         this.productId = orderLine.getProductId();
         this.productName = orderLine.getProductName();
         this.price = orderLine.getPrice();

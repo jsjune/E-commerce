@@ -82,8 +82,8 @@ public class CartService implements CartUseCase {
 
     @Override
     @CacheEvict(value = "cartList", key = "#memberId")
-    public void clearCart(Long memberId, List<Long> productId) {
-        cartRepository.deleteAllByMemberIdAndProductIdIn(memberId, productId);
+    public void clearCart(Long memberId, List<Long> cartIds) {
+        cartRepository.deleteAllByMemberIdAndIdIn(memberId, cartIds);
     }
 
     @Override

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "productClient", url = "${productClient.url}")
+@FeignClient(name = "product-service")
 public interface ProductClient {
     @GetMapping("/internal/products/{productId}")
     ProductDto getProduct(@PathVariable Long productId);

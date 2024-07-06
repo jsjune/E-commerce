@@ -19,16 +19,16 @@ public class OrderRollbackService {
     public void rollbackOrder(OrderRollbackDto command) {
         productOrderRepository.findById(command.productOrderId()).ifPresent(productOrder -> {
             productOrder.rollback(command.totalPrice(), command.totalDiscount());
-            cancelOrderLine(productOrder, command.orderLineId());
+            cancelOrderLine(productOrder, command.orderLineId(), command.paymentId(), command.deliveryId());
             productOrderRepository.save(productOrder);
         });
     }
-    private void cancelOrderLine(ProductOrder productOrder, Long orderLineId) {
+    private void cancelOrderLine(ProductOrder productOrder, Long orderLineId, Long paymentId, Long deliveryId) {
         productOrder.getOrderLines().stream()
             .filter(orderLine -> orderLine.getId().equals(orderLineId))
             .findFirst()
             .ifPresent(orderLine -> {
-                orderLine.cancelOrderLine();
+                orderLine.cancelOrderLine(paymentId, deliveryId);
                 orderLineRepository.save(orderLine);
             });
     }

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.orderservice.entity.OrderLine;
 import com.orderservice.repository.OrderLineRepository;
 import com.orderservice.usecase.impl.OrderRollbackService;
-import com.orderservice.usecase.kafka.OrderKafkaProducer;
 import com.orderservice.usecase.kafka.event.EventResult;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -78,4 +77,5 @@ public class OrderKafkaService {
         throws JsonProcessingException {
         orderKafkaProducer.occurRollbackPaymentFailure(eventResult);
     }
+
 }

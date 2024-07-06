@@ -15,7 +15,7 @@ public interface CartUseCase {
 
     void updateCartQuantity(Long memberId, Long cartId, Long quantity);
 
-    void clearCart(Long memberId, List<Long> productIds);
+    void clearCart(Long memberId, List<Long> cartIds);
 
     List<CartDto> getCartList(Long memberId, List<Long> cartIds);
 }

@@ -55,8 +55,14 @@ public class OrderLine extends BaseTimeEntity {
         this.productOrder = productOrder;
     }
 
-    public void cancelOrderLine() {
+    public void cancel() {
         this.orderLineStatus = OrderLineStatus.CANCELLED;
+    }
+
+    public void cancelOrderLine(Long paymentId, Long deliveryId) {
+        this.orderLineStatus = OrderLineStatus.CANCELLED;
+        this.paymentId = paymentId == null || paymentId == -1 ? null : paymentId;
+        this.deliveryId = deliveryId == null || deliveryId == -1 ? null : deliveryId;
     }
 
     public void assignPayment(Long paymentId) {

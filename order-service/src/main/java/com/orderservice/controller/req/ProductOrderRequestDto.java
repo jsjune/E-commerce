@@ -1,12 +1,12 @@
 package com.orderservice.controller.req;
 
-import com.orderservice.usecase.dto.RegisterOrderOfProductDto;
+import com.orderservice.usecase.dto.RegisterOrderFromProductDto;
 
 public record ProductOrderRequestDto(
     Long productId,
     Long quantity
 ) {
-    public RegisterOrderOfProductDto mapToCommand() {
-        return new RegisterOrderOfProductDto(productId, quantity);
+    public RegisterOrderFromProductDto mapToCommand() {
+        return new RegisterOrderFromProductDto(productId, quantity);
     }
 }

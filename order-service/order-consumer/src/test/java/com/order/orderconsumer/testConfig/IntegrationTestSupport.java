@@ -1,4 +1,4 @@
-package com.orderservice;
+package com.order.orderconsumer.testConfig;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;

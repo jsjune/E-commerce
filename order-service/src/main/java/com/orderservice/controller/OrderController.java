@@ -2,11 +2,13 @@ package com.orderservice.controller;
 
 
 import com.orderservice.controller.req.CartOrderRequestDto;
-import com.orderservice.controller.req.OrderRequest;
+import com.orderservice.controller.req.OrderRequestFromCart;
+import com.orderservice.controller.req.OrderRequestFromProduct;
 import com.orderservice.controller.req.ProductOrderRequestDto;
 import com.orderservice.controller.res.OrderDetailResponseDto;
 import com.orderservice.controller.res.OrderListResponseDto;
-import com.orderservice.usecase.OrderUseCase;
+import com.orderservice.usecase.OrderReadUseCase;
+import com.orderservice.usecase.OrderWriteUseCase;
 import com.orderservice.utils.Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,46 +25,54 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/order")
 public class OrderController {
 
-    private final OrderUseCase orderUseCase;
+    private final OrderWriteUseCase orderWriteUseCase;
+    private final OrderReadUseCase orderReadUseCase;
 
-    @PostMapping("/cart/create")
-    public Response<OrderDetailResponseDto> registerOrderOfCart(@RequestHeader("Member-Id")Long memberId,
+    @PostMapping("/create/cart")
+    public Response<OrderDetailResponseDto> getOrderFromCart(@RequestHeader("Member-Id")Long memberId,
         @RequestBody CartOrderRequestDto request) {
-        OrderDetailResponseDto data = orderUseCase.registerOrderOfCart(memberId,
+        OrderDetailResponseDto data = orderReadUseCase.getOrderFromCart(memberId,
             request.mapToCommand());
         return Response.success(HttpStatus.OK.value(), data);
     }
 
     @PostMapping("/create")
-    public Response<OrderDetailResponseDto> registerOrder(@RequestHeader("Member-Id")Long memberId,
+    public Response<OrderDetailResponseDto> getOrderFromProduct(@RequestHeader("Member-Id")Long memberId,
         @RequestBody ProductOrderRequestDto request) {
-        OrderDetailResponseDto data = orderUseCase.registerOrder(memberId,
+        OrderDetailResponseDto data = orderReadUseCase.getOrderFromProduct(memberId,
             request.mapToCommand());
         return Response.success(HttpStatus.OK.value(), data);
     }
 
-    @PostMapping("/submit")
-    public Response<Void> submitOrder(@RequestHeader("Member-Id")Long memberId,
-        @RequestBody OrderRequest request) throws Exception {
-        orderUseCase.submitOrder(memberId, request.mapToCommand());
+    @PostMapping("/submit/product")
+    public Response<Void> submitOrderFromProduct(@RequestHeader("Member-Id")Long memberId,
+        @RequestBody OrderRequestFromProduct request) {
+        orderWriteUseCase.submitOrderFromProduct(memberId, request.mapToCommand());
+        return Response.success(HttpStatus.OK.value(), null);
+    }
+
+    @PostMapping("/submit/cart")
+    public Response<Void> submitOrderFromCart(@RequestHeader("Member-Id")Long memberId,
+        @RequestBody OrderRequestFromCart request) {
+        orderWriteUseCase.submitOrderFromCart(memberId, request.mapToCommand());
         return Response.success(HttpStatus.OK.value(), null);
     }
 
     @GetMapping("/{orderId}")
     public Response<OrderDetailResponseDto> getOrder(@RequestHeader("Member-Id")Long memberId,@PathVariable Long orderId) {
-        OrderDetailResponseDto data = orderUseCase.getOrder(memberId, orderId);
+        OrderDetailResponseDto data = orderReadUseCase.getOrder(memberId, orderId);
         return Response.success(HttpStatus.OK.value(), data);
     }
 
     @GetMapping
     public Response<OrderListResponseDto> getOrders(@RequestHeader("Member-Id")Long memberId) {
-        OrderListResponseDto data = orderUseCase.getOrders(memberId);
+        OrderListResponseDto data = orderReadUseCase.getOrders(memberId);
         return Response.success(HttpStatus.OK.value(), data);
     }
 
     @PostMapping("/{orderLineId}/cancel")
     public Response<Void> cancelOrder(@RequestHeader("Member-Id")Long memberId,@PathVariable Long orderLineId) {
-        orderUseCase.cancelOrder(memberId, orderLineId);
+        orderWriteUseCase.cancelOrder(memberId, orderLineId);
         return Response.success(HttpStatus.OK.value(), null);
     }
 }

@@ -1,6 +1,6 @@
 package com.orderservice.usecase.dto;
 
-public record RegisterOrderOfProductDto(
+public record RegisterOrderFromProductDto(
     Long productId,
     Long quantity
 ) {
