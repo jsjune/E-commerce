@@ -1,12 +1,9 @@
 package com.memberservice.usecase;
 
 
-import com.memberservice.controller.internal.res.MemberDto;
-import com.memberservice.controller.req.LoginRequestDto;
-import com.memberservice.controller.req.SignupRequestDto;
-import com.memberservice.controller.req.UserInfoRequestDto;
-import com.memberservice.controller.res.LoginResponseDto;
-import com.memberservice.controller.res.MemberInfoResponseDto;
+import com.memberservice.usecase.dto.MemberDto;
+import com.memberservice.usecase.dto.LoginResponseDto;
+import com.memberservice.usecase.dto.MemberInfoResponseDto;
 import com.memberservice.usecase.dto.LoginDto;
 import com.memberservice.usecase.dto.PasswordDto;
 import com.memberservice.usecase.dto.SignupDto;

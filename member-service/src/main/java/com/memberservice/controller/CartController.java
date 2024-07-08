@@ -1,7 +1,7 @@
 package com.memberservice.controller;
 
 
-import com.memberservice.controller.res.CartResponseDto;
+import com.memberservice.usecase.dto.CartResponseDto;
 import com.memberservice.usecase.CartUseCase;
 import com.memberservice.utils.Response;
 import lombok.RequiredArgsConstructor;

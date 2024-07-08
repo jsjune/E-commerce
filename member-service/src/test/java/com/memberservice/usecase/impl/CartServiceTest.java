@@ -6,8 +6,8 @@ import static org.mockito.Mockito.when;
 
 import com.memberservice.IntegrationTestSupport;
 import com.memberservice.adapter.ProductClient;
-import com.memberservice.adapter.dto.ProductDto;
-import com.memberservice.controller.res.CartResponseDto;
+import com.memberservice.usecase.dto.ProductDto;
+import com.memberservice.usecase.dto.CartResponseDto;
 import com.memberservice.entity.Cart;
 import com.memberservice.entity.Member;
 import com.memberservice.repository.CartRepository;
@@ -51,10 +51,11 @@ class CartServiceTest extends IntegrationTestSupport {
         cartUseCase.addCart(member.getId(), product1.productId());
         cartUseCase.addCart(member.getId(), product2.productId());
         cartUseCase.addCart(member.getId(), product2.productId());
-        List<Long> productId = List.of(product1.productId(), product2.productId());
+        List<Cart> findCarts = cartRepository.findAll();
+        List<Long> cartIds = findCarts.stream().map(Cart::getId).toList();
 
         // when
-        cartRepository.deleteAllByMemberIdAndProductIdIn(member.getId(), productId);
+        cartRepository.deleteAllByMemberIdAndIdIn(member.getId(), cartIds);
         List<Cart> result = cartRepository.findAll();
 
         // then
@@ -100,9 +101,9 @@ class CartServiceTest extends IntegrationTestSupport {
         CartResponseDto cartList = cartUseCase.getCartList(member.getId());
 
         // then
-        assertEquals(cartList.getCarts().size(), 2);
-        assertEquals(cartList.getCarts().get(0).getProductId(), product1.productId());
-        assertEquals(cartList.getCarts().get(1).getProductId(), product2.productId());
+        assertEquals(cartList.carts().size(), 2);
+        assertEquals(cartList.carts().get(0).productId(), product1.productId());
+        assertEquals(cartList.carts().get(1).productId(), product2.productId());
     }
 
     @DisplayName("장바구니 삭제")

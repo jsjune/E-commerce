@@ -1,4 +1,4 @@
-package com.memberservice.controller.internal.res;
+package com.memberservice.usecase.dto;
 
 public record MemberDto(
     Long memberId,

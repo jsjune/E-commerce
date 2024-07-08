@@ -1,8 +1,8 @@
 package com.memberservice.usecase;
 
 
-import com.memberservice.controller.internal.res.CartDto;
-import com.memberservice.controller.res.CartResponseDto;
+import com.memberservice.usecase.dto.CartDto;
+import com.memberservice.usecase.dto.CartResponseDto;
 import java.util.List;
 
 public interface CartUseCase {

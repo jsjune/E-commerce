@@ -1,7 +1,7 @@
 package com.memberservice.adapter;
 
 
-import com.memberservice.adapter.dto.ProductDto;
+import com.memberservice.usecase.dto.ProductDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

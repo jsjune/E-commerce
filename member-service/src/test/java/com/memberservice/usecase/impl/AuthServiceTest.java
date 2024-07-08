@@ -9,12 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.memberservice.IntegrationTestSupport;
 import com.memberservice.auth.LoginUser;
-import com.memberservice.controller.req.LoginRequestDto;
-import com.memberservice.controller.req.PasswordRequestDto;
-import com.memberservice.controller.req.SignupRequestDto;
-import com.memberservice.controller.req.UserInfoRequestDto;
-import com.memberservice.controller.res.LoginResponseDto;
-import com.memberservice.controller.res.MemberInfoResponseDto;
+import com.memberservice.usecase.dto.LoginResponseDto;
+import com.memberservice.usecase.dto.MemberInfoResponseDto;
 import com.memberservice.entity.Member;
 import com.memberservice.entity.UserRole;
 import com.memberservice.repository.MemberRepository;
@@ -233,8 +229,8 @@ class AuthServiceTest extends IntegrationTestSupport {
         LoginResponseDto response = authUseCase.login(command);
 
         // then
-        assertNotNull(response.getAccessToken());
-        assertEquals(response.getUsername(), username);
+        assertNotNull(response.accessToken());
+        assertEquals(response.username(), username);
 
     }
 
@@ -257,8 +253,8 @@ class AuthServiceTest extends IntegrationTestSupport {
         LoginResponseDto response = authUseCase.login(command);
 
         // then
-        assertNotNull(response.getAccessToken());
-        assertEquals(response.getUsername(), username);
+        assertNotNull(response.accessToken());
+        assertEquals(response.username(), username);
     }
 
     @DisplayName("잘못된 비밀번호로 수정 실패")
@@ -317,8 +313,8 @@ class AuthServiceTest extends IntegrationTestSupport {
         MemberInfoResponseDto result = authUseCase.getUserInfo(loginUser.getMember().getId());
 
         // then
-        assertEquals(result.getEmail(), member.getEmail());
-        assertEquals(result.getPhoneNumber(), phoneNumber);
+        assertEquals(result.email(), member.getEmail());
+        assertEquals(result.phoneNumber(), phoneNumber);
     }
 
     @DisplayName("프로필 수정")
@@ -347,7 +343,7 @@ class AuthServiceTest extends IntegrationTestSupport {
             loginUser.getMember().getId(), command);
 
         // then
-        assertEquals(result.getUsername(), username);
+        assertEquals(result.username(), username);
 
     }
 }

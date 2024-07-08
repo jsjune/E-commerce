@@ -20,6 +20,11 @@ spring:
       hibernate:
         format_sql: true
 
+  data:
+    redis:
+      host: ${spring.redis.host}
+      port: ${spring.redis.port}
+
   h2:
     console:
       enabled: true

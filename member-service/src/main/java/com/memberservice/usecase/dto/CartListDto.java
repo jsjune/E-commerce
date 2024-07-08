@@ -1,6 +1,5 @@
-package com.memberservice.controller.res;
+package com.memberservice.usecase.dto;
 
-import com.memberservice.controller.internal.res.CartDto;
 import com.memberservice.entity.Cart;
 import java.io.Serializable;
 import lombok.Builder;

@@ -2,9 +2,9 @@ package com.memberservice.usecase.impl;
 
 
 import com.memberservice.adapter.ProductClient;
-import com.memberservice.adapter.dto.ProductDto;
-import com.memberservice.controller.internal.res.CartDto;
-import com.memberservice.controller.res.CartResponseDto;
+import com.memberservice.usecase.dto.ProductDto;
+import com.memberservice.usecase.dto.CartDto;
+import com.memberservice.usecase.dto.CartResponseDto;
 import com.memberservice.entity.Cart;
 import com.memberservice.repository.CartRepository;
 import com.memberservice.repository.MemberRepository;
