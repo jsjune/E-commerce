@@ -1,11 +1,7 @@
 package com.paymentservice.controller.internal;
 
-import com.paymentservice.controller.internal.req.ProcessPaymentRequest;
-import com.paymentservice.controller.internal.res.PaymentDto;
 import com.paymentservice.usecase.PaymentUseCase;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

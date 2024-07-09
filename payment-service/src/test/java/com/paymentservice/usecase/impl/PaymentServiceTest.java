@@ -41,8 +41,8 @@ class PaymentServiceTest extends IntegrationTestSupport {
             .memberId(1L)
             .orderLineId(1L)
             .paymentMethodId(paymentMethod.getId())
-            .totalPrice(6000)
-            .discount(0)
+            .totalPrice(6000L)
+            .discount(0L)
             .build();
 
         // when

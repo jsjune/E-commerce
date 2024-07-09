@@ -35,7 +35,6 @@ public class OrderEventConsumer {
     private final KafkaHealthIndicator kafkaHealthIndicator;
     private final ProductOrderRepository productOrderRepository;
     private final OrderLineRepository orderLineRepository;
-    private final OrderKafkaProducer orderKafkaProducer;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @KafkaListener(topics = "submit_order_product_request", groupId = "order")
@@ -81,7 +80,7 @@ public class OrderEventConsumer {
                 applicationEventPublisher.publishEvent(productOrderEvent);
             } else {
                 log.error("Failed to send payment event");
-                orderKafkaProducer.occurPaymentFailure(productOrderEvent);
+                orderKafkaService.occurPaymentFailure(productOrderEvent);
             }
             productOrder.finalizeOrder(
                 ProductOrderStatus.COMPLETED,
@@ -141,7 +140,7 @@ public class OrderEventConsumer {
                     applicationEventPublisher.publishEvent(productOrderEvent);
                 } else {
                     log.error("Failed to send payment event");
-                    orderKafkaProducer.occurPaymentFailure(productOrderEvent);
+                    orderKafkaService.occurPaymentFailure(productOrderEvent);
                 }
             }
             productOrder.finalizeOrder(

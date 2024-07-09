@@ -1,6 +1,6 @@
 package com.productservice.controller.internal;
 
-import com.productservice.controller.internal.res.ProductDto;
+import com.productservice.usecase.dto.ProductDto;
 import com.productservice.usecase.ProductReadUseCase;
 import com.productservice.usecase.ProductWriteUseCase;
 import lombok.RequiredArgsConstructor;

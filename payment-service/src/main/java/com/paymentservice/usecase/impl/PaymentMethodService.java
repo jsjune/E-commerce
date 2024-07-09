@@ -1,8 +1,8 @@
 package com.paymentservice.usecase.impl;
 
 
-import com.paymentservice.controller.res.PaymentMethodListDto;
-import com.paymentservice.controller.res.PaymentMethodResponseDto;
+import com.paymentservice.usecase.dto.PaymentMethodListDto;
+import com.paymentservice.usecase.dto.PaymentMethodResponseDto;
 import com.paymentservice.entity.PaymentMethod;
 import com.paymentservice.repository.PaymentMethodRepository;
 import com.paymentservice.usecase.PaymentMethodUseCase;

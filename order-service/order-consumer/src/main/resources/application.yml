@@ -1,5 +1,5 @@
 spring.application.name: order-consumer
-server.port: 8088
+server.port: 0
 
 spring:
   config:
@@ -13,7 +13,7 @@ spring:
 
 eureka:
   instance:
-    instance-id: ${spring.application.name}:${server.port}
+    instance-id: ${spring.application.name}:${random.value}
   client:
     register-with-eureka: true
     fetch-registry: true

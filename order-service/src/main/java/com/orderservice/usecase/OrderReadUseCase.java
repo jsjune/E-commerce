@@ -1,7 +1,7 @@
 package com.orderservice.usecase;
 
-import com.orderservice.controller.res.OrderDetailResponseDto;
-import com.orderservice.controller.res.OrderListResponseDto;
+import com.orderservice.usecase.dto.OrderDetailResponseDto;
+import com.orderservice.usecase.dto.OrderListResponseDto;
 import com.orderservice.usecase.dto.RegisterOrderFromCartDto;
 import com.orderservice.usecase.dto.RegisterOrderFromProductDto;
 

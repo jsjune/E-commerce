@@ -3,8 +3,8 @@ package com.productservice.controller;
 
 import com.productservice.utils.Response;
 import com.productservice.controller.req.ProductRequestDto;
-import com.productservice.controller.res.ProductListResponseDto;
-import com.productservice.controller.res.ProductResponseDto;
+import com.productservice.usecase.dto.ProductListResponseDto;
+import com.productservice.usecase.dto.ProductResponseDto;
 import com.productservice.usecase.ProductReadUseCase;
 import com.productservice.usecase.ProductWriteUseCase;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
 package com.paymentservice.usecase;
 
-import com.paymentservice.controller.res.PaymentMethodResponseDto;
+import com.paymentservice.usecase.dto.PaymentMethodResponseDto;
 import com.paymentservice.usecase.dto.RegisterPaymentMethodDto;
 
 public interface PaymentMethodUseCase {

@@ -1,9 +1,13 @@
 package com.deliveryservice.usecase.kafka;
 
+import com.deliveryservice.entity.DeliveryOutBox;
+import com.deliveryservice.repository.DeliveryOutBoxRepository;
 import com.deliveryservice.usecase.DeliveryUseCase;
 import com.deliveryservice.usecase.kafka.event.EventResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,7 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class DeliveryKafkaService {
-
+    @Value(value = "${producers.topic1}")
+    private String DELIVERY_TOPIC;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final DeliveryOutBoxRepository outBoxRepository;
     private final DeliveryUseCase deliveryUseCase;
     private final DeliveryKafkaProducer deliveryKafkaProducer;
 
@@ -23,6 +30,12 @@ public class DeliveryKafkaService {
     }
 
     public void occurDeliveryFailure(EventResult orderEvent) throws JsonProcessingException {
-        deliveryKafkaProducer.occurDeliveryFailure(orderEvent);
+        String json = objectMapper.writeValueAsString(orderEvent);
+        DeliveryOutBox outBox = DeliveryOutBox.builder()
+            .topic(DELIVERY_TOPIC)
+            .message(json)
+            .success(false)
+            .build();
+        outBoxRepository.save(outBox);
     }
 }

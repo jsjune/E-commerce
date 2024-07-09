@@ -378,7 +378,5 @@ class OrderEventConsumerTest extends IntegrationTestSupport {
         assertEquals(findProductOrder.getOrderLines().get(0).getOrderLineStatus(), OrderLineStatus.CANCELLED);
         assertEquals(findProductOrder.getTotalPrice(), 0);
         assertEquals(findProductOrder.getTotalDiscount(), 0);
-
-
     }
 }

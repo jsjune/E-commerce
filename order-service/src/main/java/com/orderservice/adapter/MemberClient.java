@@ -1,7 +1,7 @@
 package com.orderservice.adapter;
 
-import com.orderservice.adapter.res.CartDto;
-import com.orderservice.adapter.res.MemberDto;
+import com.orderservice.usecase.dto.CartDto;
+import com.orderservice.usecase.dto.MemberDto;
 import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.DeleteMapping;

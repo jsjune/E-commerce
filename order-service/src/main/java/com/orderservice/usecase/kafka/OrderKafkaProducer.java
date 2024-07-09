@@ -51,23 +51,6 @@ public class OrderKafkaProducer {
     public String SUBMIT_ORDER_CART_TOPIC;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final KafkaTemplate<String, String> kafkaTemplate;
-    private final OrderOutBoxRepository outBoxRepository;
-    private final ProductOrderRepository productOrderRepository;
-    private final OrderLineRepository orderLineRepository;
-    private final KafkaHealthIndicator kafkaHealthIndicator;
-    private final OrderRollbackService orderRollbackService;
-
-    @Transactional
-    public void occurPaymentFailure(ProductOrderEvent productOrderEvent)
-        throws JsonProcessingException {
-        String json = objectMapper.writeValueAsString(productOrderEvent);
-        OrderOutBox outBox = OrderOutBox.builder()
-            .topic(PAYMENT_TOPIC)
-            .message(json)
-            .success(false)
-            .build();
-        outBoxRepository.save(outBox);
-    }
 
     public void occurDeliveryEvent(EventResult productOrderEvent)
         throws JsonProcessingException {
@@ -81,17 +64,6 @@ public class OrderKafkaProducer {
                 log.error("[delivery_request] failed to send: {}", productOrderEvent, ex);
             }
         });
-    }
-
-    @Transactional
-    public void occurDeliveryFailure(EventResult eventResult) throws JsonProcessingException {
-        String json = objectMapper.writeValueAsString(eventResult);
-        OrderOutBox outBox = OrderOutBox.builder()
-            .topic(DELIVERY_TOPIC)
-            .message(json)
-            .success(false)
-            .build();
-        outBoxRepository.save(outBox);
     }
 
     public void occurProductEvent(EventResult eventResult)
@@ -109,17 +81,6 @@ public class OrderKafkaProducer {
 
     }
 
-    @Transactional
-    public void occurProductFailure(EventResult eventResult) throws JsonProcessingException {
-        String json = objectMapper.writeValueAsString(eventResult);
-        OrderOutBox outBox = OrderOutBox.builder()
-            .topic(PRODUCT_TOPIC)
-            .message(json)
-            .success(false)
-            .build();
-        outBoxRepository.save(outBox);
-    }
-
     public void occurRollbackPaymentEvent(EventResult eventResult) throws JsonProcessingException {
         String json = objectMapper.writeValueAsString(eventResult);
         CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(
@@ -131,18 +92,6 @@ public class OrderKafkaProducer {
                 log.error("[rollback_payment_request] failed to send: {}", eventResult, ex);
             }
         });
-    }
-
-    @Transactional
-    public void occurRollbackPaymentFailure(EventResult eventResult)
-        throws JsonProcessingException {
-        String json = objectMapper.writeValueAsString(eventResult);
-        OrderOutBox outBox = OrderOutBox.builder()
-            .topic(ROLLBACK_PAYMENT_TOPIC)
-            .message(json)
-            .success(false)
-            .build();
-        outBoxRepository.save(outBox);
     }
 
     public void occurRollbackDeliveryEvent(EventResult eventResult) throws JsonProcessingException {
@@ -158,92 +107,6 @@ public class OrderKafkaProducer {
         });
     }
 
-    @Transactional
-    public void occurRollbackDeliveryFailure(EventResult eventResult)
-        throws JsonProcessingException {
-        String json = objectMapper.writeValueAsString(eventResult);
-        OrderOutBox outBox = OrderOutBox.builder()
-            .topic(ROLLBACK_DELIVERY_TOPIC)
-            .message(json)
-            .success(false)
-            .build();
-        outBoxRepository.save(outBox);
-    }
-
-    @Scheduled(fixedRate = 30000)
-    @Transactional
-    public void retry() throws JsonProcessingException {
-        log.info("kafka health check and retrying...");
-        List<OrderOutBox> findOrderOutBoxes = outBoxRepository.findAllBySuccessFalseNoOffset(
-            LocalDateTime.now(), 5);
-        for (OrderOutBox outBox : findOrderOutBoxes) {
-            if (kafkaHealthIndicator.isKafkaUp()) {
-                processOutboxMessage(outBox);
-                outBoxRepository.delete(outBox);
-            }
-        }
-    }
-
-    private void processOutboxMessage(OrderOutBox outBox) throws JsonProcessingException {
-        kafkaTemplate.send(outBox.getTopic(), outBox.getMessage());
-        if (outBox.getTopic().equals(PAYMENT_TOPIC)) {
-            processPaymentEvent(outBox);
-        } else if (outBox.getTopic().equals(DELIVERY_TOPIC)) {
-            processDeliveryEvent(outBox);
-        } else if (outBox.getTopic().equals(PRODUCT_TOPIC)) {
-            processProductEvent(outBox);
-        } else if (outBox.getTopic().equals(ROLLBACK_PAYMENT_TOPIC) || outBox.getTopic()
-            .equals(ROLLBACK_DELIVERY_TOPIC)) {
-            processRollbackEvent(outBox);
-        }
-    }
-
-    private void processPaymentEvent(OrderOutBox outBox) throws JsonProcessingException {
-        ProductOrderEvent result = objectMapper.readValue(outBox.getMessage(),
-            ProductOrderEvent.class);
-        Optional<ProductOrder> findProductOrder = productOrderRepository.findById(
-            result.productOrderId());
-        if (findProductOrder.isPresent()) {
-            ProductOrder productOrder = findProductOrder.get();
-            long finalTotalPrice = 0L;
-            long totalDiscount = 0L;
-            for (OrderLine orderLine : productOrder.getOrderLines()) {
-                totalDiscount += orderLine.getDiscount();
-                finalTotalPrice += orderLine.getPrice() * orderLine.getQuantity();
-            }
-            productOrder.finalizeOrder(ProductOrderStatus.COMPLETED, finalTotalPrice,
-                totalDiscount);
-            productOrderRepository.save(productOrder);
-        }
-    }
-
-    private void processDeliveryEvent(OrderOutBox outBox) throws JsonProcessingException {
-        EventResult result = objectMapper.readValue(outBox.getMessage(), EventResult.class);
-        Optional<OrderLine> findOrderLine = orderLineRepository.findById(
-            result.orderLine().orderLineId());
-        if (findOrderLine.isPresent()) {
-            OrderLine orderLine = findOrderLine.get();
-            orderLine.assignPayment(result.paymentId());
-            orderLineRepository.save(orderLine);
-        }
-    }
-
-    private void processProductEvent(OrderOutBox outBox) throws JsonProcessingException {
-        EventResult result = objectMapper.readValue(outBox.getMessage(), EventResult.class);
-        Optional<OrderLine> findOrderLine = orderLineRepository.findById(
-            result.orderLine().orderLineId());
-        if (findOrderLine.isPresent()) {
-            OrderLine orderLine = findOrderLine.get();
-            orderLine.assignDelivery(result.deliveryId());
-            orderLineRepository.save(orderLine);
-        }
-    }
-
-    private void processRollbackEvent(OrderOutBox outBox) throws JsonProcessingException {
-        EventResult result = objectMapper.readValue(outBox.getMessage(), EventResult.class);
-        orderRollbackService.rollbackOrder(result.mapToOrderRollbackDto());
-    }
-
     public void occurSubmitOrderFromProductEvent(SubmitOrderEvent submitEvent) throws JsonProcessingException {
         String json = objectMapper.writeValueAsString(submitEvent);
         CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(SUBMIT_ORDER_PRODUCT_TOPIC,
@@ -255,17 +118,6 @@ public class OrderKafkaProducer {
                 log.error("[order_submit_request] failed to send: {}", submitEvent, ex);
             }
         });
-    }
-
-    public void occurSubmitOrderFromProductEventFailure(SubmitOrderEvent submitEvent)
-        throws JsonProcessingException {
-        String json = objectMapper.writeValueAsString(submitEvent);
-        OrderOutBox outBox = OrderOutBox.builder()
-            .topic(SUBMIT_ORDER_PRODUCT_TOPIC)
-            .message(json)
-            .success(false)
-            .build();
-        outBoxRepository.save(outBox);
     }
 
     public void occurSubmitOrderFromCartEvent(SubmitOrderEvents submitEvents)
@@ -282,20 +134,9 @@ public class OrderKafkaProducer {
         });
     }
 
-    public void occurSubmitOrderFromCartEventFailure(SubmitOrderEvents submitEvents)
-        throws JsonProcessingException {
-        String json = objectMapper.writeValueAsString(submitEvents);
-        OrderOutBox outBox = OrderOutBox.builder()
-            .topic(SUBMIT_ORDER_CART_TOPIC)
-            .message(json)
-            .success(false)
-            .build();
-        outBoxRepository.save(outBox);
-    }
-
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void submitOrderFromCartComplete(ProductOrderEvent productOrderEvent)
+    public void submitOrderComplete(ProductOrderEvent productOrderEvent)
         throws JsonProcessingException {
         String json = objectMapper.writeValueAsString(productOrderEvent);
         CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(PAYMENT_TOPIC,
@@ -305,6 +146,17 @@ public class OrderKafkaProducer {
                 log.info("[payment_request] sent: {}", productOrderEvent);
             } else {
                 log.error("[payment_request] failed to send: {}", productOrderEvent, ex);
+            }
+        });
+    }
+
+    public void occurOutBoxEvent(String topic, String message) {
+        CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, message);
+        future.whenComplete((result, ex) -> {
+            if (ex == null) {
+                log.info("[order_submit_request] sent: {}", message);
+            } else {
+                log.error("[order_submit_request] failed to send: {}", message, ex);
             }
         });
     }

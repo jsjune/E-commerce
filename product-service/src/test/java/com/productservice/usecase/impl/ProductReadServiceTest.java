@@ -8,16 +8,14 @@ import static org.mockito.Mockito.when;
 
 import com.productservice.IntegrationTestSupport;
 import com.productservice.adapter.MemberClient;
-import com.productservice.adapter.dto.MemberDto;
-import com.productservice.controller.res.ProductListResponseDto;
-import com.productservice.controller.res.ProductResponseDto;
+import com.productservice.usecase.dto.MemberDto;
+import com.productservice.usecase.dto.ProductListResponseDto;
+import com.productservice.usecase.dto.ProductResponseDto;
 import com.productservice.entity.Product;
 import com.productservice.entity.ProductImage;
 import com.productservice.entity.Seller;
 import com.productservice.repository.ProductRepository;
 import com.productservice.usecase.ProductReadUseCase;
-import com.productservice.utils.error.ErrorCode;
-import com.productservice.utils.error.GlobalException;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,7 +66,7 @@ class ProductReadServiceTest extends IntegrationTestSupport {
         ProductListResponseDto response = productReadUseCase.getProducts(pageable);
 
         // then
-        assertEquals(response.getProducts().size(), products.size());
+        assertEquals(response.products().size(), products.size());
     }
 
     @DisplayName("상품 조회시 존재하지 않는 경우 null")
@@ -101,8 +99,8 @@ class ProductReadServiceTest extends IntegrationTestSupport {
         ProductResponseDto response = productReadUseCase.getProduct(product.getId());
 
         // then
-        assertEquals(response.getName(), product.getName());
-        assertEquals(response.getPhoneNumber(), member.phoneNumber());
+        assertEquals(response.name(), product.getName());
+        assertEquals(response.phoneNumber(), member.phoneNumber());
 
     }
 

@@ -1,11 +1,11 @@
 package com.productservice.usecase.impl;
 
-import com.productservice.controller.internal.res.ProductDto;
+import com.productservice.usecase.dto.ProductDto;
 import com.productservice.utils.AesUtil;
 import com.productservice.utils.ExceptionWrapper;
-import com.productservice.controller.res.ProductListDto;
-import com.productservice.controller.res.ProductListResponseDto;
-import com.productservice.controller.res.ProductResponseDto;
+import com.productservice.usecase.dto.ProductListDto;
+import com.productservice.usecase.dto.ProductListResponseDto;
+import com.productservice.usecase.dto.ProductResponseDto;
 import com.productservice.entity.Product;
 import com.productservice.entity.ProductImage;
 import com.productservice.repository.ProductRepository;
@@ -54,7 +54,11 @@ public class ProductReadService implements ProductReadUseCase {
         List<ProductListDto> response = products.getContent().stream()
             .map(ExceptionWrapper.wrap(this::mapToProductResponse))
             .collect(Collectors.toList());
-        return new ProductListResponseDto(response, products.getNumber(), products.getTotalPages());
+        return ProductListResponseDto.builder()
+            .products(response)
+            .currentPage(products.getNumber())
+            .totalPage(products.getTotalPages())
+            .build();
     }
 
     @Override

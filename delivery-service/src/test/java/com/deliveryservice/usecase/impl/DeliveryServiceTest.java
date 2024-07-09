@@ -40,18 +40,18 @@ class DeliveryServiceTest extends IntegrationTestSupport {
         // given
         long memberId = 1L;
         AddressRequestDto request = getAddressRequest(true);
-        deliveryAddressUseCase.registerAddress(memberId, request);
+        deliveryAddressUseCase.registerAddress(memberId, request.mapToCommand());
         DeliveryAddress findDeliveryAddress = deliveryAddressRepository.findAll().stream().findFirst()
             .get();
-
-        // when
         ProcessDelivery command = ProcessDelivery.builder()
             .deliveryAddressId(findDeliveryAddress.getId())
             .orderLineId(1L)
             .productId(1L)
             .productName("상품1")
-            .quantity(1)
+            .quantity(1L)
             .build();
+
+        // when
         Long deliveryId = deliveryUseCase.processDelivery(command);
         Delivery result = deliveryRepository.findById(deliveryId).orElse(null);
 

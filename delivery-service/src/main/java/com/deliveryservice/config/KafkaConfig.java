@@ -6,6 +6,7 @@ import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
@@ -16,7 +17,8 @@ import org.springframework.kafka.core.ProducerFactory;
 @Configuration
 public class KafkaConfig {
 
-    private static final String BOOTSTRAP_SERVERS = "localhost:9092";
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String BOOTSTRAP_SERVERS;
 
     @Bean
     public KafkaAdmin kafkaAdmin() {

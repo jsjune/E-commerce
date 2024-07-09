@@ -1,7 +1,7 @@
 package com.deliveryservice.usecase;
 
 
-import com.deliveryservice.controller.res.DeliveryAddressListResponseDto;
+import com.deliveryservice.usecase.dto.DeliveryAddressListResponseDto;
 import com.deliveryservice.usecase.dto.RegisterAddress;
 
 public interface DeliveryAddressUseCase {

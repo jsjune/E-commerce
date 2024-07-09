@@ -3,10 +3,10 @@ package com.orderservice.usecase.impl;
 import com.ecommerce.common.cache.CartListDto;
 import com.orderservice.adapter.MemberClient;
 import com.orderservice.adapter.ProductClient;
-import com.orderservice.adapter.res.CartDto;
-import com.orderservice.adapter.res.ProductDto;
-import com.orderservice.controller.res.OrderDetailResponseDto;
-import com.orderservice.controller.res.OrderListResponseDto;
+import com.orderservice.usecase.dto.CartDto;
+import com.orderservice.usecase.dto.ProductDto;
+import com.orderservice.usecase.dto.OrderDetailResponseDto;
+import com.orderservice.usecase.dto.OrderListResponseDto;
 import com.orderservice.entity.OrderLine;
 import com.orderservice.entity.OrderLineStatus;
 import com.orderservice.entity.ProductOrder;
@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 public class OrderReadService implements OrderReadUseCase {
+
     private final ProductOrderRepository productOrderRepository;
     private final CircuitBreakerFactory circuitBreakerFactory;
     private final RedisUtils redisUtils;
@@ -133,6 +134,9 @@ public class OrderReadService implements OrderReadUseCase {
     @Override
     public OrderListResponseDto getOrders(Long memberId) {
         List<ProductOrder> findProductOrder = productOrderRepository.findAllByMemberId(memberId);
-        return new OrderListResponseDto(findProductOrder);
+        return new OrderListResponseDto(
+            findProductOrder.stream()
+                .map(OrderDetailResponseDto::new).toList()
+        );
     }
 }

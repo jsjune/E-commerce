@@ -1,5 +1,8 @@
 package com.productservice.usecase.kafka.event;
 
+import lombok.Builder;
+
+@Builder
 public record OrderLineEvent(
     Long orderLineId,
     Long productId,

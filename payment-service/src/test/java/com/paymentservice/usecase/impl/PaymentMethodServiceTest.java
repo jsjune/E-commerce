@@ -4,8 +4,7 @@ package com.paymentservice.usecase.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.paymentservice.IntegrationTestSupport;
-import com.paymentservice.controller.req.PaymentMethodRequestDto;
-import com.paymentservice.controller.res.PaymentMethodResponseDto;
+import com.paymentservice.usecase.dto.PaymentMethodResponseDto;
 import com.paymentservice.entity.PaymentMethod;
 import com.paymentservice.entity.PaymentType;
 import com.paymentservice.repository.PaymentMethodRepository;
@@ -46,8 +45,8 @@ class PaymentMethodServiceTest extends IntegrationTestSupport {
             memberId);
 
         // then
-        assertEquals(result.getPaymentMethods().size(), 2);
-        assertEquals(result.getPaymentMethods().get(0).getBank(), bank);
+        assertEquals(result.paymentMethods().size(), 2);
+        assertEquals(result.paymentMethods().get(0).bank(), bank);
 
     }
 

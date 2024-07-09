@@ -4,21 +4,16 @@ import com.ecommerce.common.cache.CartListDto;
 import com.orderservice.adapter.DeliveryClient;
 import com.orderservice.adapter.MemberClient;
 import com.orderservice.adapter.ProductClient;
-import com.orderservice.adapter.res.CartDto;
-import com.orderservice.adapter.res.ProductDto;
-import com.orderservice.controller.res.OrderDetailResponseDto;
-import com.orderservice.entity.OrderLine;
-import com.orderservice.entity.OrderLineStatus;
+import com.orderservice.usecase.dto.CartDto;
+import com.orderservice.usecase.dto.ProductDto;
 import com.orderservice.entity.ProductOrder;
-import com.orderservice.entity.ProductOrderStatus;
 import com.orderservice.repository.OrderLineRepository;
 import com.orderservice.usecase.OrderWriteUseCase;
 import com.orderservice.usecase.dto.OrderDtoFromCart;
 import com.orderservice.usecase.dto.OrderDtoFromProduct;
-import com.orderservice.usecase.dto.RegisterOrderFromCartDto;
-import com.orderservice.usecase.dto.RegisterOrderFromProductDto;
 import com.orderservice.usecase.kafka.KafkaHealthIndicator;
 import com.orderservice.usecase.kafka.OrderKafkaProducer;
+import com.orderservice.usecase.kafka.OrderKafkaService;
 import com.orderservice.usecase.kafka.event.ProductInfoEvent;
 import com.orderservice.usecase.kafka.event.SubmitOrderEvent;
 import com.orderservice.usecase.kafka.event.SubmitOrderEvents;
@@ -47,6 +42,7 @@ public class OrderWriteService implements OrderWriteUseCase {
     private final CircuitBreakerFactory circuitBreakerFactory;
     private final RedisUtils redisUtils;
     private final KafkaHealthIndicator kafkaHealthIndicator;
+    private final OrderKafkaService orderKafkaService;
 
     @Override
     public void submitOrderFromProduct(Long memberId, OrderDtoFromProduct command) {
@@ -59,7 +55,7 @@ public class OrderWriteService implements OrderWriteUseCase {
             if (kafkaHealthIndicator.isKafkaUp()) {
                 orderKafkaProducer.occurSubmitOrderFromProductEvent(submitEvent);
             } else {
-                orderKafkaProducer.occurSubmitOrderFromProductEventFailure(submitEvent);
+                orderKafkaService.occurSubmitOrderFromProductEventFailure(submitEvent);
             }
         } catch (Exception e) {
             log.error("Failed to send payment event", e);
@@ -98,7 +94,7 @@ public class OrderWriteService implements OrderWriteUseCase {
             if (kafkaHealthIndicator.isKafkaUp()) {
                 orderKafkaProducer.occurSubmitOrderFromCartEvent(submitOrderEvents);
             } else {
-                orderKafkaProducer.occurSubmitOrderFromCartEventFailure(submitOrderEvents);
+                orderKafkaService.occurSubmitOrderFromCartEventFailure(submitOrderEvents);
             }
             memberClient.clearCart(memberId, command.cartIds());
         } catch (Exception e) {

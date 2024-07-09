@@ -1,7 +1,7 @@
 package com.productservice.usecase.impl;
 
 import com.productservice.adapter.MemberClient;
-import com.productservice.adapter.dto.MemberDto;
+import com.productservice.usecase.dto.MemberDto;
 import com.productservice.entity.Seller;
 import com.productservice.usecase.dto.RegisterProductDto;
 import com.productservice.utils.AesUtil;
@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -85,7 +86,7 @@ public class ProductWriteService implements ProductWriteUseCase {
                 return -1;
             }
             product.decreaseStock(quantity);
-            return 0;
+            return 1;
         }
         return -1;
     }

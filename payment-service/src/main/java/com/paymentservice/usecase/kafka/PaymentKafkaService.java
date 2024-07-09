@@ -1,10 +1,14 @@
 package com.paymentservice.usecase.kafka;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.paymentservice.entity.PaymentOutBox;
+import com.paymentservice.repository.PaymentOutBoxRepository;
 import com.paymentservice.usecase.PaymentUseCase;
 import com.paymentservice.usecase.kafka.event.EventResult;
 import com.paymentservice.usecase.kafka.event.ProductOrderEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,7 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @RequiredArgsConstructor
 public class PaymentKafkaService {
-
+    @Value(value = "${producers.topic1}")
+    public String PAYMENT_TOPIC;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final PaymentOutBoxRepository outBoxRepository;
     private final PaymentUseCase paymentUseCase;
     private final PaymentKafkaProducer paymentKafkaProducer;
 
@@ -24,6 +31,12 @@ public class PaymentKafkaService {
     }
 
     public void occurPaymentFailure(ProductOrderEvent orderEvent) throws JsonProcessingException {
-        paymentKafkaProducer.occurPaymentFailure(orderEvent);
+        String json = objectMapper.writeValueAsString(orderEvent);
+        PaymentOutBox outBox = PaymentOutBox.builder()
+            .topic(PAYMENT_TOPIC)
+            .message(json)
+            .success(false)
+            .build();
+        outBoxRepository.save(outBox);
     }
 }

@@ -6,8 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.deliveryservice.IntegrationTestSupport;
-import com.deliveryservice.controller.req.AddressRequestDto;
-import com.deliveryservice.controller.res.DeliveryAddressListResponseDto;
+import com.deliveryservice.usecase.dto.DeliveryAddressListResponseDto;
 import com.deliveryservice.entity.DeliveryAddress;
 import com.deliveryservice.repository.DeliveryAddressRepository;
 import com.deliveryservice.usecase.DeliveryAddressUseCase;
@@ -47,9 +46,9 @@ class DeliveryAddressServiceTest extends IntegrationTestSupport {
             memberId);
 
         // then
-        assertEquals(result.getDeliveryAddresses().size(), 2);
-        assertEquals(result.getDeliveryAddresses().get(0).getStreet(), command2.street());
-        assertTrue(result.getDeliveryAddresses().get(0).isMainAddress());
+        assertEquals(result.deliveryAddresses().size(), 2);
+        assertEquals(result.deliveryAddresses().get(0).street(), command2.street());
+        assertTrue(result.deliveryAddresses().get(0).isMainAddress());
     }
 
     @DisplayName("대표 배송지가 있는데 다시 대표 배송지로 등록할 경우")

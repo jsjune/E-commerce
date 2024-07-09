@@ -11,7 +11,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableJpaAuditing
 @EnableDiscoveryClient
 @EnableFeignClients
-@EnableScheduling
 public class PaymentServiceApplication {
 
     public static void main(String[] args) {

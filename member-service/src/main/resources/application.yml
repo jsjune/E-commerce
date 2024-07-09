@@ -1,5 +1,5 @@
 spring.application.name: member-service
-server.port: 8081
+server.port: 0
 
 spring:
   config:

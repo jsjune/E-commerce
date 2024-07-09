@@ -6,11 +6,11 @@ import static org.mockito.Mockito.when;
 import com.orderservice.IntegrationTestSupport;
 import com.orderservice.adapter.MemberClient;
 import com.orderservice.adapter.ProductClient;
-import com.orderservice.adapter.res.CartDto;
-import com.orderservice.adapter.res.MemberDto;
-import com.orderservice.adapter.res.ProductDto;
-import com.orderservice.controller.res.OrderDetailResponseDto;
-import com.orderservice.controller.res.OrderListResponseDto;
+import com.orderservice.usecase.dto.CartDto;
+import com.orderservice.usecase.dto.MemberDto;
+import com.orderservice.usecase.dto.ProductDto;
+import com.orderservice.usecase.dto.OrderDetailResponseDto;
+import com.orderservice.usecase.dto.OrderListResponseDto;
 import com.orderservice.entity.OrderLine;
 import com.orderservice.entity.OrderLineStatus;
 import com.orderservice.entity.ProductOrder;
@@ -62,10 +62,10 @@ class OrderReadServiceTest extends IntegrationTestSupport {
             member.memberId(), command);
 
         // then
-        assertEquals(result.getOrderLines().size(), 1);
-        assertEquals(result.getOrderLines().get(0).getPrice(), product.price());
-        assertEquals(result.getOrderLines().get(0).getQuantity(), quantity);
-        assertEquals(result.getTotalPrice(), product.price() * quantity);
+        assertEquals(result.orderLines().size(), 1);
+        assertEquals(result.orderLines().get(0).price(), product.price());
+        assertEquals(result.orderLines().get(0).quantity(), quantity);
+        assertEquals(result.totalPrice(), product.price() * quantity);
     }
 
     @DisplayName("장바구니에서 주문서 작성")
@@ -89,11 +89,11 @@ class OrderReadServiceTest extends IntegrationTestSupport {
             member.memberId(), command);
 
         // then
-        assertEquals(result.getOrderLines().size(), 2);
-        assertEquals(result.getOrderLines().get(0).getPrice(), product1.price());
-        assertEquals(result.getOrderLines().get(0).getQuantity(), carts.get(0).quantity());
-        assertEquals(result.getOrderLines().get(1).getPrice(), product2.price());
-        assertEquals(result.getOrderLines().get(1).getQuantity(), carts.get(1).quantity());
+        assertEquals(result.orderLines().size(), 2);
+        assertEquals(result.orderLines().get(0).price(), product1.price());
+        assertEquals(result.orderLines().get(0).quantity(), carts.get(0).quantity());
+        assertEquals(result.orderLines().get(1).price(), product2.price());
+        assertEquals(result.orderLines().get(1).quantity(), carts.get(1).quantity());
 
     }
 
@@ -120,8 +120,8 @@ class OrderReadServiceTest extends IntegrationTestSupport {
         OrderListResponseDto result = orderReadUseCase.getOrders(memberId);
 
         // then
-        assertEquals(result.getOrders().size(), 1);
-        assertEquals(result.getOrders().get(0).getOrderLines().size(), 3);
+        assertEquals(result.orders().size(), 1);
+        assertEquals(result.orders().get(0).orderLines().size(), 3);
 
     }
 
@@ -156,10 +156,10 @@ class OrderReadServiceTest extends IntegrationTestSupport {
         OrderDetailResponseDto result = orderReadUseCase.getOrder(memberId, productOrder.getId());
 
         // then
-        assertEquals(result.getOrderLines().size(), 3);
-        assertEquals(result.getTotalPrice(), 14000);
-        assertEquals(result.getOrderLines().get(0).getPrice(), orderLines.get(0).getPrice());
-        assertEquals(result.getOrderLines().get(1).getPrice(), orderLines.get(1).getPrice());
+        assertEquals(result.totalPrice(), 14000);
+        assertEquals(result.orderLines().size(), 3);
+        assertEquals(result.orderLines().get(0).price(), orderLines.get(0).getPrice());
+        assertEquals(result.orderLines().get(1).price(), orderLines.get(1).getPrice());
     }
 
     private static ProductDto registeredProduct(Long productId, Long price) {

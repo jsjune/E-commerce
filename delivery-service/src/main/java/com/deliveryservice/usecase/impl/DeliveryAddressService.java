@@ -1,8 +1,8 @@
 package com.deliveryservice.usecase.impl;
 
 
-import com.deliveryservice.controller.res.DeliveryAddressListDto;
-import com.deliveryservice.controller.res.DeliveryAddressListResponseDto;
+import com.deliveryservice.usecase.dto.DeliveryAddressListDto;
+import com.deliveryservice.usecase.dto.DeliveryAddressListResponseDto;
 import com.deliveryservice.entity.Address;
 import com.deliveryservice.entity.DeliveryAddress;
 import com.deliveryservice.repository.DeliveryAddressRepository;

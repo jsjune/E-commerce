@@ -6,7 +6,7 @@ import static org.mockito.Mockito.when;
 
 import com.productservice.IntegrationTestSupport;
 import com.productservice.adapter.MemberClient;
-import com.productservice.adapter.dto.MemberDto;
+import com.productservice.usecase.dto.MemberDto;
 import com.productservice.entity.Product;
 import com.productservice.repository.ProductRepository;
 import com.productservice.usecase.ProductWriteUseCase;
@@ -53,6 +53,22 @@ class ProductWriteServiceTest extends IntegrationTestSupport {
         assertEquals(result.getTotalStock(), 100);
         assertEquals(result.getSoldQuantity(), 0);
 
+    }
+
+    @DisplayName("주문시 재고가 없을때")
+    @Test
+    void none_stock() {
+        // given
+        Product product = Product.builder().totalStock(1L).soldQuantity(99L).build();
+        productRepository.save(product);
+
+        // when
+        int status = productWriteUseCase.decreaseStock(product.getId(), 10L);
+        Product result = productRepository.findById(product.getId()).get();
+
+        // then
+        assertEquals(status, -1);
+        assertEquals(result.getTotalStock(), 1);
     }
 
     @DisplayName("주문시 재고 감소")

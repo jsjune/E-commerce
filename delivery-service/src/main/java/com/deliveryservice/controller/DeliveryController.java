@@ -2,7 +2,7 @@ package com.deliveryservice.controller;
 
 
 import com.deliveryservice.controller.req.AddressRequestDto;
-import com.deliveryservice.controller.res.DeliveryAddressListResponseDto;
+import com.deliveryservice.usecase.dto.DeliveryAddressListResponseDto;
 import com.deliveryservice.usecase.DeliveryAddressUseCase;
 import com.deliveryservice.utils.Response;
 import lombok.RequiredArgsConstructor;

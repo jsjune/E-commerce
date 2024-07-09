@@ -1,7 +1,9 @@
 package com.deliveryservice.controller.req;
 
 import com.deliveryservice.usecase.dto.RegisterAddress;
+import lombok.Builder;
 
+@Builder
 public record AddressRequestDto(
     String street,
     String detailAddress,

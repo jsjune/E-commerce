@@ -2,7 +2,7 @@ package com.paymentservice.controller;
 
 
 import com.paymentservice.controller.req.PaymentMethodRequestDto;
-import com.paymentservice.controller.res.PaymentMethodResponseDto;
+import com.paymentservice.usecase.dto.PaymentMethodResponseDto;
 import com.paymentservice.usecase.PaymentMethodUseCase;
 import com.paymentservice.utils.Response;
 import lombok.RequiredArgsConstructor;

@@ -1,11 +1,8 @@
 package com.orderservice.usecase;
 
 
-import com.orderservice.controller.res.OrderDetailResponseDto;
 import com.orderservice.usecase.dto.OrderDtoFromCart;
 import com.orderservice.usecase.dto.OrderDtoFromProduct;
-import com.orderservice.usecase.dto.RegisterOrderFromCartDto;
-import com.orderservice.usecase.dto.RegisterOrderFromProductDto;
 
 public interface OrderWriteUseCase {
 
