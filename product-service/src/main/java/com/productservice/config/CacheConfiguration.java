@@ -9,6 +9,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -36,8 +37,7 @@ public class CacheConfiguration {
 
         RedisCacheConfiguration productsCacheConfig = RedisCacheConfiguration.defaultCacheConfig()
             .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer()))
-            .serializeValuesWith(
-                SerializationPair.fromSerializer(new JdkSerializationRedisSerializer()))
+            .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()))
             .entryTtl(Duration.ofMinutes(3));
 
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();

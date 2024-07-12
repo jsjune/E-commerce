@@ -53,7 +53,7 @@ public class ProductEventConsumerTest extends IntegrationTestSupport {
                 .productId(product.getId())
                 .quantity(3L)
                 .build())
-            .status(0)
+            .status(1)
             .build();
         String json = objectMapper.writeValueAsString(eventResult);
         ConsumerRecord<String, String> record = new ConsumerRecord<>("product_request", 0, 0, null, json);

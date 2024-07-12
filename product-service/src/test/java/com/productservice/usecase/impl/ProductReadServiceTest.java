@@ -2,20 +2,19 @@ package com.productservice.usecase.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.productservice.IntegrationTestSupport;
 import com.productservice.adapter.MemberClient;
-import com.productservice.usecase.dto.MemberDto;
-import com.productservice.usecase.dto.ProductListResponseDto;
-import com.productservice.usecase.dto.ProductResponseDto;
 import com.productservice.entity.Product;
 import com.productservice.entity.ProductImage;
 import com.productservice.entity.Seller;
 import com.productservice.repository.ProductRepository;
+import com.productservice.testConfig.IntegrationTestSupport;
 import com.productservice.usecase.ProductReadUseCase;
+import com.productservice.usecase.dto.MemberDto;
+import com.productservice.usecase.dto.ProductListResponseDto;
+import com.productservice.usecase.dto.ProductResponseDto;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,10 +41,12 @@ class ProductReadServiceTest extends IntegrationTestSupport {
         productRepository.deleteAllInBatch();
     }
 
-    @DisplayName("상품 목록 조회")
+    @DisplayName("상품 검색 조회")
     @Test
     void get_products() throws Exception {
         // given
+        String type = "name";
+        String keyword = "ab";
         MemberDto member = registerMember("331672794abf3e48bea635a008d36aec");
         Seller seller = new Seller(member.memberId(), member.phoneNumber(), null);
         List<Product> products = new ArrayList<>();
@@ -63,7 +64,7 @@ class ProductReadServiceTest extends IntegrationTestSupport {
 
         // when
         when(memberClient.getMemberInfo(any())).thenReturn(member);
-        ProductListResponseDto response = productReadUseCase.getProducts(pageable);
+        ProductListResponseDto response = productReadUseCase.getProducts(type, keyword, pageable);
 
         // then
         assertEquals(response.products().size(), products.size());

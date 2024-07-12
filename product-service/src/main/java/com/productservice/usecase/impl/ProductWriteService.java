@@ -20,14 +20,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.redisson.api.RedissonClient;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class ProductWriteService implements ProductWriteUseCase {
 
     private final MemberClient memberClient;
@@ -37,9 +40,10 @@ public class ProductWriteService implements ProductWriteUseCase {
     private static final String UPLOAD_FOLDER = "images";
 
     @Override
+    @CacheEvict(cacheNames = "products", allEntries = true)
     public void createProduct(Long memberId, RegisterProductDto command) throws Exception {
         MemberDto member = memberClient.getMemberInfo(memberId);
-        if(member == null) {
+        if (member == null) {
             throw new GlobalException(ErrorCode.MEMBER_NOT_FOUND);
         }
         List<ProductImage> images = new ArrayList<>();

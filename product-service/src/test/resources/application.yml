@@ -11,14 +11,23 @@ spring:
     driverClassName: org.h2.Driver
     username: sa
     password:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://localhost:3306/e_commerce_test?useSSL=false&allowPublicKeyRetrieval=true
+#    username: root
+#    password: 1234
 
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
   h2:
     console:

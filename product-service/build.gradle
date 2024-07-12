@@ -59,6 +59,11 @@ dependencies {
 
     implementation 'org.redisson:redisson-spring-boot-starter:3.27.2'
 
+    // https://mvnrepository.com/artifact/org.testcontainers/testcontainers
+    testImplementation 'org.testcontainers:testcontainers:1.19.7'
+    // https://mvnrepository.com/artifact/org.testcontainers/kafka
+    testImplementation 'org.testcontainers:kafka:1.19.7'
+
     // actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 

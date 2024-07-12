@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -40,7 +41,7 @@ public class ProductController {
     }
 
     @GetMapping
-    public Response<ProductListResponseDto> getProducts(Pageable pageable) {
-        return Response.success(HttpStatus.OK.value(), productReadUseCase.getProducts(pageable));
+    public Response<ProductListResponseDto> getProducts(@RequestParam String type, @RequestParam String keyword, Pageable pageable) {
+        return Response.success(HttpStatus.OK.value(), productReadUseCase.getProducts(type, keyword, pageable));
     }
 }

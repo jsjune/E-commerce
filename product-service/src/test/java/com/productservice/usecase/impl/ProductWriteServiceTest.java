@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.productservice.IntegrationTestSupport;
+import com.productservice.testConfig.IntegrationTestSupport;
 import com.productservice.adapter.MemberClient;
 import com.productservice.usecase.dto.MemberDto;
 import com.productservice.entity.Product;

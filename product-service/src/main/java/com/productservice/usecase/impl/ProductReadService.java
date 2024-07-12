@@ -10,12 +10,14 @@ import com.productservice.entity.Product;
 import com.productservice.entity.ProductImage;
 import com.productservice.repository.ProductRepository;
 import com.productservice.usecase.ProductReadUseCase;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,15 +51,20 @@ public class ProductReadService implements ProductReadUseCase {
     }
 
     @Override
-    public ProductListResponseDto getProducts(Pageable pageable) {
-        Page<Product> products = productRepository.findAll(pageable);
-        List<ProductListDto> response = products.getContent().stream()
+    @Cacheable(cacheNames = "products", key = "#type.concat(#keyword).concat(#pageable.pageNumber).concat(#pageable.sort.toString())")
+    public ProductListResponseDto getProducts(String type, String keyword, Pageable pageable) {
+        List<Product> products = productRepository.searchAll(type, keyword, pageable);
+        boolean hasNext = false;
+        if (products.size() > pageable.getPageSize()) {
+            hasNext = true;
+            products = products.subList(0, pageable.getPageSize());
+        }
+        List<ProductListDto> response = products.stream()
             .map(ExceptionWrapper.wrap(this::mapToProductResponse))
-            .collect(Collectors.toList());
+            .toList();
         return ProductListResponseDto.builder()
             .products(response)
-            .currentPage(products.getNumber())
-            .totalPage(products.getTotalPages())
+            .hasNext(hasNext)
             .build();
     }
 
@@ -68,6 +75,12 @@ public class ProductReadService implements ProductReadUseCase {
     }
 
     private ProductListDto mapToProductResponse(Product product) throws Exception {
+        Set<String> tags = product.getTags() != null ? new HashSet<>(product.getTags()) : new HashSet<>();
+        List<String> orgProductImages = product.getProductImages() != null ?
+            product.getProductImages().stream()
+                .map(ProductImage::getThumbnailUrl)
+                .toList()
+            : new ArrayList<>();
         return ProductListDto.builder()
             .productId(product.getId())
             .sellerId(product.getSeller().getSellerId())
@@ -76,10 +89,8 @@ public class ProductReadService implements ProductReadUseCase {
             .name(product.getName())
             .description(product.getDescription())
             .price(product.getPrice())
-            .tags(product.getTags())
-            .orgProductImages(product.getProductImages().stream()
-                .map(ProductImage::getThumbnailUrl)
-                .collect(Collectors.toList()))
+            .tags(tags)
+            .orgProductImages(orgProductImages)
             .build();
     }
 

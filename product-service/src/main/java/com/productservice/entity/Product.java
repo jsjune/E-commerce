@@ -9,6 +9,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.util.List;
 import java.util.Set;
 import lombok.AccessLevel;
@@ -23,6 +25,10 @@ import org.hibernate.annotations.BatchSize;
 @AllArgsConstructor
 @Builder
 @Getter
+@Table(indexes = {
+    @Index(name = "idx_name_id", columnList = "id, name"),
+    @Index(name = "idx_sold_quantity", columnList = "soldQuantity")
+})
 public class Product extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,7 +43,7 @@ public class Product extends BaseTimeEntity {
     @ElementCollection
     @CollectionTable(
         name = "product_tags",
-        indexes = @Index(name = "idx_tag", columnList = "tags")
+        indexes = @Index(name = "idx_tag_id", columnList = "tags, product_id")
     )
     @BatchSize(size = 100)
     private Set<String> tags;

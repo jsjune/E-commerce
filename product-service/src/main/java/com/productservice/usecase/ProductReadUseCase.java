@@ -8,7 +8,7 @@ public interface ProductReadUseCase {
 
     ProductResponseDto getProduct(Long productId) throws Exception;
 
-    ProductListResponseDto getProducts(Pageable pageable);
+    ProductListResponseDto getProducts(String type, String keyword, Pageable pageable);
 
     ProductDto findProductById(Long productId);
 }

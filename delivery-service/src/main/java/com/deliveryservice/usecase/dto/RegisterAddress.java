@@ -9,7 +9,7 @@ public record RegisterAddress(
     String zipCode,
     String alias,
     String receiver,
-    boolean isMainAddress
+    boolean mainAddress
 ) {
 
 }
