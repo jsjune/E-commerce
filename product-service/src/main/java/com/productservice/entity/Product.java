@@ -10,7 +10,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import java.util.List;
 import java.util.Set;
 import lombok.AccessLevel;
@@ -60,5 +59,9 @@ public class Product extends BaseTimeEntity {
     public void incrementStock(Long quantity) {
         this.totalStock += quantity;
         this.soldQuantity -= quantity;
+    }
+
+    public void assignImages(List<ProductImage> images) {
+        this.productImages = images;
     }
 }

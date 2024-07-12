@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import com.productservice.testConfig.IntegrationTestSupport;
 import com.productservice.adapter.MemberClient;
+import com.productservice.usecase.dto.ImageUploadEvent;
 import com.productservice.usecase.dto.MemberDto;
 import com.productservice.entity.Product;
 import com.productservice.repository.ProductRepository;
@@ -19,9 +20,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
 
-
+@RecordApplicationEvents
 class ProductWriteServiceTest extends IntegrationTestSupport {
 
     @Autowired
@@ -30,8 +34,8 @@ class ProductWriteServiceTest extends IntegrationTestSupport {
     private ProductRepository productRepository;
     @MockBean
     private MemberClient memberClient;
-    @MockBean
-    private S3Utils s3Utils;
+    @Autowired
+    private ApplicationEvents events;
 
     @BeforeEach
     void setUp() {
@@ -104,16 +108,15 @@ class ProductWriteServiceTest extends IntegrationTestSupport {
 
         // when
         when(memberClient.getMemberInfo(any())).thenReturn(member);
-        when(s3Utils.uploadThumbFile(any(), any())).thenReturn("imageUrl");
-        when(s3Utils.uploadFile(any(), any())).thenReturn("s_imageUrl");
         productWriteUseCase.createProduct(member.memberId(), command);
 
         // then
+        long count = events.stream(ImageUploadEvent.class).count();
+        assertEquals(count, 1);
         productRepository.findAll().stream().findFirst().ifPresent(product -> {
             assertEquals(product.getSeller().getCompany(), member.company());
             assertEquals(product.getName(), command.name());
             assertEquals(product.getTags().size(), command.tags().size());
-            assertEquals(product.getProductImages().size(), 1);
         });
 
     }

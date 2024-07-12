@@ -7,58 +7,58 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import javax.imageio.ImageIO;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class S3Utils {
     private final AmazonS3Client amazonS3Client;
     @Value("${cloud.aws.s3.bucket-name}")
     public String bucket;
 
-    public String uploadFile(MultipartFile file, String s3Path) {
+    public String uploadFile(InputStream inputStream, long contentLength, String contentType, String s3Path) {
         ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentLength(file.getSize());
-        objectMetadata.setContentType(file.getContentType());
+        objectMetadata.setContentLength(contentLength);
+        objectMetadata.setContentType(contentType);
 
-        try (InputStream inputStream = file.getInputStream()) {
+        try {
             amazonS3Client.putObject(new PutObjectRequest(bucket, s3Path, inputStream, objectMetadata)
                 .withCannedAcl(CannedAccessControlList.PublicRead));
             return amazonS3Client.getUrl(bucket, s3Path).toString();
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드 실패");
         }
     }
 
-    public String uploadThumbFile(MultipartFile file, String thumbS3Path) {
+    public String uploadThumbFile(InputStream inputStream, String contentType, String thumbS3Path) {
         try {
-            BufferedImage bufferImage = ImageIO.read(file.getInputStream());
+            BufferedImage bufferImage = ImageIO.read(inputStream);
             BufferedImage thumbnailImage = Thumbnails.of(bufferImage).size(400, 333).asBufferedImage();
 
             ByteArrayOutputStream thumbOutput = new ByteArrayOutputStream();
-            String imageType = file.getContentType();
-            ImageIO.write(thumbnailImage, imageType.substring(imageType.indexOf("/") + 1), thumbOutput);
+            ImageIO.write(thumbnailImage, contentType.substring(contentType.indexOf("/") + 1), thumbOutput);
 
             ObjectMetadata objectMetadata = new ObjectMetadata();
             byte[] thumbBytes = thumbOutput.toByteArray();
             objectMetadata.setContentLength(thumbBytes.length);
-            objectMetadata.setContentType(file.getContentType());
+            objectMetadata.setContentType(contentType);
 
             InputStream thumbStream = new ByteArrayInputStream(thumbBytes);
-            amazonS3Client.putObject(new PutObjectRequest(bucket, thumbS3Path, thumbStream, objectMetadata).withCannedAcl(CannedAccessControlList.PublicRead));
+            amazonS3Client.putObject(new PutObjectRequest(bucket, thumbS3Path, thumbStream, objectMetadata)
+                .withCannedAcl(CannedAccessControlList.PublicRead));
             return amazonS3Client.getUrl(bucket, thumbS3Path).toString();
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드 실패");
         }
     }
@@ -66,5 +66,4 @@ public class S3Utils {
     public void deleteFile(String s3Path) {
         amazonS3Client.deleteObject(bucket, s3Path);
     }
-
 }

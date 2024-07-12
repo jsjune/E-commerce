@@ -11,8 +11,8 @@ public record RegisterProductDto(
     String description,
     Long price,
     Long stock,
-    Set<String>tags,
-    List<MultipartFile>productImages
+    Set<String> tags,
+    List<MultipartFile> productImages
 ) {
 
 }
