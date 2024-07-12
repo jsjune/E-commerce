@@ -12,6 +12,7 @@ import com.memberservice.usecase.AuthUseCase;
 import com.memberservice.usecase.dto.LoginDto;
 import com.memberservice.usecase.dto.PasswordDto;
 import com.memberservice.usecase.dto.SignupDto;
+import com.memberservice.usecase.dto.SignupEmailEvent;
 import com.memberservice.usecase.dto.UserInfoDto;
 import com.memberservice.utils.AesUtil;
 import com.memberservice.utils.EmailValidator;
@@ -19,6 +20,7 @@ import com.memberservice.utils.error.ErrorCode;
 import com.memberservice.utils.error.GlobalException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -37,6 +39,7 @@ public class AuthService implements AuthUseCase {
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
     private final AesUtil aesUtil;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public void signup(SignupDto command) throws Exception {
@@ -53,6 +56,7 @@ public class AuthService implements AuthUseCase {
             .company(command.company())
             .build();
         memberRepository.save(member);
+        eventPublisher.publishEvent(new SignupEmailEvent(command.email()));
     }
 
     @Override
