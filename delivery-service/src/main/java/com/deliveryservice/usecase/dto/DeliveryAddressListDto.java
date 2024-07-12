@@ -10,6 +10,6 @@ public record DeliveryAddressListDto(
     String zipCode,
     String alias,
     String receiver,
-    boolean isMainAddress
+    boolean mainAddress
 ) {
 }

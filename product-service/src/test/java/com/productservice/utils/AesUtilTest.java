@@ -3,7 +3,7 @@ package com.productservice.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.productservice.IntegrationTestSupport;
+import com.productservice.testConfig.IntegrationTestSupport;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

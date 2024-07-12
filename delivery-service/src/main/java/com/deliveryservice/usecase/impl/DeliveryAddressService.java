@@ -26,8 +26,8 @@ public class DeliveryAddressService implements DeliveryAddressUseCase {
 
     @Override
     public void registerAddress(Long memberId, RegisterAddress command) throws Exception {
-        deliveryAddressRepository.findByMemberIdAndIsMainAddress(memberId, true)
-            .ifPresent(deliveryAddress -> deliveryAddress.setMainAddress(false));
+        deliveryAddressRepository.findByMemberIdAndMainAddress(memberId, true)
+            .ifPresent(deliveryAddress -> deliveryAddress.assignMainAddress(false));
         Address address = Address.builder()
             .street(aesUtil.aesEncode(command.street()))
             .detailAddress(aesUtil.aesEncode(command.detailAddress()))
@@ -38,7 +38,7 @@ public class DeliveryAddressService implements DeliveryAddressUseCase {
             .memberId(memberId)
             .address(address)
             .receiver(command.receiver())
-            .isMainAddress(command.isMainAddress())
+            .mainAddress(command.mainAddress())
             .build();
         deliveryAddressRepository.save(deliveryAddress);
     }
@@ -59,7 +59,7 @@ public class DeliveryAddressService implements DeliveryAddressUseCase {
                 .zipCode(aesUtil.aesDecode(deliveryAddress.getAddress().getZipCode()))
                 .alias(deliveryAddress.getAddress().getAlias())
                 .receiver(deliveryAddress.getReceiver())
-                .isMainAddress(deliveryAddress.isMainAddress())
+                .mainAddress(deliveryAddress.isMainAddress())
                 .build();
             DeliveryAddressList.add(addressListDto);
         }

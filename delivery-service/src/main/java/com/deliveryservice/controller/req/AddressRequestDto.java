@@ -10,7 +10,7 @@ public record AddressRequestDto(
     String zipCode,
     String alias,
     String receiver,
-    boolean isMainAddress
+    boolean mainAddress
 ) {
     public RegisterAddress mapToCommand() {
         return RegisterAddress.builder()
@@ -19,7 +19,7 @@ public record AddressRequestDto(
             .zipCode(zipCode)
             .alias(alias)
             .receiver(receiver)
-            .isMainAddress(isMainAddress)
+            .mainAddress(mainAddress)
             .build();
     }
 }

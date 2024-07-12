@@ -56,8 +56,8 @@ public class DeliveryEventConsumerTest extends IntegrationTestSupport {
     void consumeDelivery() throws Exception {
         // given
         long memberId = 1L;
-        boolean isMainAddress = true;
-        RegisterAddress command = getAddressRequest(isMainAddress);
+        boolean mainAddress = true;
+        RegisterAddress command = getAddressRequest(mainAddress);
         deliveryAddressUseCase.registerAddress(memberId, command);
         DeliveryAddress deliveryAddress = deliveryAddressRepository.findAll().stream().findFirst()
             .get();
@@ -113,14 +113,14 @@ public class DeliveryEventConsumerTest extends IntegrationTestSupport {
         assertNotNull(delivery.getReferenceCode());
     }
 
-    private static RegisterAddress getAddressRequest(boolean isMainAddress) {
+    private static RegisterAddress getAddressRequest(boolean mainAddress) {
         return RegisterAddress.builder()
             .street("서울시 강남구")
             .detailAddress("역삼동")
             .zipCode("12345")
             .alias("집")
             .receiver("홍길동")
-            .isMainAddress(isMainAddress)
+            .mainAddress(mainAddress)
             .build();
     }
 }

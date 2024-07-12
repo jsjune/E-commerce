@@ -3,7 +3,7 @@ package com.productservice.utils;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.productservice.IntegrationTestSupport;
+import com.productservice.testConfig.IntegrationTestSupport;
 import com.productservice.utils.error.ErrorCode;
 import com.productservice.utils.error.GlobalException;
 import org.junit.jupiter.api.DisplayName;

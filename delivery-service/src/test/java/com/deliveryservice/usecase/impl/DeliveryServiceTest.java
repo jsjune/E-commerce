@@ -61,14 +61,14 @@ class DeliveryServiceTest extends IntegrationTestSupport {
         assertEquals(result.getProductName(), command.productName());
     }
 
-    private static AddressRequestDto getAddressRequest(boolean isMainAddress) {
+    private static AddressRequestDto getAddressRequest(boolean mainAddress) {
         return AddressRequestDto.builder()
             .street("서울시 강남구")
             .detailAddress("역삼동")
             .zipCode("12345")
             .alias("집")
             .receiver("홍길동")
-            .isMainAddress(isMainAddress)
+            .mainAddress(mainAddress)
             .build();
     }
 }

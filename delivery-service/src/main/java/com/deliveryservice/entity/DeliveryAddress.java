@@ -23,19 +23,19 @@ public class DeliveryAddress extends BaseTimeEntity {
     @Embedded
     private Address address;
     private String receiver;
-    private boolean isMainAddress;
+    private boolean mainAddress;
 
     @Builder
     public DeliveryAddress(Long id, Long memberId, Address address, String alias, String receiver,
-        boolean isMainAddress) {
+        boolean mainAddress) {
         this.id = id;
         this.memberId = memberId;
         this.address = address;
         this.receiver = receiver;
-        this.isMainAddress = isMainAddress;
+        this.mainAddress = mainAddress;
     }
 
-    public void setMainAddress(boolean isMainAddress) {
-        this.isMainAddress = isMainAddress;
+    public void assignMainAddress(boolean mainAddress) {
+        this.mainAddress = mainAddress;
     }
 }

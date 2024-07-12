@@ -48,7 +48,7 @@ class DeliveryAddressServiceTest extends IntegrationTestSupport {
         // then
         assertEquals(result.deliveryAddresses().size(), 2);
         assertEquals(result.deliveryAddresses().get(0).street(), command2.street());
-        assertTrue(result.deliveryAddresses().get(0).isMainAddress());
+        assertTrue(result.deliveryAddresses().get(0).mainAddress());
     }
 
     @DisplayName("대표 배송지가 있는데 다시 대표 배송지로 등록할 경우")
@@ -56,8 +56,8 @@ class DeliveryAddressServiceTest extends IntegrationTestSupport {
     void exist_main_address_retry_register_address() throws Exception {
         // given
         long memberId = 1L;
-        boolean isMainAddress = true;
-        RegisterAddress command = getAddressRequest(isMainAddress);
+        boolean mainAddress = true;
+        RegisterAddress command = getAddressRequest(mainAddress);
 
         // when
         deliveryAddressUseCase.registerAddress(memberId, command);
@@ -76,8 +76,8 @@ class DeliveryAddressServiceTest extends IntegrationTestSupport {
     void register_delivery_address() throws Exception {
         // given
         long memberId = 1L;
-        boolean isMainAddress = true;
-        RegisterAddress command = getAddressRequest(isMainAddress);
+        boolean mainAddress = true;
+        RegisterAddress command = getAddressRequest(mainAddress);
 
         // when
         deliveryAddressUseCase.registerAddress(memberId, command);
@@ -86,18 +86,18 @@ class DeliveryAddressServiceTest extends IntegrationTestSupport {
 
         // then
         assertNotNull(deliveryAddress);
-        assertEquals(deliveryAddress.isMainAddress(), command.isMainAddress());
+        assertEquals(deliveryAddress.isMainAddress(), command.mainAddress());
 
     }
 
-    private static RegisterAddress getAddressRequest(boolean isMainAddress) {
+    private static RegisterAddress getAddressRequest(boolean mainAddress) {
         return RegisterAddress.builder()
             .street("서울시 강남구")
             .detailAddress("역삼동")
             .zipCode("12345")
             .alias("집")
             .receiver("홍길동")
-            .isMainAddress(isMainAddress)
+            .mainAddress(mainAddress)
             .build();
     }
 
