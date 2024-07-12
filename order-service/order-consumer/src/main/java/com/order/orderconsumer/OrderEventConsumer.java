@@ -27,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
 public class OrderEventConsumer {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -89,6 +88,7 @@ public class OrderEventConsumer {
             );
         } catch (Exception e) {
             log.error("Failed to consume submit", e);
+            throw new RuntimeException("Failed to consume submit from product");
         }
     }
 
@@ -151,6 +151,7 @@ public class OrderEventConsumer {
 
         } catch (Exception e) {
             log.error("Failed to consume submit", e);
+            throw new RuntimeException("Failed to consume submit from cart");
         }
     }
 
@@ -170,6 +171,7 @@ public class OrderEventConsumer {
             }
         } catch (Exception e) {
             log.error("Failed to consume order from payment", e);
+            throw new RuntimeException("Failed to consume order from payment");
         }
     }
 
@@ -194,6 +196,7 @@ public class OrderEventConsumer {
             }
         } catch (Exception e) {
             log.error("Failed to consume order from delivery", e);
+            throw new RuntimeException("Failed to consume order from delivery");
         }
     }
 
@@ -211,6 +214,7 @@ public class OrderEventConsumer {
             }
         } catch (Exception e) {
             log.error("Failed to consume order from product", e);
+            throw new RuntimeException("Failed to consume order from product");
         }
     }
 

@@ -1,39 +1,58 @@
 package com.product.productconsumer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.productservice.usecase.kafka.KafkaHealthIndicator;
 import com.productservice.usecase.kafka.ProductKafkaService;
 import com.productservice.usecase.kafka.event.EventResult;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
 public class ProductEventConsumer {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ProductKafkaService productKafkaService;
     private final KafkaHealthIndicator kafkaHealthIndicator;
+    private final RedissonClient redissonClient;
 
     @KafkaListener(topics = "${consumers.topic1}", groupId = "${consumers.groupId}")
     public void consumeProduct(ConsumerRecord<String, String> record) {
         try {
             EventResult orderEvent = objectMapper.readValue(record.value(), EventResult.class);
-            if (kafkaHealthIndicator.isKafkaUp()) {
-                productKafkaService.handleProduct(orderEvent);
-            } else {
-                log.error("Failed to send order event");
-                productKafkaService.occurProductFailure(orderEvent);
+            RLock lock = redissonClient.getLock(
+                "product-lock::" + orderEvent.orderLine().productId());
+            boolean lockAcquired = false;
+            try {
+                lockAcquired = lock.tryLock(5, 10, TimeUnit.SECONDS);
+                if (!lockAcquired) {
+                    log.error("Failed to acquire lock");
+                    throw new RuntimeException("Failed to acquire lock");
+                }
+                if (kafkaHealthIndicator.isKafkaUp()) {
+                    productKafkaService.handleProduct(orderEvent);
+                } else {
+                    log.error("Failed to send order event");
+                    productKafkaService.occurProductFailure(orderEvent);
+                }
+            } catch (InterruptedException e) {
+                log.error("Failed to acquire lock");
+                throw new InterruptedException("Failed to acquire lock");
+            }finally {
+                if (lockAcquired) { // 락을 획득한 경우에만 해제
+                    lock.unlock();
+                }
             }
         } catch (Exception e) {
-            log.error("Failed to consume product event");
+            log.error("Failed to consume product event", e);
+            throw new RuntimeException("Failed to consume product event");
         }
     }
 }

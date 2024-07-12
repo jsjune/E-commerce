@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
 public class PaymentEventConsumer {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -37,13 +36,19 @@ public class PaymentEventConsumer {
             }
         } catch (Exception e) {
             log.error("Failed to consume payment event");
+            throw new RuntimeException("Failed to consume payment event");
         }
     }
 
     @KafkaListener(topics = "${consumers.topic2}", groupId = "${consumers.groupId}")
     public void consumeRollbackPayment(ConsumerRecord<String, String> record)
         throws Exception {
-        EventResult eventResult = objectMapper.readValue(record.value(), EventResult.class);
-        paymentRollbackService.rollbackProcessPayment(eventResult.mapToCommand());
+        try {
+            EventResult eventResult = objectMapper.readValue(record.value(), EventResult.class);
+            paymentRollbackService.rollbackProcessPayment(eventResult.mapToCommand());
+        } catch (Exception e) {
+            log.error("Failed to consume rollback payment event");
+            throw new RuntimeException("Failed to consume rollback payment event");
+        }
     }
 }
