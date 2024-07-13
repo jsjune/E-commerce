@@ -1,4 +1,4 @@
-package com.delivery.deliveryconsumer;
+package com.delivery.deliveryscheduler;
 
 import com.deliveryservice.entity.DeliveryOutBox;
 import com.deliveryservice.repository.DeliveryOutBoxRepository;

@@ -1,17 +1,17 @@
-package com.order.orderconsumer;
+package com.order.orderscheduler;
 
 import com.orderservice.OrderServiceApplication;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
-import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-@EnableAsync
+@EnableScheduling
 @Import(OrderServiceApplication.class)
-public class OrderConsumerApplication {
+public class OrderSchedulerApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(OrderConsumerApplication.class, args);
+        SpringApplication.run(OrderSchedulerApplication.class, args);
     }
 }

@@ -1,4 +1,4 @@
-package com.payment.paymentconsumer;
+package com.payment.paymentscheduler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentservice.entity.PaymentOutBox;
