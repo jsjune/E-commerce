@@ -1,9 +1,12 @@
 package com.productservice.usecase;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.productservice.entity.Product;
 import com.productservice.entity.ProductImage;
 import com.productservice.repository.ProductRepository;
 import com.productservice.usecase.dto.ImageUploadEvent;
+import com.productservice.usecase.kafka.ProductKafkaProducer;
+import com.productservice.usecase.kafka.event.EventResult;
 import com.productservice.utils.S3Utils;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -27,11 +30,13 @@ public class ProductListener {
 
     private final S3Utils s3Utils;
     private final ProductRepository productRepository;
+    private final ProductKafkaProducer productKafkaProducer;
     private static final String UPLOAD_FOLDER = "images";
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void listenImageUpload(ImageUploadEvent event) {
+        log.info("Image upload event occurred: {}", event);
         Optional<Product> findProduct = productRepository.findById(event.productId());
         if (findProduct.isPresent()) {
             Product product = findProduct.get();
@@ -70,5 +75,13 @@ public class ProductListener {
             }
         }
     }
+
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void listenProductEvent(EventResult eventResult) throws JsonProcessingException {
+        log.info("Product event occurred: {}", eventResult);
+        productKafkaProducer.occurProductEvent(eventResult);
+    }
+
 
 }

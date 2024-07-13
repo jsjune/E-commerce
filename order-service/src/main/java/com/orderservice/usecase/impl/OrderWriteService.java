@@ -4,16 +4,13 @@ import com.ecommerce.common.cache.CartListDto;
 import com.orderservice.adapter.DeliveryClient;
 import com.orderservice.adapter.MemberClient;
 import com.orderservice.adapter.ProductClient;
-import com.orderservice.usecase.dto.CartDto;
-import com.orderservice.usecase.dto.ProductDto;
 import com.orderservice.entity.ProductOrder;
 import com.orderservice.repository.OrderLineRepository;
 import com.orderservice.usecase.OrderWriteUseCase;
+import com.orderservice.usecase.dto.CartDto;
 import com.orderservice.usecase.dto.OrderDtoFromCart;
 import com.orderservice.usecase.dto.OrderDtoFromProduct;
-import com.orderservice.usecase.kafka.KafkaHealthIndicator;
-import com.orderservice.usecase.kafka.OrderKafkaProducer;
-import com.orderservice.usecase.kafka.OrderKafkaService;
+import com.orderservice.usecase.dto.ProductDto;
 import com.orderservice.usecase.kafka.event.ProductInfoEvent;
 import com.orderservice.usecase.kafka.event.SubmitOrderEvent;
 import com.orderservice.usecase.kafka.event.SubmitOrderEvents;
@@ -26,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,31 +36,25 @@ public class OrderWriteService implements OrderWriteUseCase {
     private final MemberClient memberClient;
     private final ProductClient productClient;
     private final DeliveryClient deliveryClient;
-    private final OrderKafkaProducer orderKafkaProducer;
     private final CircuitBreakerFactory circuitBreakerFactory;
     private final RedisUtils redisUtils;
-    private final KafkaHealthIndicator kafkaHealthIndicator;
-    private final OrderKafkaService orderKafkaService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public void submitOrderFromProduct(Long memberId, OrderDtoFromProduct command) {
-        try {
-            ProductDto product = productClient.getProduct(command.productId());
-            if (product == null) {
-                throw new GlobalException(ErrorCode.PRODUCT_NOT_FOUND);
-            }
-            SubmitOrderEvent submitEvent = generateSubmitEvent(memberId, command, product);
-            if (kafkaHealthIndicator.isKafkaUp()) {
-                orderKafkaProducer.occurSubmitOrderFromProductEvent(submitEvent);
-            } else {
-                orderKafkaService.occurSubmitOrderFromProductEventFailure(submitEvent);
-            }
-        } catch (Exception e) {
-            log.error("Failed to send payment event", e);
+        ProductDto product = productClient.getProduct(command.productId());
+        if (product == null) {
+            throw new GlobalException(ErrorCode.PRODUCT_NOT_FOUND);
         }
+        Boolean result = redisUtils.decreaseStock(product.productId(), command.quantity());
+        if (result == null || !result) {
+            throw new GlobalException(ErrorCode.PRODUCT_STOCK_NOT_ENOUGH);
+        }
+        SubmitOrderEvent submitEvent = generateSubmitEvent(memberId, command, product);
+        eventPublisher.publishEvent(submitEvent);
     }
 
-    private static SubmitOrderEvent generateSubmitEvent(Long memberId, OrderDtoFromProduct command,
+    private SubmitOrderEvent generateSubmitEvent(Long memberId, OrderDtoFromProduct command,
         ProductDto product) {
         return SubmitOrderEvent.builder()
             .memberId(memberId)
@@ -78,28 +70,20 @@ public class OrderWriteService implements OrderWriteUseCase {
 
     @Override
     public void submitOrderFromCart(Long memberId, OrderDtoFromCart command) {
-        try {
-            List<CartDto> cartList = fetchCartDtosWithFallback(memberId, command.cartIds());
-            List<ProductInfoEvent> productInfoEvents = new ArrayList<>();
-            for (CartDto cart : cartList) {
-                ProductInfoEvent productInfoEvent = generateSubmitEvent(memberId, command, cart);
-                productInfoEvents.add(productInfoEvent);
-            }
-            SubmitOrderEvents submitOrderEvents = SubmitOrderEvents.builder()
-                .memberId(memberId)
-                .paymentMethodId(command.paymentMethodId())
-                .deliveryAddressId(command.deliveryAddressId())
-                .productInfo(productInfoEvents)
-                .build();
-            if (kafkaHealthIndicator.isKafkaUp()) {
-                orderKafkaProducer.occurSubmitOrderFromCartEvent(submitOrderEvents);
-            } else {
-                orderKafkaService.occurSubmitOrderFromCartEventFailure(submitOrderEvents);
-            }
-            memberClient.clearCart(memberId, command.cartIds());
-        } catch (Exception e) {
-            log.error("Failed to send payment event", e);
+        List<CartDto> cartList = fetchCartDtosWithFallback(memberId, command.cartIds());
+        List<ProductInfoEvent> productInfoEvents = new ArrayList<>();
+        for (CartDto cart : cartList) {
+            ProductInfoEvent productInfoEvent = generateSubmitEvent(memberId, command, cart);
+            productInfoEvents.add(productInfoEvent);
         }
+        SubmitOrderEvents submitOrderEvents = SubmitOrderEvents.builder()
+            .memberId(memberId)
+            .paymentMethodId(command.paymentMethodId())
+            .deliveryAddressId(command.deliveryAddressId())
+            .productInfo(productInfoEvents)
+            .build();
+        eventPublisher.publishEvent(submitOrderEvents);
+        memberClient.clearCart(memberId, command.cartIds());
     }
 
     private List<CartDto> fetchCartDtosWithFallback(Long memberId, List<Long> cartIds) {
@@ -128,7 +112,7 @@ public class OrderWriteService implements OrderWriteUseCase {
         return null;
     }
 
-    private static ProductInfoEvent generateSubmitEvent(Long memberId, OrderDtoFromCart command,
+    private ProductInfoEvent generateSubmitEvent(Long memberId, OrderDtoFromCart command,
         CartDto cart) {
         return ProductInfoEvent.builder()
             .productId(cart.productId())
@@ -139,8 +123,8 @@ public class OrderWriteService implements OrderWriteUseCase {
             .build();
     }
 
-    @Transactional
     @Override
+    @Transactional
     public void cancelOrder(Long memberId, Long orderLineId) {
         orderLineRepository.findById(orderLineId).ifPresent(orderLine -> {
             Boolean check = deliveryClient.deliveryStatusCheck(orderLine.getDeliveryId());

@@ -28,7 +28,7 @@ public class ProductEventConsumer {
         try {
             EventResult orderEvent = objectMapper.readValue(record.value(), EventResult.class);
             RLock lock = redissonClient.getLock(
-                "product-lock::" + orderEvent.orderLine().productId());
+                "product.lock=" + orderEvent.orderLine().productId());
             boolean lockAcquired = false;
             try {
                 lockAcquired = lock.tryLock(5, 10, TimeUnit.SECONDS);
@@ -36,18 +36,19 @@ public class ProductEventConsumer {
                     log.error("Failed to acquire lock");
                     throw new RuntimeException("Failed to acquire lock");
                 }
-                if (kafkaHealthIndicator.isKafkaUp()) {
-                    productKafkaService.handleProduct(orderEvent);
-                } else {
-                    log.error("Failed to send order event");
-                    productKafkaService.occurProductFailure(orderEvent);
-                }
+                orderEvent = productKafkaService.decreaseStock(orderEvent);
             } catch (InterruptedException e) {
                 log.error("Failed to acquire lock");
                 throw new InterruptedException("Failed to acquire lock");
             }finally {
                 if (lockAcquired) { // 락을 획득한 경우에만 해제
                     lock.unlock();
+                    if (kafkaHealthIndicator.isKafkaUp()) {
+                        productKafkaService.handleProduct(orderEvent);
+                    } else {
+                        log.error("Failed to send order event");
+                        productKafkaService.occurProductFailure(orderEvent);
+                    }
                 }
             }
         } catch (Exception e) {

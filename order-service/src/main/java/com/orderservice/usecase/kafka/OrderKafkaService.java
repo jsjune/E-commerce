@@ -3,26 +3,38 @@ package com.orderservice.usecase.kafka;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.orderservice.entity.OrderLine;
+import com.orderservice.entity.OrderLineStatus;
 import com.orderservice.entity.OrderOutBox;
 import com.orderservice.entity.ProductOrder;
 import com.orderservice.entity.ProductOrderStatus;
 import com.orderservice.repository.OrderLineRepository;
 import com.orderservice.repository.OrderOutBoxRepository;
 import com.orderservice.repository.ProductOrderRepository;
+import com.orderservice.usecase.dto.DeliveryEvent;
+import com.orderservice.usecase.dto.OrderOutBoxEvent;
+import com.orderservice.usecase.dto.PaymentEvent;
+import com.orderservice.usecase.dto.RollbackDeliveryEvent;
+import com.orderservice.usecase.dto.RollbackPaymentEvent;
 import com.orderservice.usecase.impl.OrderRollbackService;
 import com.orderservice.usecase.kafka.event.EventResult;
+import com.orderservice.usecase.kafka.event.OrderLineEvent;
+import com.orderservice.usecase.kafka.event.ProductInfoEvent;
 import com.orderservice.usecase.kafka.event.ProductOrderEvent;
 import com.orderservice.usecase.kafka.event.SubmitOrderEvent;
 import com.orderservice.usecase.kafka.event.SubmitOrderEvents;
+import com.orderservice.utils.RedisUtils;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class OrderKafkaService {
     @Value(value = "${producers.topic1}")
     public String PAYMENT_TOPIC;
@@ -40,32 +52,31 @@ public class OrderKafkaService {
     public String SUBMIT_ORDER_CART_TOPIC;
     private final ProductOrderRepository productOrderRepository;
     private final OrderLineRepository orderLineRepository;
-    private final OrderKafkaProducer orderKafkaProducer;
     private final OrderRollbackService orderRollbackService;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final OrderOutBoxRepository outBoxRepository;
+    private final ApplicationEventPublisher eventPublisher;
+    private final KafkaHealthIndicator kafkaHealthIndicator;
 
-    public void handleOrderFromPayment(EventResult eventResult)
-        throws JsonProcessingException {
+    public void handleOrderFromPayment(EventResult eventResult) {
         Optional<OrderLine> findOrderLine = orderLineRepository.findById(
             eventResult.orderLine().orderLineId());
         if (findOrderLine.isPresent()) {
             OrderLine orderLine = findOrderLine.get();
             orderLine.assignPayment(eventResult.paymentId());
             orderLineRepository.save(orderLine);
-            orderKafkaProducer.occurDeliveryEvent(eventResult);
+            eventPublisher.publishEvent(new PaymentEvent(eventResult));
         }
     }
 
-    public void handleOrderFromDelivery(EventResult eventResult)
-        throws JsonProcessingException {
+    public void handleOrderFromDelivery(EventResult eventResult) {
         Optional<OrderLine> findOrderLine = orderLineRepository.findById(
             eventResult.orderLine().orderLineId());
         if (findOrderLine.isPresent()) {
             OrderLine orderLine = findOrderLine.get();
             orderLine.assignDelivery(eventResult.deliveryId());
             orderLineRepository.save(orderLine);
-            orderKafkaProducer.occurProductEvent(eventResult);
+            eventPublisher.publishEvent(new DeliveryEvent(eventResult));
         }
     }
 
@@ -73,16 +84,15 @@ public class OrderKafkaService {
         orderRollbackService.rollbackOrder(eventResult.mapToOrderRollbackDto());
     }
 
-    public void handleRollbackOrderFromDelivery(EventResult eventResult)
-        throws JsonProcessingException {
-        orderKafkaProducer.occurRollbackPaymentEvent(eventResult);
+    public void handleRollbackOrderFromDelivery(EventResult eventResult) {
+        eventPublisher.publishEvent(new RollbackPaymentEvent(eventResult));
         orderRollbackService.rollbackOrder(eventResult.mapToOrderRollbackDto());
     }
 
     public void handleRollbackOrderFromProduct(EventResult eventResult)
         throws JsonProcessingException {
-        orderKafkaProducer.occurRollbackDeliveryEvent(eventResult);
-        orderKafkaProducer.occurRollbackPaymentEvent(eventResult);
+        eventPublisher.publishEvent(new RollbackDeliveryEvent(eventResult));
+        eventPublisher.publishEvent(new RollbackPaymentEvent(eventResult));
         orderRollbackService.rollbackOrder(eventResult.mapToOrderRollbackDto());
     }
 
@@ -168,7 +178,7 @@ public class OrderKafkaService {
     }
 
     public void processOutboxMessage(OrderOutBox outBox) throws JsonProcessingException {
-        orderKafkaProducer.occurOutBoxEvent(outBox.getTopic(), outBox.getMessage());
+        eventPublisher.publishEvent(new OrderOutBoxEvent(outBox.getTopic(), outBox.getMessage()));
         if (outBox.getTopic().equals(PAYMENT_TOPIC)) {
             processPaymentEvent(outBox);
         } else if (outBox.getTopic().equals(DELIVERY_TOPIC)) {
@@ -225,5 +235,111 @@ public class OrderKafkaService {
     private void processRollbackEvent(OrderOutBox outBox) throws JsonProcessingException {
         EventResult result = objectMapper.readValue(outBox.getMessage(), EventResult.class);
         orderRollbackService.rollbackOrder(result.mapToOrderRollbackDto());
+    }
+
+    public void submitOrderFromProduct(SubmitOrderEvent submitEvent)
+        throws JsonProcessingException {
+        ProductOrder productOrder = ProductOrder.builder()
+            .memberId(submitEvent.memberId())
+            .productOrderStatus(ProductOrderStatus.INITIATED)
+            .totalPrice(submitEvent.price() * submitEvent.quantity())
+            .totalDiscount(0L)
+            .build();
+        productOrderRepository.save(productOrder);
+        OrderLine orderLine = OrderLine.builder()
+            .productId(submitEvent.productId())
+            .productName(submitEvent.productName())
+            .price(submitEvent.price())
+            .thumbnailUrl(submitEvent.thumbnailUrl())
+            .quantity(submitEvent.quantity())
+            .discount(0L)
+            .orderLineStatus(OrderLineStatus.INITIATED)
+            .build();
+        productOrder.addOrderLine(orderLine);
+        orderLineRepository.save(orderLine);
+
+        OrderLineEvent orderLineEvent = OrderLineEvent.builder()
+            .orderLineId(orderLine.getId())
+            .productId(orderLine.getProductId())
+            .productName(orderLine.getProductName())
+            .price(orderLine.getPrice())
+            .discount(orderLine.getDiscount())
+            .quantity(orderLine.getQuantity())
+            .build();
+
+        ProductOrderEvent productOrderEvent = ProductOrderEvent.builder()
+            .productOrderId(productOrder.getId())
+            .orderLine(orderLineEvent)
+            .memberId(submitEvent.memberId())
+            .paymentMethodId(submitEvent.paymentMethodId())
+            .deliveryAddressId(submitEvent.deliveryAddressId())
+            .build();
+
+        if (kafkaHealthIndicator.isKafkaUp()) {
+            eventPublisher.publishEvent(productOrderEvent);
+        } else {
+            log.error("Failed to send payment event");
+            occurPaymentFailure(productOrderEvent);
+        }
+
+        productOrder.finalizeOrder(
+            ProductOrderStatus.COMPLETED,
+            orderLine.getPrice() * orderLine.getQuantity(),
+            orderLine.getDiscount()
+        );
+    }
+
+    public void submitOrderFromCart(SubmitOrderEvents submitEvent) throws JsonProcessingException {
+        ProductOrder productOrder = ProductOrder.builder()
+            .memberId(submitEvent.memberId())
+            .productOrderStatus(ProductOrderStatus.INITIATED)
+            .totalDiscount(0L)
+            .build();
+        productOrderRepository.save(productOrder);
+        long totalPrice = 0;
+        long totalDiscount = 0;
+        for (ProductInfoEvent productInfo : submitEvent.productInfo()) {
+            OrderLine orderLine = OrderLine.builder()
+                .productOrder(productOrder)
+                .productId(productInfo.productId())
+                .productName(productInfo.productName())
+                .price(productInfo.price())
+                .quantity(productInfo.quantity())
+                .thumbnailUrl(productInfo.thumbnailUrl())
+                .discount(0L)
+                .orderLineStatus(OrderLineStatus.INITIATED)
+                .build();
+            productOrder.addOrderLine(orderLine);
+            orderLineRepository.save(orderLine);
+            totalPrice += orderLine.getPrice() * orderLine.getQuantity();
+            totalDiscount += orderLine.getDiscount();
+
+            OrderLineEvent orderLineEvent = OrderLineEvent.builder()
+                .orderLineId(orderLine.getId())
+                .productId(orderLine.getProductId())
+                .productName(orderLine.getProductName())
+                .price(orderLine.getPrice())
+                .discount(orderLine.getDiscount())
+                .quantity(orderLine.getQuantity())
+                .build();
+            ProductOrderEvent productOrderEvent = ProductOrderEvent.builder()
+                .productOrderId(productOrder.getId())
+                .orderLine(orderLineEvent)
+                .memberId(submitEvent.memberId())
+                .paymentMethodId(submitEvent.paymentMethodId())
+                .deliveryAddressId(submitEvent.deliveryAddressId())
+                .build();
+            if (kafkaHealthIndicator.isKafkaUp()) {
+                eventPublisher.publishEvent(productOrderEvent);
+            } else {
+                log.error("Failed to send payment event");
+                occurPaymentFailure(productOrderEvent);
+            }
+        }
+        productOrder.finalizeOrder(
+            ProductOrderStatus.COMPLETED,
+            totalPrice,
+            totalDiscount
+        );
     }
 }

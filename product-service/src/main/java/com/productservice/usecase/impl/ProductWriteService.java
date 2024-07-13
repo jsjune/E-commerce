@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,6 +32,7 @@ public class ProductWriteService implements ProductWriteUseCase {
     private final ProductRepository productRepository;
     private final AesUtil aesUtil;
     private final ApplicationEventPublisher eventPublisher;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Override
     @CacheEvict(cacheNames = "products", allEntries = true)
@@ -60,6 +62,7 @@ public class ProductWriteService implements ProductWriteUseCase {
             .build();
 
         Product findProduct = productRepository.save(product);
+        redisTemplate.opsForValue().set("product.stock="+ findProduct.getId(), String.valueOf(findProduct.getTotalStock()));
         ImageUploadEvent event = new ImageUploadEvent(command.productImages(), member.company(),
             findProduct.getId());
         eventPublisher.publishEvent(event);

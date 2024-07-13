@@ -9,6 +9,7 @@ import com.paymentservice.usecase.kafka.event.EventResult;
 import com.paymentservice.usecase.kafka.event.ProductOrderEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,13 +22,13 @@ public class PaymentKafkaService {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final PaymentOutBoxRepository outBoxRepository;
     private final PaymentUseCase paymentUseCase;
-    private final PaymentKafkaProducer paymentKafkaProducer;
+    private final ApplicationEventPublisher eventPublisher;
 
     public void handlePayment(ProductOrderEvent orderEvent) throws Exception {
         Long paymentId = paymentUseCase.processPayment(orderEvent.mapToCommand());
         int status = paymentId == -1L ? -1 : 1;
         EventResult eventResult = orderEvent.mapToEventResult(paymentId, status);
-        paymentKafkaProducer.occurPaymentEvent(eventResult);
+        eventPublisher.publishEvent(eventResult);
     }
 
     public void occurPaymentFailure(ProductOrderEvent orderEvent) throws JsonProcessingException {

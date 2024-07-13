@@ -40,8 +40,7 @@ public class DeliveryEventConsumer {
     }
 
     @KafkaListener(topics = "${consumers.topic2}", groupId = "${consumers.groupId}")
-    public void consumeRollbackDelivery(ConsumerRecord<String, String> record)
-        throws Exception {
+    public void consumeRollbackDelivery(ConsumerRecord<String, String> record) {
         try {
             EventResult eventResult = objectMapper.readValue(record.value(), EventResult.class);
             deliveryRollbackService.rollbackProcessDelivery(eventResult.deliveryId());

@@ -23,10 +23,10 @@ public class ProductInternalController {
         return productReadUseCase.findProductById(productId);
     }
 
-//    @PostMapping("/{productId}/decrease")
-//    public Boolean decreaseStock(@PathVariable Long productId, @RequestParam int quantity) {
-//        return productWriteUseCase.decreaseStock(productId, quantity);
-//    }
+    @PostMapping("/{productId}/decrease")
+    public int decreaseStock(@PathVariable Long productId, @RequestParam Long quantity) {
+        return productWriteUseCase.decreaseStock(productId, quantity);
+    }
 
     @PostMapping("/{productId}/increment")
     public Boolean incrementStock(@PathVariable Long productId, @RequestParam Long quantity) {

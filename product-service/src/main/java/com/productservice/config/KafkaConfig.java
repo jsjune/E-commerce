@@ -3,7 +3,6 @@ package com.productservice.config;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.kafka.clients.admin.AdminClientConfig;
-import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,12 +33,8 @@ public class KafkaConfig {
         config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
         config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        config.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true); // 멱등성 보장
         return new DefaultKafkaProducerFactory<>(config);
-    }
-
-    @Bean
-    public KafkaProducer<String, String> producer() {
-        return new KafkaProducer<>(producerFactory().getConfigurationProperties());
     }
 
     @Bean

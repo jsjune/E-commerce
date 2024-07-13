@@ -9,6 +9,7 @@ import com.productservice.usecase.kafka.event.EventResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,13 +23,17 @@ public class ProductKafkaService {
     private String PRODUCT_TOPIC;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ProductOutBoxRepository outBoxRepository;
-    private final ProductKafkaProducer productKafkaProducer;
     private final ProductWriteUseCase productWriteUseCase;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public void handleProduct(EventResult orderEvent) throws JsonProcessingException {
-        int status = productWriteUseCase.decreaseStock(orderEvent.orderLine().productId(), orderEvent.orderLine().quantity());
-        orderEvent = orderEvent.withStatus(status);
-        productKafkaProducer.occurProductEvent(orderEvent);
+    public EventResult decreaseStock(EventResult orderEvent) {
+        int status = productWriteUseCase.decreaseStock(orderEvent.orderLine().productId(),
+            orderEvent.orderLine().quantity());
+        return orderEvent.withStatus(status);
+    }
+
+    public void handleProduct(EventResult orderEvent) {
+        eventPublisher.publishEvent(orderEvent);
     }
 
     public void occurProductFailure(EventResult orderEvent) throws JsonProcessingException {

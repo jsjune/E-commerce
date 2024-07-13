@@ -4,6 +4,7 @@ import com.orderservice.entity.ProductOrder;
 import com.orderservice.repository.OrderLineRepository;
 import com.orderservice.repository.ProductOrderRepository;
 import com.orderservice.usecase.dto.OrderRollbackDto;
+import com.orderservice.utils.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,8 +16,10 @@ public class OrderRollbackService {
 
     private final ProductOrderRepository productOrderRepository;
     private final OrderLineRepository orderLineRepository;
+    private final RedisUtils redisUtils;
 
     public void rollbackOrder(OrderRollbackDto command) {
+        redisUtils.increaseStock(command.productId(), command.quantity());
         productOrderRepository.findById(command.productOrderId()).ifPresent(productOrder -> {
             productOrder.rollback(command.totalPrice(), command.totalDiscount());
             cancelOrderLine(productOrder, command.orderLineId(), command.paymentId(), command.deliveryId());

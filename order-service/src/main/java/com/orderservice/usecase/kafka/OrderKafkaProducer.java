@@ -2,33 +2,17 @@ package com.orderservice.usecase.kafka;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.orderservice.entity.OrderLine;
-import com.orderservice.entity.OrderOutBox;
-import com.orderservice.entity.ProductOrder;
-import com.orderservice.entity.ProductOrderStatus;
-import com.orderservice.repository.OrderLineRepository;
-import com.orderservice.repository.OrderOutBoxRepository;
-import com.orderservice.repository.ProductOrderRepository;
-import com.orderservice.usecase.impl.OrderRollbackService;
 import com.orderservice.usecase.kafka.event.EventResult;
 import com.orderservice.usecase.kafka.event.ProductOrderEvent;
 import com.orderservice.usecase.kafka.event.SubmitOrderEvent;
 import com.orderservice.usecase.kafka.event.SubmitOrderEvents;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 @Component
 @RequiredArgsConstructor
@@ -62,6 +46,7 @@ public class OrderKafkaProducer {
                 log.info("[delivery_request] sent: {}", productOrderEvent);
             } else {
                 log.error("[delivery_request] failed to send: {}", productOrderEvent, ex);
+                throw new RuntimeException("[delivery_request] failed to send", ex);
             }
         });
     }
@@ -116,6 +101,7 @@ public class OrderKafkaProducer {
                 log.info("[order_submit_request] sent: {}", submitEvent);
             } else {
                 log.error("[order_submit_request] failed to send: {}", submitEvent, ex);
+                throw new RuntimeException("[order_submit_request] failed to send",ex);
             }
         });
     }
@@ -130,12 +116,11 @@ public class OrderKafkaProducer {
                 log.info("[order_submit_request] sent: {}", submitEvents);
             } else {
                 log.error("[order_submit_request] failed to send: {}", submitEvents, ex);
+                throw new RuntimeException("[order_submit_request] failed to send",ex);
             }
         });
     }
 
-    @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void submitOrderComplete(ProductOrderEvent productOrderEvent)
         throws JsonProcessingException {
         String json = objectMapper.writeValueAsString(productOrderEvent);
@@ -146,6 +131,7 @@ public class OrderKafkaProducer {
                 log.info("[payment_request] sent: {}", productOrderEvent);
             } else {
                 log.error("[payment_request] failed to send: {}", productOrderEvent, ex);
+                throw new RuntimeException("[payment_request] failed to send", ex);
             }
         });
     }

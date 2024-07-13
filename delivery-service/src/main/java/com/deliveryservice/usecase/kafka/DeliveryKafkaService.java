@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,13 +21,13 @@ public class DeliveryKafkaService {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final DeliveryOutBoxRepository outBoxRepository;
     private final DeliveryUseCase deliveryUseCase;
-    private final DeliveryKafkaProducer deliveryKafkaProducer;
+    private final ApplicationEventPublisher eventPublisher;
 
     public void handleDelivery(EventResult orderEvent) throws Exception {
         Long deliveryId = deliveryUseCase.processDelivery(orderEvent.mapToCommand());
         int status = deliveryId == -1L ? -1 : 1;
         orderEvent = orderEvent.assignDeliveryIdAndStatus(deliveryId, status);
-        deliveryKafkaProducer.occurDeliveryEvent(orderEvent);
+        eventPublisher.publishEvent(orderEvent);
     }
 
     public void occurDeliveryFailure(EventResult orderEvent) throws JsonProcessingException {

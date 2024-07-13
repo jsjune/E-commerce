@@ -18,6 +18,8 @@ public record EventResult(
     public OrderRollbackDto mapToOrderRollbackDto() {
         return OrderRollbackDto.builder()
             .productOrderId(productOrderId())
+            .productId(orderLine().productId())
+            .quantity(orderLine().quantity())
             .paymentId(paymentId())
             .deliveryId(deliveryId())
             .orderLineId(orderLine().orderLineId())

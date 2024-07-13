@@ -13,10 +13,10 @@ public record ProductOrderEvent(
 ) {
     public ProcessPaymentDto mapToCommand() {
         return ProcessPaymentDto.builder()
+            .memberId(memberId())
             .orderLineId(orderLine.orderLineId())
             .totalPrice(orderLine.price() * orderLine.quantity())
             .discount(orderLine.discount())
-            .memberId(memberId())
             .paymentMethodId(paymentMethodId())
             .build();
     }
