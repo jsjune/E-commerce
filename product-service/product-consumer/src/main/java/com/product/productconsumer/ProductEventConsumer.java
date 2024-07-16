@@ -1,9 +1,9 @@
 package com.product.productconsumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.productservice.usecase.kafka.KafkaHealthIndicator;
-import com.productservice.usecase.kafka.ProductKafkaService;
-import com.productservice.usecase.kafka.event.EventResult;
+import com.product.productcore.infrastructure.kafka.KafkaHealthIndicator;
+import com.product.productcore.infrastructure.kafka.ProductKafkaService;
+import com.product.productcore.infrastructure.kafka.event.EventResult;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

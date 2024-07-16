@@ -2,25 +2,20 @@ package com.delivery.deliveryconsumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.delivery.deliveryapi.usecase.DeliveryAddressUseCase;
+import com.delivery.deliveryapi.usecase.dto.RegisterAddressDto;
 import com.delivery.deliveryconsumer.testConfig.IntegrationTestSupport;
-import com.deliveryservice.entity.Address;
-import com.deliveryservice.entity.Delivery;
-import com.deliveryservice.entity.DeliveryAddress;
-import com.deliveryservice.entity.DeliveryStatus;
-import com.deliveryservice.repository.DeliveryAddressRepository;
-import com.deliveryservice.repository.DeliveryRepository;
-import com.deliveryservice.usecase.DeliveryAddressUseCase;
-import com.deliveryservice.usecase.dto.RegisterAddress;
-import com.deliveryservice.usecase.kafka.DeliveryKafkaProducer;
-import com.deliveryservice.usecase.kafka.KafkaHealthIndicator;
-import com.deliveryservice.usecase.kafka.event.EventResult;
-import com.deliveryservice.usecase.kafka.event.OrderLineEvent;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.delivery.deliverycore.infrastructure.entity.Address;
+import com.delivery.deliverycore.infrastructure.entity.Delivery;
+import com.delivery.deliverycore.infrastructure.entity.DeliveryAddress;
+import com.delivery.deliverycore.infrastructure.entity.DeliveryStatus;
+import com.delivery.deliverycore.infrastructure.kafka.KafkaHealthIndicator;
+import com.delivery.deliverycore.infrastructure.kafka.event.EventResult;
+import com.delivery.deliverycore.infrastructure.kafka.event.OrderLineEvent;
+import com.delivery.deliverycore.infrastructure.repository.DeliveryAddressRepository;
+import com.delivery.deliverycore.infrastructure.repository.DeliveryRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +23,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
 
+@RecordApplicationEvents
 public class DeliveryEventConsumerTest extends IntegrationTestSupport {
     @Autowired
     private DeliveryEventConsumer deliveryEventConsumer;
@@ -38,12 +36,12 @@ public class DeliveryEventConsumerTest extends IntegrationTestSupport {
     private ObjectMapper objectMapper = new ObjectMapper();
     @Autowired
     private DeliveryRepository deliveryRepository;
-    @MockBean
-    private DeliveryKafkaProducer deliveryKafkaProducer;
     @Autowired
     private DeliveryAddressRepository deliveryAddressRepository;
     @Autowired
     private DeliveryAddressUseCase deliveryAddressUseCase;
+    @Autowired
+    private ApplicationEvents events;
 
     @BeforeEach
     void setUp() {
@@ -57,7 +55,7 @@ public class DeliveryEventConsumerTest extends IntegrationTestSupport {
         // given
         long memberId = 1L;
         boolean mainAddress = true;
-        RegisterAddress command = getAddressRequest(mainAddress);
+        RegisterAddressDto command = getAddressRequest(mainAddress);
         deliveryAddressUseCase.registerAddress(memberId, command);
         DeliveryAddress deliveryAddress = deliveryAddressRepository.findAll().stream().findFirst()
             .get();
@@ -83,9 +81,10 @@ public class DeliveryEventConsumerTest extends IntegrationTestSupport {
         when(kafkaHealthIndicator.isKafkaUp()).thenReturn(true);
         deliveryEventConsumer.consumeDelivery(record);
         Delivery result = deliveryRepository.findAll().stream().findFirst().get();
+        long count = events.stream(EventResult.class).count();
 
         // then
-        verify(deliveryKafkaProducer, times(1)).occurDeliveryEvent(any());
+        assertEquals(count, 1);
         assertEquals(result.getProductId(), eventResult.orderLine().productId());
         assertEquals(result.getStatus(), DeliveryStatus.REQUESTED);
     }
@@ -113,8 +112,8 @@ public class DeliveryEventConsumerTest extends IntegrationTestSupport {
         assertNotNull(delivery.getReferenceCode());
     }
 
-    private static RegisterAddress getAddressRequest(boolean mainAddress) {
-        return RegisterAddress.builder()
+    private static RegisterAddressDto getAddressRequest(boolean mainAddress) {
+        return RegisterAddressDto.builder()
             .street("서울시 강남구")
             .detailAddress("역삼동")
             .zipCode("12345")

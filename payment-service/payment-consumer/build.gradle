@@ -33,7 +33,7 @@ dependencies {
     // https://mvnrepository.com/artifact/org.testcontainers/kafka
     testImplementation 'org.testcontainers:kafka:1.19.7'
 
-    implementation project(':payment-service')
+    implementation project(':payment-service:payment-core')
 }
 
 test {

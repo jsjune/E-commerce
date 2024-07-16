@@ -1,17 +1,16 @@
 package com.payment.paymentconsumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.paymentservice.usecase.impl.PaymentRollbackService;
-import com.paymentservice.usecase.kafka.KafkaHealthIndicator;
-import com.paymentservice.usecase.kafka.PaymentKafkaService;
-import com.paymentservice.usecase.kafka.event.EventResult;
-import com.paymentservice.usecase.kafka.event.ProductOrderEvent;
+import com.payment.paymentcore.application.service.impl.PaymentRollbackService;
+import com.payment.paymentcore.infrastructure.kafka.KafkaHealthIndicator;
+import com.payment.paymentcore.infrastructure.kafka.PaymentKafkaService;
+import com.payment.paymentcore.infrastructure.kafka.event.EventResult;
+import com.payment.paymentcore.infrastructure.kafka.event.ProductOrderEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor

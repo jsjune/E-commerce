@@ -2,12 +2,12 @@ package com.product.productscheduler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.productservice.entity.ProductOutBox;
-import com.productservice.repository.ProductOutBoxRepository;
-import com.productservice.usecase.ProductWriteUseCase;
-import com.productservice.usecase.kafka.KafkaHealthIndicator;
-import com.productservice.usecase.kafka.ProductKafkaProducer;
-import com.productservice.usecase.kafka.event.EventResult;
+import com.product.productapi.usecase.InternalProductUseCase;
+import com.product.productcore.infrastructure.entity.ProductOutBox;
+import com.product.productcore.infrastructure.kafka.KafkaHealthIndicator;
+import com.product.productcore.infrastructure.kafka.ProductKafkaProducer;
+import com.product.productcore.infrastructure.kafka.event.EventResult;
+import com.product.productcore.infrastructure.repository.ProductOutBoxRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
@@ -25,7 +25,7 @@ public class KafkaOutBoxProcessor {
     private final ProductOutBoxRepository outBoxRepository;
     private final KafkaHealthIndicator kafkaHealthIndicator;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final ProductWriteUseCase productWriteUseCase;
+    private final InternalProductUseCase internalProductUseCase;
     private final ProductKafkaProducer productKafkaProducer;
     private final ReentrantLock lock = new ReentrantLock();
 
@@ -41,7 +41,7 @@ public class KafkaOutBoxProcessor {
                     if (kafkaHealthIndicator.isKafkaUp()) {
                         EventResult orderEvent = objectMapper.readValue(outBox.getMessage(),
                             EventResult.class);
-                        int status = productWriteUseCase.decreaseStock(
+                        int status = internalProductUseCase.decreaseStock(
                             orderEvent.orderLine().productId(),
                             orderEvent.orderLine().quantity());
                         orderEvent = orderEvent.withStatus(status);

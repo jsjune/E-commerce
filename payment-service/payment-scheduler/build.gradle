@@ -22,7 +22,7 @@ dependencies {
     // actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
-    implementation project(':payment-service')
+    implementation project(':payment-service:payment-core')
 }
 
 test {

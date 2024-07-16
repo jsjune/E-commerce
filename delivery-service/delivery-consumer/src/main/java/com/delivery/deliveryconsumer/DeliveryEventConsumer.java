@@ -1,16 +1,15 @@
 package com.delivery.deliveryconsumer;
 
-import com.deliveryservice.usecase.impl.DeliveryRollbackService;
-import com.deliveryservice.usecase.kafka.DeliveryKafkaService;
-import com.deliveryservice.usecase.kafka.KafkaHealthIndicator;
-import com.deliveryservice.usecase.kafka.event.EventResult;
+import com.delivery.deliverycore.application.service.DeliveryRollbackUseCase;
+import com.delivery.deliverycore.infrastructure.kafka.DeliveryKafkaService;
+import com.delivery.deliverycore.infrastructure.kafka.KafkaHealthIndicator;
+import com.delivery.deliverycore.infrastructure.kafka.event.EventResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -18,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class DeliveryEventConsumer {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final DeliveryRollbackService deliveryRollbackService;
+    private final DeliveryRollbackUseCase deliveryRollbackUseCase;
     private final DeliveryKafkaService deliveryKafkaService;
     private final KafkaHealthIndicator kafkaHealthIndicator;
 
@@ -43,7 +42,7 @@ public class DeliveryEventConsumer {
     public void consumeRollbackDelivery(ConsumerRecord<String, String> record) {
         try {
             EventResult eventResult = objectMapper.readValue(record.value(), EventResult.class);
-            deliveryRollbackService.rollbackProcessDelivery(eventResult.deliveryId());
+            deliveryRollbackUseCase.rollbackProcessDelivery(eventResult.deliveryId());
         } catch (Exception e) {
             log.error("Failed to consume rollback delivery event");
             throw new RuntimeException("Failed to consume rollback delivery event");

@@ -22,7 +22,8 @@ dependencies {
     // actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
-    implementation project(':product-service')
+    implementation project(':product-service:product-core')
+    implementation project(':product-service:product-api')
 }
 
 test {

@@ -1,13 +1,13 @@
 package com.payment.paymentscheduler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.paymentservice.entity.PaymentOutBox;
-import com.paymentservice.repository.PaymentOutBoxRepository;
-import com.paymentservice.usecase.PaymentUseCase;
-import com.paymentservice.usecase.kafka.KafkaHealthIndicator;
-import com.paymentservice.usecase.kafka.PaymentKafkaProducer;
-import com.paymentservice.usecase.kafka.event.EventResult;
-import com.paymentservice.usecase.kafka.event.ProductOrderEvent;
+import com.payment.paymentcore.application.service.PaymentProcessUseCase;
+import com.payment.paymentcore.infrastructure.entity.PaymentOutBox;
+import com.payment.paymentcore.infrastructure.kafka.KafkaHealthIndicator;
+import com.payment.paymentcore.infrastructure.kafka.PaymentKafkaProducer;
+import com.payment.paymentcore.infrastructure.kafka.event.EventResult;
+import com.payment.paymentcore.infrastructure.kafka.event.ProductOrderEvent;
+import com.payment.paymentcore.infrastructure.repository.PaymentOutBoxRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
@@ -25,7 +25,7 @@ public class KafkaOutBoxProcessor {
     private final PaymentOutBoxRepository outBoxRepository;
     private final KafkaHealthIndicator kafkaHealthIndicator;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final PaymentUseCase paymentUseCase;
+    private final PaymentProcessUseCase paymentProcessUseCase;
     private final PaymentKafkaProducer paymentKafkaProducer;
     private final ReentrantLock lock = new ReentrantLock();
 
@@ -41,7 +41,7 @@ public class KafkaOutBoxProcessor {
                     if (kafkaHealthIndicator.isKafkaUp()) {
                         ProductOrderEvent orderEvent = objectMapper.readValue(
                             outBox.getMessage(), ProductOrderEvent.class);
-                        Long paymentId = paymentUseCase.processPayment(orderEvent.mapToCommand());
+                        Long paymentId = paymentProcessUseCase.processPayment(orderEvent.mapToCommand());
                         int status = paymentId == -1L ? -1 : 1;
                         EventResult eventResult = orderEvent.mapToEventResult(paymentId, status);
                         paymentKafkaProducer.occurPaymentEvent(eventResult);

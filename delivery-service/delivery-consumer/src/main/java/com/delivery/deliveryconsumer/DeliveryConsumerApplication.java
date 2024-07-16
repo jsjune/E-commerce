@@ -1,6 +1,6 @@
 package com.delivery.deliveryconsumer;
 
-import com.deliveryservice.DeliveryServiceApplication;
+import com.delivery.deliverycore.DeliveryCoreApplication;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableScheduling
 @EnableAsync
-@Import(DeliveryServiceApplication.class)
+@Import(DeliveryCoreApplication.class)
 public class DeliveryConsumerApplication {
 
     public static void main(String[] args) {

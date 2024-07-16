@@ -36,7 +36,7 @@ dependencies {
     // https://mvnrepository.com/artifact/org.testcontainers/kafka
     testImplementation 'org.testcontainers:kafka:1.19.7'
 
-    implementation project(':product-service')
+    implementation project(':product-service:product-core')
 }
 
 test {
