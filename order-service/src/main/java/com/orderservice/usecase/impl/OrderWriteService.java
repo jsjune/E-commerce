@@ -1,19 +1,19 @@
 package com.orderservice.usecase.impl;
 
-import com.ecommerce.common.cache.CartListDto;
+import com.ecommerce.common.cache.CachingCartListDto;
 import com.orderservice.adapter.DeliveryClient;
 import com.orderservice.adapter.MemberClient;
 import com.orderservice.adapter.ProductClient;
-import com.orderservice.entity.ProductOrder;
-import com.orderservice.repository.OrderLineRepository;
+import com.orderservice.infrastructure.entity.ProductOrder;
+import com.orderservice.infrastructure.repository.OrderLineRepository;
 import com.orderservice.usecase.OrderWriteUseCase;
 import com.orderservice.usecase.dto.CartDto;
 import com.orderservice.usecase.dto.OrderDtoFromCart;
 import com.orderservice.usecase.dto.OrderDtoFromProduct;
 import com.orderservice.usecase.dto.ProductDto;
-import com.orderservice.usecase.kafka.event.ProductInfoEvent;
-import com.orderservice.usecase.kafka.event.SubmitOrderEvent;
-import com.orderservice.usecase.kafka.event.SubmitOrderEvents;
+import com.orderservice.infrastructure.kafka.event.ProductInfoEvent;
+import com.orderservice.infrastructure.kafka.event.SubmitOrderEvent;
+import com.orderservice.infrastructure.kafka.event.SubmitOrderEvents;
 import com.orderservice.utils.RedisUtils;
 import com.orderservice.utils.error.ErrorCode;
 import com.orderservice.utils.error.GlobalException;
@@ -96,14 +96,14 @@ public class OrderWriteService implements OrderWriteUseCase {
 
     private List<CartDto> retrieveCartListFromRedis(Long memberId, List<Long> cartIds) {
         List<CartDto> carts = new ArrayList<>();
-        List<CartListDto> cartList = redisUtils.getCartList(memberId);
+        List<CachingCartListDto> cartList = redisUtils.getCartList(memberId);
         if (cartList != null) {
-            for (CartListDto cartListDto : cartList) {
-                if (cartIds.contains(cartListDto.cartId())) {
-                    CartDto cartDto = new CartDto(cartListDto.productId(),
-                        cartListDto.productName(),
-                        cartListDto.price(), cartListDto.thumbnailImageUrl(),
-                        cartListDto.quantity());
+            for (CachingCartListDto cachingCartListDto : cartList) {
+                if (cartIds.contains(cachingCartListDto.cartId())) {
+                    CartDto cartDto = new CartDto(cachingCartListDto.productId(),
+                        cachingCartListDto.productName(),
+                        cachingCartListDto.price(), cachingCartListDto.thumbnailImageUrl(),
+                        cachingCartListDto.quantity());
                     carts.add(cartDto);
                 }
             }

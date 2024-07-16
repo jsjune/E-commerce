@@ -3,12 +3,12 @@ package com.orderservice.usecase.impl;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.orderservice.IntegrationTestSupport;
-import com.orderservice.entity.OrderLine;
-import com.orderservice.entity.OrderLineStatus;
-import com.orderservice.entity.ProductOrder;
-import com.orderservice.entity.ProductOrderStatus;
-import com.orderservice.repository.OrderLineRepository;
-import com.orderservice.repository.ProductOrderRepository;
+import com.orderservice.infrastructure.entity.OrderLine;
+import com.orderservice.infrastructure.entity.OrderLineStatus;
+import com.orderservice.infrastructure.entity.ProductOrder;
+import com.orderservice.infrastructure.entity.ProductOrderStatus;
+import com.orderservice.infrastructure.repository.OrderLineRepository;
+import com.orderservice.infrastructure.repository.ProductOrderRepository;
 import com.orderservice.usecase.dto.OrderRollbackDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

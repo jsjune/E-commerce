@@ -1,7 +1,7 @@
 package com.orderservice.testConfig;
 
 
-import com.ecommerce.common.cache.CartListDto;
+import com.ecommerce.common.cache.CachingCartListDto;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.springframework.context.annotation.Bean;
@@ -41,8 +41,8 @@ public class RedisTestContainers {
     }
 
     @Bean
-    public RedisTemplate<String, List<CartListDto>> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-        RedisTemplate<String, List<CartListDto>> redisTemplate = new RedisTemplate<>();
+    public RedisTemplate<String, List<CachingCartListDto>> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, List<CachingCartListDto>> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setValueSerializer(new JdkSerializationRedisSerializer());

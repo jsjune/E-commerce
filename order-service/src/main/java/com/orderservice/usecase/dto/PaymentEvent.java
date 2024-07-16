@@ -1,5 +1,5 @@
 package com.orderservice.usecase.dto;
 
-import com.orderservice.usecase.kafka.event.EventResult;
+import com.orderservice.infrastructure.kafka.event.EventResult;
 
 public record PaymentEvent(EventResult eventResult) { }

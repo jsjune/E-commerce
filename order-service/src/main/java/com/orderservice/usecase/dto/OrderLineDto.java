@@ -1,9 +1,8 @@
 package com.orderservice.usecase.dto;
 
 
-import com.orderservice.entity.OrderLine;
+import com.orderservice.infrastructure.entity.OrderLine;
 import lombok.Builder;
-import lombok.Getter;
 
 @Builder
 public record OrderLineDto(

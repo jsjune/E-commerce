@@ -36,4 +36,8 @@ include 'payment-service:payment-api'
 findProject(':payment-service:payment-api')?.name = 'payment-api'
 include 'payment-service:payment-core'
 findProject(':payment-service:payment-core')?.name = 'payment-core'
+include 'member-service:member-core'
+findProject(':member-service:member-core')?.name = 'member-core'
+include 'member-service:member-api'
+findProject(':member-service:member-api')?.name = 'member-api'
 

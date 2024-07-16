@@ -1,8 +1,8 @@
 package com.orderservice.usecase.impl;
 
-import com.orderservice.entity.ProductOrder;
-import com.orderservice.repository.OrderLineRepository;
-import com.orderservice.repository.ProductOrderRepository;
+import com.orderservice.infrastructure.entity.ProductOrder;
+import com.orderservice.infrastructure.repository.OrderLineRepository;
+import com.orderservice.infrastructure.repository.ProductOrderRepository;
 import com.orderservice.usecase.dto.OrderRollbackDto;
 import com.orderservice.utils.RedisUtils;
 import lombok.RequiredArgsConstructor;

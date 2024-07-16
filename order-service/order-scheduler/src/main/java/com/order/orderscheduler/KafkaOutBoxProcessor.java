@@ -1,10 +1,10 @@
 package com.order.orderscheduler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.orderservice.entity.OrderOutBox;
-import com.orderservice.repository.OrderOutBoxRepository;
-import com.orderservice.usecase.kafka.KafkaHealthIndicator;
-import com.orderservice.usecase.kafka.OrderKafkaService;
+import com.orderservice.infrastructure.entity.OrderOutBox;
+import com.orderservice.infrastructure.repository.OrderOutBoxRepository;
+import com.orderservice.infrastructure.kafka.KafkaHealthIndicator;
+import com.orderservice.infrastructure.kafka.OrderKafkaService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;

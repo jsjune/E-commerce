@@ -1,6 +1,6 @@
 package com.orderservice.utils;
 
-import com.ecommerce.common.cache.CartListDto;
+import com.ecommerce.common.cache.CachingCartListDto;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -11,11 +11,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RedisUtils {
 
-    private final RedisTemplate<String, List<CartListDto>> objectRedisTemplate;
+    private final RedisTemplate<String, List<CachingCartListDto>> objectRedisTemplate;
     private final RedisTemplate<String, String> redisTemplate;
     private final String PRODUCT_KEY = "product.stock=";
 
-    public List<CartListDto> getCartList(Long memberId) {
+    public List<CachingCartListDto> getCartList(Long memberId) {
         return objectRedisTemplate.opsForValue()
             .get(String.format("cartList::%s", memberId));
     }

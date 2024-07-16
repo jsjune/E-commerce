@@ -1,7 +1,7 @@
 package com.orderservice.usecase.dto;
 
 
-import com.orderservice.entity.ProductOrder;
+import com.orderservice.infrastructure.entity.ProductOrder;
 import java.util.List;
 import lombok.Builder;
 

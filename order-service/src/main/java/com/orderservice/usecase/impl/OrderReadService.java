@@ -1,17 +1,17 @@
 package com.orderservice.usecase.impl;
 
-import com.ecommerce.common.cache.CartListDto;
+import com.ecommerce.common.cache.CachingCartListDto;
 import com.orderservice.adapter.MemberClient;
 import com.orderservice.adapter.ProductClient;
 import com.orderservice.usecase.dto.CartDto;
 import com.orderservice.usecase.dto.ProductDto;
 import com.orderservice.usecase.dto.OrderDetailResponseDto;
 import com.orderservice.usecase.dto.OrderListResponseDto;
-import com.orderservice.entity.OrderLine;
-import com.orderservice.entity.OrderLineStatus;
-import com.orderservice.entity.ProductOrder;
-import com.orderservice.entity.ProductOrderStatus;
-import com.orderservice.repository.ProductOrderRepository;
+import com.orderservice.infrastructure.entity.OrderLine;
+import com.orderservice.infrastructure.entity.OrderLineStatus;
+import com.orderservice.infrastructure.entity.ProductOrder;
+import com.orderservice.infrastructure.entity.ProductOrderStatus;
+import com.orderservice.infrastructure.repository.ProductOrderRepository;
 import com.orderservice.usecase.OrderReadUseCase;
 import com.orderservice.usecase.dto.RegisterOrderFromCartDto;
 import com.orderservice.usecase.dto.RegisterOrderFromProductDto;
@@ -78,14 +78,14 @@ public class OrderReadService implements OrderReadUseCase {
 
     private List<CartDto> retrieveCartListFromRedis(Long memberId, List<Long> cartIds) {
         List<CartDto> cartDtos = new ArrayList<>();
-        List<CartListDto> cartListDtos = redisUtils.getCartList(memberId);
-        if (cartListDtos != null) {
-            for (CartListDto cartListDto : cartListDtos) {
-                if (cartIds.contains(cartListDto.cartId())) {
-                    CartDto cartDto = new CartDto(cartListDto.productId(),
-                        cartListDto.productName(),
-                        cartListDto.price(), cartListDto.thumbnailImageUrl(),
-                        cartListDto.quantity());
+        List<CachingCartListDto> cachingCartListDtos = redisUtils.getCartList(memberId);
+        if (cachingCartListDtos != null) {
+            for (CachingCartListDto cachingCartListDto : cachingCartListDtos) {
+                if (cartIds.contains(cachingCartListDto.cartId())) {
+                    CartDto cartDto = new CartDto(cachingCartListDto.productId(),
+                        cachingCartListDto.productName(),
+                        cachingCartListDto.price(), cachingCartListDto.thumbnailImageUrl(),
+                        cachingCartListDto.quantity());
                     cartDtos.add(cartDto);
                 }
             }
