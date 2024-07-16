@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface ProductClient {
     @GetMapping("/internal/products/{productId}")
     ProductDto getProduct(@PathVariable Long productId);
-    @PostMapping("/internal/products/{productId}/decrease")
-    int decreaseStock(@PathVariable Long productId,@RequestParam Long quantity);
     @PostMapping("/internal/products/{productId}/increment")
     Boolean incrementStock(@PathVariable Long productId,@RequestParam Long quantity);
 }
