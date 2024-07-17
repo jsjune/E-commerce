@@ -1,0 +1,83 @@
+plugins {
+    id 'jacoco-report-aggregation'
+}
+
+repositories {
+    mavenCentral()
+}
+
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'jacoco'
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+def excludedProjects = [
+        'apigateway-service',
+        'common',
+        'discovery-service',
+        'logging-consumer'
+]
+
+def includedProjects = subprojects.findAll { project ->
+    !excludedProjects.contains(project.name)
+}
+
+subprojects {
+    // JaCoCo 플러그인을 제외할 모듈 리스트에 포함되지 않은 경우에만 JaCoCo 플러그인을 적용
+    if (!excludedProjects.contains(project.name)) {
+        apply plugin: 'jacoco'
+
+        jacocoTestReport {
+            dependsOn test
+            reports {
+                xml.required = true
+                html.required = false
+            }
+        }
+    }
+}
+
+// 루트 프로젝트의 'testAll' 태스크 정의
+task testAll {
+    dependsOn includedProjects.collect { it.tasks.withType(Test) }
+}
+
+tasks.register("jacocoRootReport", JacocoReport) {
+    dependsOn testAll
+
+    additionalSourceDirs.from files(includedProjects.collect { it.sourceSets.main.allSource.srcDirs }.flatten())
+    sourceDirectories.from files(includedProjects.collect { it.sourceSets.main.allSource.srcDirs }.flatten())
+
+    // 특정 클래스 제외
+    def classFiles = files(includedProjects.collect { it.sourceSets.main.output }.flatten())
+    classFiles = classFiles.asFileTree.matching {
+        exclude '**/config/log/**'
+        exclude '**/entity/Q*'
+    }
+    classDirectories.from classFiles
+
+    // 특정 모듈 제외
+    def executionFiles = fileTree(dir: '.', include: '**/build/jacoco/test.exec')
+    executionFiles = executionFiles.matching {
+        exclude '**/apigateway-service/**'
+        exclude '**/common/**'
+        exclude '**/discovery-service/**'
+        exclude '**/logging-consumer/**'
+    }
+    executionData.from executionFiles
+
+    reports {
+        xml.required = true
+        csv.required = false
+        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+    }
+}
+
+// 모든 테스트가 완료된 후 jacocoRootReport 태스크를 실행하도록 설정
+tasks.named('testAll') {
+    finalizedBy 'jacocoRootReport'
+}
