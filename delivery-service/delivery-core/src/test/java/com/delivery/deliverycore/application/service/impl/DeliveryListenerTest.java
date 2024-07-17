@@ -5,19 +5,21 @@ import static org.mockito.Mockito.verify;
 
 import com.delivery.deliverycore.infrastructure.kafka.DeliveryKafkaProducer;
 import com.delivery.deliverycore.infrastructure.kafka.event.EventResult;
-import com.delivery.deliverycore.testConfig.IntegrationTestSupport;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-class DeliveryListenerTest extends IntegrationTestSupport {
+@ExtendWith(MockitoExtension.class)
+class DeliveryListenerTest {
 
-    @MockBean
-    private DeliveryKafkaProducer deliveryKafkaProducer;
-    @Autowired
+    @InjectMocks
     private DeliveryListener deliveryListener;
+    @Mock
+    private DeliveryKafkaProducer deliveryKafkaProducer;
 
     @DisplayName("delivery event 발생 시 kafka로 전달")
     @Test

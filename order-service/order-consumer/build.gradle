@@ -34,7 +34,7 @@ dependencies {
     // https://mvnrepository.com/artifact/org.testcontainers/kafka
     testImplementation 'org.testcontainers:kafka:1.19.7'
 
-    implementation project(':order-service')
+    implementation project(':order-service:order-core')
     implementation project(':common')
 }
 

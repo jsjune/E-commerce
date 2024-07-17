@@ -1,6 +1,5 @@
 package com.payment.paymentcore.infrastructure.kafka;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -8,7 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.payment.paymentcore.IntegrationTestSupport;
+import com.payment.paymentcore.testConfig.IntegrationTestSupport;
 import com.payment.paymentcore.infrastructure.kafka.event.EventResult;
 import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.DisplayName;

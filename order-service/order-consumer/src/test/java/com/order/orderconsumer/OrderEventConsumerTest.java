@@ -1,27 +1,31 @@
 package com.order.orderconsumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.times;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.order.orderconsumer.testConfig.IntegrationTestSupport;
-import com.orderservice.infrastructure.entity.OrderLine;
-import com.orderservice.infrastructure.entity.OrderLineStatus;
-import com.orderservice.infrastructure.entity.ProductOrder;
-import com.orderservice.infrastructure.entity.ProductOrderStatus;
-import com.orderservice.infrastructure.repository.OrderLineRepository;
-import com.orderservice.infrastructure.repository.ProductOrderRepository;
-import com.orderservice.infrastructure.kafka.KafkaHealthIndicator;
-import com.orderservice.infrastructure.kafka.OrderKafkaProducer;
-import com.orderservice.infrastructure.kafka.event.EventResult;
-import com.orderservice.infrastructure.kafka.event.OrderLineEvent;
-import com.orderservice.infrastructure.kafka.event.ProductInfoEvent;
-import com.orderservice.infrastructure.kafka.event.ProductOrderEvent;
-import com.orderservice.infrastructure.kafka.event.SubmitOrderEvent;
-import com.orderservice.infrastructure.kafka.event.SubmitOrderEvents;
+import com.order.ordercore.application.service.dto.DeliveryEvent;
+import com.order.ordercore.application.service.dto.PaymentEvent;
+import com.order.ordercore.application.service.dto.RollbackDeliveryEvent;
+import com.order.ordercore.application.service.dto.RollbackPaymentEvent;
+import com.order.ordercore.infrastructure.entity.OrderLine;
+import com.order.ordercore.infrastructure.entity.OrderLineStatus;
+import com.order.ordercore.infrastructure.entity.ProductOrder;
+import com.order.ordercore.infrastructure.entity.ProductOrderStatus;
+import com.order.ordercore.infrastructure.kafka.KafkaHealthIndicator;
+import com.order.ordercore.infrastructure.kafka.OrderKafkaProducer;
+import com.order.ordercore.infrastructure.kafka.event.EventResult;
+import com.order.ordercore.infrastructure.kafka.event.OrderLineEvent;
+import com.order.ordercore.infrastructure.kafka.event.ProductInfoEvent;
+import com.order.ordercore.infrastructure.kafka.event.ProductOrderEvent;
+import com.order.ordercore.infrastructure.kafka.event.SubmitOrderEvent;
+import com.order.ordercore.infrastructure.kafka.event.SubmitOrderEvents;
+import com.order.ordercore.infrastructure.repository.OrderLineRepository;
+import com.order.ordercore.infrastructure.repository.ProductOrderRepository;
 import java.util.List;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.BeforeEach;
@@ -154,16 +158,17 @@ class OrderEventConsumerTest extends IntegrationTestSupport {
             .build();
         String json = objectMapper.writeValueAsString(eventResult);
         ConsumerRecord<String, String> record = new ConsumerRecord<>("payment_result", 0, 0, null, json);
+        when(kafkaHealthIndicator.isKafkaUp()).thenReturn(true);
 
         // when
-        when(kafkaHealthIndicator.isKafkaUp()).thenReturn(true);
         orderEventConsumer.consumeOrderFromPayment(record);
         ProductOrder findProductOrder = productOrderRepository.findAll().stream().findFirst().get();
+        long count = events.stream(PaymentEvent.class).count();
 
         // then
+        assertEquals(count, 1);
         assertEquals(findProductOrder.getOrderLines().get(0).getPaymentId(), eventResult.paymentId());
         assertEquals(findProductOrder.getOrderLines().get(0).getOrderLineStatus(), OrderLineStatus.PAYMENT_COMPLETED);
-        verify(orderKafkaProducer, times(1)).occurDeliveryEvent(eventResult);
 
     }
 
@@ -258,16 +263,17 @@ class OrderEventConsumerTest extends IntegrationTestSupport {
             .build();
         String json = objectMapper.writeValueAsString(eventResult);
         ConsumerRecord<String, String> record = new ConsumerRecord<>("delivery_result", 0, 0, null, json);
+        when(kafkaHealthIndicator.isKafkaUp()).thenReturn(true);
 
         // when
-        when(kafkaHealthIndicator.isKafkaUp()).thenReturn(true);
         orderEventConsumer.consumeOrderFromDelivery(record);
         ProductOrder findProductOrder = productOrderRepository.findAll().stream().findFirst().get();
+        long count = events.stream(DeliveryEvent.class).count();
 
         // then
+        assertEquals(count, 1);
         assertEquals(findProductOrder.getOrderLines().get(0).getDeliveryId(), eventResult.deliveryId());
         assertEquals(findProductOrder.getOrderLines().get(0).getOrderLineStatus(), OrderLineStatus.DELIVERY_REQUESTED);
-        verify(orderKafkaProducer, times(1)).occurProductEvent(eventResult);
     }
 
     @DisplayName("delivery_result 토픽 받는 consumer, 배송 실패 -> 롤백")
@@ -310,14 +316,15 @@ class OrderEventConsumerTest extends IntegrationTestSupport {
             .build();
         String json = objectMapper.writeValueAsString(eventResult);
         ConsumerRecord<String, String> record = new ConsumerRecord<>("delivery_result", 0, 0, null, json);
+        when(kafkaHealthIndicator.isKafkaUp()).thenReturn(true);
 
         // when
-        when(kafkaHealthIndicator.isKafkaUp()).thenReturn(true);
         orderEventConsumer.consumeOrderFromDelivery(record);
         ProductOrder findProductOrder = productOrderRepository.findAll().stream().findFirst().get();
+        long count = events.stream(RollbackPaymentEvent.class).count();
 
         // then
-        verify(orderKafkaProducer, times(1)).occurRollbackPaymentEvent(eventResult);
+        assertEquals(count, 1);
         assertEquals(findProductOrder.getOrderLines().get(0).getDeliveryId(), eventResult.deliveryId());
         assertEquals(findProductOrder.getOrderLines().get(0).getOrderLineStatus(), OrderLineStatus.CANCELLED);
         assertEquals(findProductOrder.getTotalPrice(), 0);
@@ -364,15 +371,17 @@ class OrderEventConsumerTest extends IntegrationTestSupport {
             .build();
         String json = objectMapper.writeValueAsString(eventResult);
         ConsumerRecord<String, String> record = new ConsumerRecord<>("product_result", 0, 0, null, json);
+        when(kafkaHealthIndicator.isKafkaUp()).thenReturn(true);
 
         // when
-        when(kafkaHealthIndicator.isKafkaUp()).thenReturn(true);
         orderEventConsumer.consumeOrderFromProduct(record);
         ProductOrder findProductOrder = productOrderRepository.findAll().stream().findFirst().get();
+        long countDelivery = events.stream(RollbackDeliveryEvent.class).count();
+        long countPayment = events.stream(RollbackPaymentEvent.class).count();
 
         // then
-        verify(orderKafkaProducer, times(1)).occurRollbackDeliveryEvent(eventResult);
-        verify(orderKafkaProducer, times(1)).occurRollbackPaymentEvent(eventResult);
+        assertEquals(countDelivery, 1);
+        assertEquals(countPayment, 1);
         assertEquals(findProductOrder.getOrderLines().get(0).getPaymentId(), eventResult.paymentId());
         assertEquals(findProductOrder.getOrderLines().get(0).getDeliveryId(), eventResult.deliveryId());
         assertEquals(findProductOrder.getOrderLines().get(0).getOrderLineStatus(), OrderLineStatus.CANCELLED);

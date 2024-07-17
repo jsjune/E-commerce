@@ -20,9 +20,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
 
+@RecordApplicationEvents
 public class ProductEventConsumerTest extends IntegrationTestSupport {
 
+    @Autowired
+    private ApplicationEvents events;
     @Autowired
     private ProductEventConsumer productEventConsumer;
     @Autowired
@@ -57,14 +62,15 @@ public class ProductEventConsumerTest extends IntegrationTestSupport {
             .build();
         String json = objectMapper.writeValueAsString(eventResult);
         ConsumerRecord<String, String> record = new ConsumerRecord<>("product_request", 0, 0, null, json);
+        when(kafkaHealthIndicator.isKafkaUp()).thenReturn(true);
 
         // when
-        when(kafkaHealthIndicator.isKafkaUp()).thenReturn(true);
         productEventConsumer.consumeProduct(record);
         Product result = productRepository.findAll().stream().findFirst().get();
+        long count = events.stream(EventResult.class).count();
 
         // then
-        verify(productKafkaProducer, times(1)).occurProductEvent(eventResult);
+        assertEquals(count, 1);
         assertEquals(result.getSoldQuantity(), eventResult.orderLine().quantity());
         assertEquals(result.getTotalStock(), 97L);
     }

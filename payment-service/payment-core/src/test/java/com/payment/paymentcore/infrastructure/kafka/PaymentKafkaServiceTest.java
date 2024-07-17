@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.payment.paymentcore.IntegrationTestSupport;
+import com.payment.paymentcore.testConfig.IntegrationTestSupport;
 import com.payment.paymentcore.application.service.PaymentProcessUseCase;
 import com.payment.paymentcore.infrastructure.entity.PaymentOutBox;
 import com.payment.paymentcore.infrastructure.kafka.event.EventResult;

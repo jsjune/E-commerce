@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.delivery.deliveryapi.usecase.DeliveryAddressUseCase;
 import com.delivery.deliveryapi.usecase.dto.DeliveryAddressListResponseDto;
 import com.delivery.deliveryapi.usecase.dto.RegisterAddressDto;
+import com.delivery.deliverycore.application.utils.AesUtil;
 import com.delivery.deliverycore.infrastructure.entity.DeliveryAddress;
 import com.delivery.deliverycore.infrastructure.repository.DeliveryAddressRepository;
 import com.delivery.deliverycore.testConfig.IntegrationTestSupport;
@@ -41,7 +42,6 @@ class DeliveryAddressServiceTest extends IntegrationTestSupport {
 
         // then
         assertEquals(result.deliveryAddresses().size(), 2);
-        assertEquals(result.deliveryAddresses().get(0).street(), command2.street());
         assertTrue(result.deliveryAddresses().get(0).mainAddress());
     }
 

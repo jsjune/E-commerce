@@ -2,7 +2,7 @@ package com.payment.paymentcore.application.service.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.payment.paymentcore.IntegrationTestSupport;
+import com.payment.paymentcore.testConfig.IntegrationTestSupport;
 import com.payment.paymentcore.application.service.PaymentProcessUseCase;
 import com.payment.paymentcore.application.service.dto.ProcessPaymentDto;
 import com.payment.paymentcore.infrastructure.entity.Payment;

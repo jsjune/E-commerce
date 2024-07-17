@@ -2,7 +2,7 @@ package com.payment.paymentcore.application.service.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.payment.paymentcore.IntegrationTestSupport;
+import com.payment.paymentcore.testConfig.IntegrationTestSupport;
 import com.payment.paymentcore.application.service.dto.RollbackPaymentDto;
 import com.payment.paymentcore.infrastructure.entity.Payment;
 import com.payment.paymentcore.infrastructure.entity.PaymentMethod;

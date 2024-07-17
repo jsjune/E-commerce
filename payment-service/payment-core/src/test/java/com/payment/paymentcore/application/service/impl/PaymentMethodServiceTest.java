@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.payment.paymentapi.usecase.PaymentMethodUseCase;
 import com.payment.paymentapi.usecase.dto.PaymentMethodResponseDto;
 import com.payment.paymentapi.usecase.dto.RegisterPaymentMethodDto;
-import com.payment.paymentcore.IntegrationTestSupport;
+import com.payment.paymentcore.testConfig.IntegrationTestSupport;
 import com.payment.paymentcore.application.utils.AesUtil;
 import com.payment.paymentcore.infrastructure.entity.PaymentMethod;
 import com.payment.paymentcore.infrastructure.entity.PaymentType;

@@ -9,22 +9,37 @@ import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.payment.paymentconsumer.testConfig.IntegrationTestSupport;
+import com.payment.paymentcore.infrastructure.entity.Payment;
+import com.payment.paymentcore.infrastructure.entity.PaymentMethod;
+import com.payment.paymentcore.infrastructure.entity.PaymentStatus;
+import com.payment.paymentcore.infrastructure.entity.Refund;
+import com.payment.paymentcore.infrastructure.kafka.KafkaHealthIndicator;
+import com.payment.paymentcore.infrastructure.kafka.PaymentKafkaProducer;
+import com.payment.paymentcore.infrastructure.kafka.event.EventResult;
+import com.payment.paymentcore.infrastructure.kafka.event.OrderLineEvent;
+import com.payment.paymentcore.infrastructure.kafka.event.ProductOrderEvent;
+import com.payment.paymentcore.infrastructure.repository.PaymentMethodRepository;
+import com.payment.paymentcore.infrastructure.repository.PaymentRepository;
+import com.payment.paymentcore.infrastructure.repository.RefundRepository;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
 
+@RecordApplicationEvents
 public class PaymentEventConsumerTest extends IntegrationTestSupport {
 
+    @Autowired
+    private ApplicationEvents events;
     @Autowired
     private PaymentEventConsumer paymentEventConsumer;
     @Autowired
     private ObjectMapper objectMapper = new ObjectMapper();
     @MockBean
     private KafkaHealthIndicator kafkaHealthIndicator;
-    @MockBean
-    private PaymentKafkaProducer paymentKafkaProducer;
     @Autowired
     private PaymentRepository paymentRepository;
     @Autowired
@@ -55,16 +70,15 @@ public class PaymentEventConsumerTest extends IntegrationTestSupport {
         String json = objectMapper.writeValueAsString(event);
         ConsumerRecord<String, String> record = new ConsumerRecord<>("payment_request", 0, 0, null,
             json);
+        when(kafkaHealthIndicator.isKafkaUp()).thenReturn(true);
 
         // when
-        when(kafkaHealthIndicator.isKafkaUp()).thenReturn(true);
         paymentEventConsumer.consumePayment(record);
         Payment result = paymentRepository.findAll().stream().findFirst().get();
+        long count = events.stream(EventResult.class).count();
 
         // then
-        int status = result.getId() == -1L ? -1 : 1;
-        EventResult eventResult = event.mapToEventResult(result.getId(), status);
-        verify(paymentKafkaProducer, times(1)).occurPaymentEvent(eventResult);
+        assertEquals(count, 1);
         assertEquals(result.getTotalPrice(),
             event.orderLine().price() * event.orderLine().quantity());
         assertEquals(result.getDiscountPrice(), event.orderLine().discount());

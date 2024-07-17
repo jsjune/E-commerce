@@ -3,7 +3,7 @@ package com.payment.paymentcore.application.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.payment.paymentcore.IntegrationTestSupport;
+import com.payment.paymentcore.testConfig.IntegrationTestSupport;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

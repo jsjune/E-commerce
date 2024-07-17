@@ -40,4 +40,8 @@ include 'member-service:member-core'
 findProject(':member-service:member-core')?.name = 'member-core'
 include 'member-service:member-api'
 findProject(':member-service:member-api')?.name = 'member-api'
+include 'order-service:order-api'
+findProject(':order-service:order-api')?.name = 'order-api'
+include 'order-service:order-core'
+findProject(':order-service:order-core')?.name = 'order-core'
 

@@ -1,11 +1,11 @@
 package com.order.orderconsumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.orderservice.infrastructure.kafka.KafkaHealthIndicator;
-import com.orderservice.infrastructure.kafka.OrderKafkaService;
-import com.orderservice.infrastructure.kafka.event.EventResult;
-import com.orderservice.infrastructure.kafka.event.SubmitOrderEvent;
-import com.orderservice.infrastructure.kafka.event.SubmitOrderEvents;
+import com.order.ordercore.infrastructure.kafka.KafkaHealthIndicator;
+import com.order.ordercore.infrastructure.kafka.OrderKafkaService;
+import com.order.ordercore.infrastructure.kafka.event.EventResult;
+import com.order.ordercore.infrastructure.kafka.event.SubmitOrderEvent;
+import com.order.ordercore.infrastructure.kafka.event.SubmitOrderEvents;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
