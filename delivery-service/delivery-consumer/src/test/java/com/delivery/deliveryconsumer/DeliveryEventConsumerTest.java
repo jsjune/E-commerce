@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
-import com.delivery.deliveryapi.usecase.DeliveryAddressUseCase;
-import com.delivery.deliveryapi.usecase.dto.RegisterAddressDto;
 import com.delivery.deliveryconsumer.testConfig.IntegrationTestSupport;
 import com.delivery.deliverycore.infrastructure.entity.Address;
 import com.delivery.deliverycore.infrastructure.entity.Delivery;
@@ -39,8 +37,6 @@ public class DeliveryEventConsumerTest extends IntegrationTestSupport {
     @Autowired
     private DeliveryAddressRepository deliveryAddressRepository;
     @Autowired
-    private DeliveryAddressUseCase deliveryAddressUseCase;
-    @Autowired
     private ApplicationEvents events;
 
     @BeforeEach
@@ -53,11 +49,9 @@ public class DeliveryEventConsumerTest extends IntegrationTestSupport {
     @Test
     void consumeDelivery() throws Exception {
         // given
-        long memberId = 1L;
-        boolean mainAddress = true;
-        RegisterAddressDto command = getAddressRequest(mainAddress);
-        deliveryAddressUseCase.registerAddress(memberId, command);
-        DeliveryAddress deliveryAddress = deliveryAddressRepository.findAll().stream().findFirst()
+        DeliveryAddress deliveryAddress = DeliveryAddress.builder().address(Address.builder().build()).build();
+        deliveryAddressRepository.save(deliveryAddress);
+        DeliveryAddress findDeliveryAddress = deliveryAddressRepository.findAll().stream().findFirst()
             .get();
         EventResult eventResult = EventResult.builder()
             .productOrderId(1L)
@@ -70,7 +64,7 @@ public class DeliveryEventConsumerTest extends IntegrationTestSupport {
                 .build())
             .memberId(1L)
             .paymentMethodId(1L)
-            .deliveryAddressId(deliveryAddress.getId())
+            .deliveryAddressId(findDeliveryAddress.getId())
             .paymentId(1L)
             .deliveryId(null)
             .build();
@@ -112,14 +106,4 @@ public class DeliveryEventConsumerTest extends IntegrationTestSupport {
         assertNotNull(delivery.getReferenceCode());
     }
 
-    private static RegisterAddressDto getAddressRequest(boolean mainAddress) {
-        return RegisterAddressDto.builder()
-            .street("서울시 강남구")
-            .detailAddress("역삼동")
-            .zipCode("12345")
-            .alias("집")
-            .receiver("홍길동")
-            .mainAddress(mainAddress)
-            .build();
-    }
 }

@@ -34,20 +34,6 @@ public class InternalProductService implements InternalProductUseCase {
     }
 
     @Override
-    public int decreaseStock(Long productId, Long quantity) {
-        Optional<Product> findProduct = productRepository.findById(productId);
-        if (findProduct.isPresent()) {
-            Product product = findProduct.get();
-            if (product.getTotalStock() < quantity) {
-                return -1;
-            }
-            product.decreaseStock(quantity);
-            return 1;
-        }
-        return -1;
-    }
-
-    @Override
     public Boolean incrementStock(Long productId, Long quantity) {
         Optional<Product> findProduct = productRepository.findById(productId);
         if (findProduct.isPresent()) {

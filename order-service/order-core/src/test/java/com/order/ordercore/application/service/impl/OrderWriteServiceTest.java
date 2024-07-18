@@ -148,6 +148,10 @@ class OrderWriteServiceTest extends IntegrationTestSupport {
             .deliveryAddressId(1L)
             .build();
         List<CartDto> cartList = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            cartList.add(CartDto.builder()
+                .productId((long) i).build());
+        }
         when(memberClient.getCartList(memberId, command.cartIds())).thenReturn(cartList);
 
         // when

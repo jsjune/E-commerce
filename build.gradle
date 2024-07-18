@@ -38,6 +38,18 @@ subprojects {
                 html.required = false
             }
         }
+
+        jacocoTestCoverageVerification {
+            violationRules {
+                rule {
+                    limit {
+                        minimum = 0.80
+                    }
+                }
+            }
+        }
+
+        tasks.check.dependsOn jacocoTestCoverageVerification
     }
 }
 
@@ -55,19 +67,13 @@ tasks.register("jacocoRootReport", JacocoReport) {
     // 특정 클래스 제외
     def classFiles = files(includedProjects.collect { it.sourceSets.main.output }.flatten())
     classFiles = classFiles.asFileTree.matching {
-        exclude '**/config/log/**'
+        exclude '**/config/**'
         exclude '**/entity/Q*'
     }
     classDirectories.from classFiles
 
     // 특정 모듈 제외
     def executionFiles = fileTree(dir: '.', include: '**/build/jacoco/test.exec')
-    executionFiles = executionFiles.matching {
-        exclude '**/apigateway-service/**'
-        exclude '**/common/**'
-        exclude '**/discovery-service/**'
-        exclude '**/logging-consumer/**'
-    }
     executionData.from executionFiles
 
     reports {
@@ -77,7 +83,32 @@ tasks.register("jacocoRootReport", JacocoReport) {
     }
 }
 
+// 커버리지 검증 태스크 추가
+task jacocoRootCoverageVerification(type: JacocoCoverageVerification) {
+    executionData.from fileTree(dir: '.', include: '**/build/jacoco/test.exec')
+    sourceDirectories.from files(includedProjects.collect { it.sourceSets.main.allSource.srcDirs }.flatten())
+
+    // 특정 경로의 클래스만 포함
+    def classFiles = files(includedProjects.collect { it.sourceSets.main.output }.flatten())
+    classFiles = classFiles.asFileTree.matching {
+        include 'com/*/*/application/**'  // 원하는 경로를 포함
+        include 'com/*/*/controller/**'  // 원하는 경로를 포함
+        include 'com/*/*/infrastructure/kafka/*Service'  // 원하는 경로를 포함
+        include 'com/*/*/infrastructure/kafka/*Producer'  // 원하는 경로를 포함
+        include 'com/*/*/infrastructure/repository/**'  // 원하는 경로를 포함
+    }
+    classDirectories.from classFiles
+
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.85
+            }
+        }
+    }
+}
+
 // 모든 테스트가 완료된 후 jacocoRootReport 태스크를 실행하도록 설정
 tasks.named('testAll') {
-    finalizedBy 'jacocoRootReport'
+    finalizedBy 'jacocoRootReport', 'jacocoRootCoverageVerification'
 }

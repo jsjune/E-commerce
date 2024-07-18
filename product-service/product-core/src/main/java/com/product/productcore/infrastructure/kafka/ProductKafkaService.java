@@ -3,6 +3,7 @@ package com.product.productcore.infrastructure.kafka;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.product.productapi.usecase.InternalProductUseCase;
+import com.product.productcore.application.service.ProductDecreaseUseCase;
 import com.product.productcore.infrastructure.entity.ProductOutBox;
 import com.product.productcore.infrastructure.kafka.event.EventResult;
 import com.product.productcore.infrastructure.repository.ProductOutBoxRepository;
@@ -23,11 +24,11 @@ public class ProductKafkaService {
     private String PRODUCT_TOPIC;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ProductOutBoxRepository outBoxRepository;
-    private final InternalProductUseCase internalProductUseCase;
+    private final ProductDecreaseUseCase productDecreaseUseCase;
     private final ApplicationEventPublisher eventPublisher;
 
     public EventResult decreaseStock(EventResult orderEvent) {
-        int status = internalProductUseCase.decreaseStock(orderEvent.orderLine().productId(),
+        int status = productDecreaseUseCase.decreaseStock(orderEvent.orderLine().productId(),
             orderEvent.orderLine().quantity());
         return orderEvent.withStatus(status);
     }

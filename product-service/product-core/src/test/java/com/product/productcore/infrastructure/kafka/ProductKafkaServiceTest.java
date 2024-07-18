@@ -5,7 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.product.productapi.usecase.InternalProductUseCase;
+import com.product.productcore.application.service.ProductDecreaseUseCase;
 import com.product.productcore.infrastructure.entity.ProductOutBox;
 import com.product.productcore.infrastructure.kafka.event.EventResult;
 import com.product.productcore.infrastructure.kafka.event.OrderLineEvent;
@@ -25,7 +25,7 @@ class ProductKafkaServiceTest extends IntegrationTestSupport {
     @Autowired
     private ApplicationEvents events;
     @MockBean
-    private InternalProductUseCase internalProductUseCase;
+    private ProductDecreaseUseCase productDecreaseUseCase;
     @Autowired
     private ProductKafkaService productKafkaService;
     @Autowired
@@ -46,7 +46,7 @@ class ProductKafkaServiceTest extends IntegrationTestSupport {
                 .quantity(1L)
                 .build())
             .build();
-        when(internalProductUseCase.decreaseStock(eventResult.orderLine().productId(), eventResult.orderLine().quantity())).thenReturn(1);
+        when(productDecreaseUseCase.decreaseStock(eventResult.orderLine().productId(), eventResult.orderLine().quantity())).thenReturn(1);
 
         // when
         EventResult result = productKafkaService.decreaseStock(eventResult);

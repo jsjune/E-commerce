@@ -66,36 +66,4 @@ class InternalProductServiceTest extends IntegrationTestSupport {
         assertEquals(result.getSoldQuantity(), 0);
 
     }
-
-    @DisplayName("주문시 재고가 없을때")
-    @Test
-    void none_stock() {
-        // given
-        Product product = Product.builder().totalStock(1L).soldQuantity(99L).build();
-        productRepository.save(product);
-
-        // when
-        int status = internalProductUseCase.decreaseStock(product.getId(), 10L);
-        Product result = productRepository.findById(product.getId()).get();
-
-        // then
-        assertEquals(status, -1);
-        assertEquals(result.getTotalStock(), 1);
-    }
-
-    @DisplayName("주문시 재고 감소")
-    @Test
-    void decrease_stock() {
-        // given
-        Product product = Product.builder().totalStock(100L).soldQuantity(0L).build();
-        productRepository.save(product);
-
-        // when
-        internalProductUseCase.decreaseStock(product.getId(), 10L);
-        Product result = productRepository.findById(product.getId()).get();
-
-        // then
-        assertEquals(result.getTotalStock(), 90);
-        assertEquals(result.getSoldQuantity(), 10);
-    }
 }

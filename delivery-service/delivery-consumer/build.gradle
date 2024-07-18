@@ -34,9 +34,17 @@ dependencies {
     testImplementation 'org.testcontainers:kafka:1.19.7'
 
     implementation project(':delivery-service:delivery-core')
-    implementation project(':delivery-service:delivery-api')
 }
 
 test {
     useJUnitPlatform()
+}
+
+// 도커
+docker {
+    println(tasks.bootJar.outputs.files)
+    name rootProject.name + '-' + project.name.toLowerCase() + ":" + version
+    dockerfile file('../../Dockerfile')
+    files tasks.bootJar.outputs.files
+    buildArgs(['JAR_FILE': tasks.bootJar.outputs.files.singleFile.name])
 }

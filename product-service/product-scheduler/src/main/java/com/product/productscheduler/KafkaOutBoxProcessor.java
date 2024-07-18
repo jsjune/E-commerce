@@ -2,7 +2,7 @@ package com.product.productscheduler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.product.productapi.usecase.InternalProductUseCase;
+import com.product.productcore.application.service.ProductDecreaseUseCase;
 import com.product.productcore.infrastructure.entity.ProductOutBox;
 import com.product.productcore.infrastructure.kafka.KafkaHealthIndicator;
 import com.product.productcore.infrastructure.kafka.ProductKafkaProducer;
@@ -25,7 +25,7 @@ public class KafkaOutBoxProcessor {
     private final ProductOutBoxRepository outBoxRepository;
     private final KafkaHealthIndicator kafkaHealthIndicator;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final InternalProductUseCase internalProductUseCase;
+    private final ProductDecreaseUseCase productDecreaseUseCase;
     private final ProductKafkaProducer productKafkaProducer;
     private final ReentrantLock lock = new ReentrantLock();
 
@@ -41,7 +41,7 @@ public class KafkaOutBoxProcessor {
                     if (kafkaHealthIndicator.isKafkaUp()) {
                         EventResult orderEvent = objectMapper.readValue(outBox.getMessage(),
                             EventResult.class);
-                        int status = internalProductUseCase.decreaseStock(
+                        int status = productDecreaseUseCase.decreaseStock(
                             orderEvent.orderLine().productId(),
                             orderEvent.orderLine().quantity());
                         orderEvent = orderEvent.withStatus(status);

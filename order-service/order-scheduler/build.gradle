@@ -22,10 +22,24 @@ dependencies {
     // actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
+    // https://mvnrepository.com/artifact/org.testcontainers/testcontainers
+    testImplementation 'org.testcontainers:testcontainers:1.19.7'
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
     implementation project(':order-service:order-core')
     implementation project(':common')
 }
 
 test {
     useJUnitPlatform()
+}
+
+// 도커
+docker {
+    println(tasks.bootJar.outputs.files)
+    name rootProject.name + '-' + project.name.toLowerCase() + ":" + version
+    dockerfile file('../../Dockerfile')
+    files tasks.bootJar.outputs.files
+    buildArgs(['JAR_FILE': tasks.bootJar.outputs.files.singleFile.name])
 }
