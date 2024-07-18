@@ -1,16 +1,15 @@
-spring.application.name: order-service
-server.port: 0
+server:
+  port: 0
 
 spring:
   config:
     import:
       - classpath:/application-docker.yml
-#      - classpath:/application-local.yml
-#      - classpath:/application-prod.yml
-#      - classpath:/application-secret.yml
+  application:
+    name: logging-consumer
 
-  profiles:
-    default: local
+  kafka:
+    bootstrap-servers: localhost:9092
 
 eureka:
   instance:
@@ -21,5 +20,3 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://127.0.0.1:8761/eureka
-
-

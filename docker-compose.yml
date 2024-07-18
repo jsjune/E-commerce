@@ -1,15 +1,16 @@
 version: "3.8"
 services:
-  mysql:
+  mysql-member:
     image: mysql:8.0
     networks:
       - ecommerce_network
     environment:
       - MYSQL_ROOT_PASSWORD=1234
     ports:
-      - "3306:3306"
+      - "0:3306"
     volumes:
-      - ./data/mysql_data:/var/lib/mysql
+      - ./sql/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+
   mysql-order:
     image: mysql:8.0
     networks:
@@ -17,9 +18,10 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=1234
     ports:
-      - "3311:3306"
+      - "0:3306"
     volumes:
-      - ./data/order:/var/lib/mysql
+      - ./sql/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+
   mysql-payment:
     image: mysql:8.0
     networks:
@@ -27,9 +29,10 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=1234
     ports:
-      - "3308:3306"
+      - "0:3306"
     volumes:
-      - ./data/payment:/var/lib/mysql
+      - ./sql/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+
   mysql-delivery:
     image: mysql:8.0
     networks:
@@ -37,9 +40,10 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=1234
     ports:
-      - "3309:3306"
+      - "0:3306"
     volumes:
-      - ./data/delivery:/var/lib/mysql
+      - ./sql/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+
   mysql-product:
     image: mysql:8.0
     networks:
@@ -47,9 +51,9 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=1234
     ports:
-      - "3310:3306"
+      - "0:3306"
     volumes:
-      - ./data/product:/var/lib/mysql
+      - ./sql/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
 
   redis:
     image: redis
@@ -57,8 +61,6 @@ services:
       - ecommerce_network
     ports:
       - "6379:6379"
-    volumes:
-      - ./data/redis_data:/data
 
 
   zookeeper:
@@ -88,8 +90,6 @@ services:
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=LC
     depends_on:
       - zookeeper
-    volumes:
-      - ./data/kafka_data:/var/lib/kafka/data
 
   kafka-ui:
     image: provectuslabs/kafka-ui
@@ -107,22 +107,165 @@ services:
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:29092
       - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
 
-  zipkin:
-    image: openzipkin/zipkin
-    ports:
-      - "9411:9411"
+  ecommerce-logging:
+    image: e-commerce-logging-consumer:0.0.1
     networks:
       - ecommerce_network
+    ports:
+      - "0:8080"
 
-#  ecommerce:
-#    image: e-commerce:0.0.2
+  ecommerce-discovery:
+    image: e-commerce-discovery-service:0.0.1
+    networks:
+      - ecommerce_network
+    ports:
+      - "8761:8761"
+
+  ecommerce-gateway:
+    image: e-commerce-apigateway-service:0.0.1
+    depends_on:
+      - ecommerce-discovery
+    networks:
+      - ecommerce_network
+    ports:
+      - "8000:8000"
+
+  ecommerce-member:
+    image: e-commerce-member-core:0.0.1
+    depends_on:
+      - ecommerce-discovery
+      - mysql-member
+      - redis
+    networks:
+      - ecommerce_network
+    ports:
+      - "0:8080"
+
+  ecommerce-product:
+    image: e-commerce-product-core:0.0.1
+    depends_on:
+      - ecommerce-discovery
+      - mysql-product
+      - redis
+    networks:
+      - ecommerce_network
+    ports:
+      - "0:8080"
+
+  ecommerce-product-consumer:
+    image: e-commerce-product-consumer:0.0.1
+    depends_on:
+      - ecommerce-discovery
+      - mysql-product
+      - redis
+    networks:
+      - ecommerce_network
+    ports:
+      - "0:8080"
+
+#  ecommerce-product-scheduler:
+#    image: e-commerce-product-scheduler:0.0.1
+#    depends_on:
+#      - ecommerce-discovery
+#      - mysql-product
+#      - redis
 #    networks:
 #      - ecommerce_network
 #    ports:
-#      - "8080:8080"
+#      - "0:8080"
+
+  ecommerce-payment:
+    image: e-commerce-payment-core:0.0.1
+    depends_on:
+      - ecommerce-discovery
+      - mysql-payment
+    networks:
+      - ecommerce_network
+    ports:
+      - "0:8080"
+
+  ecommerce-payment-consumer:
+    image: e-commerce-payment-consumer:0.0.1
+    depends_on:
+      - ecommerce-discovery
+      - mysql-payment
+    networks:
+      - ecommerce_network
+    ports:
+      - "0:8080"
+
+#  ecommerce-payment-scheduler:
+#    image: e-commerce-payment-scheduler:0.0.1
 #    depends_on:
-#      - mysql
+#      - ecommerce-discovery
+#      - mysql-payment
+#    networks:
+#      - ecommerce_network
+#    ports:
+#      - "0:8080"
+
+  ecommerce-order:
+    image: e-commerce-order-core:0.0.1
+    depends_on:
+      - ecommerce-discovery
+      - mysql-order
+      - redis
+    networks:
+      - ecommerce_network
+    ports:
+      - "0:8080"
+
+  ecommerce-order-consumer:
+    image: e-commerce-order-consumer:0.0.1
+    depends_on:
+      - ecommerce-discovery
+      - mysql-order
+      - redis
+    networks:
+      - ecommerce_network
+    ports:
+      - "0:8080"
+
+#  ecommerce-order-scheduler:
+#    image: e-commerce-order-scheduler:0.0.1
+#    depends_on:
+#      - ecommerce-discovery
+#      - mysql-order
 #      - redis
+#    networks:
+#      - ecommerce_network
+#    ports:
+#      - "0:8080"
+
+  ecommerce-delivery:
+    image: e-commerce-delivery-core:0.0.1
+    depends_on:
+      - ecommerce-discovery
+      - mysql-delivery
+    networks:
+      - ecommerce_network
+    ports:
+      - "0:8080"
+
+  ecommerce-delivery-consumer:
+    image: e-commerce-delivery-consumer:0.0.1
+    depends_on:
+      - ecommerce-discovery
+      - mysql-delivery
+    networks:
+      - ecommerce_network
+    ports:
+      - "0:8080"
+
+#  ecommerce-delivery-scheduler:
+#    image: e-commerce-delivery-scheduler:0.0.1
+#    depends_on:
+#      - ecommerce-discovery
+#      - mysql-delivery
+#    networks:
+#      - ecommerce_network
+#    ports:
+#      - "0:8080"
 
 networks:
   ecommerce_network:

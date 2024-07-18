@@ -3,15 +3,17 @@ server:
 
 spring:
   config:
-    import:
-      - classpath:/application-docker.yml
+    activate:
+      on-profile: docker
 
   application:
     name: discovery-service
 
 eureka:
+  instance:
+    hostname: localhost
+    prefer-ip-address: true
   client:
     register-with-eureka: false
     fetch-registry: false
-  instance:
-    hostname: localhost
+

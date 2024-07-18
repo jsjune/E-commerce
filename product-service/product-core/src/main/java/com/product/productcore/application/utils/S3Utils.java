@@ -17,7 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
-@Component
+//@Component
 @RequiredArgsConstructor
 @Slf4j
 public class S3Utils {

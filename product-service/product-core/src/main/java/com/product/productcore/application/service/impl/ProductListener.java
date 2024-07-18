@@ -28,7 +28,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Slf4j
 public class ProductListener {
 
-    private final S3Utils s3Utils;
+//    private final S3Utils s3Utils;
     private final ProductRepository productRepository;
     private final ProductKafkaProducer productKafkaProducer;
     private static final String UPLOAD_FOLDER = "images";
@@ -59,11 +59,11 @@ public class ProductListener {
                     String uploadImageName = UUID.randomUUID() + "_" + fileName;
 
                     String s3Path = uploadFolder + "/" + uploadImageName;
-                    String orgImageUrl = s3Utils.uploadFile(inputStream, imageBytes.length,
-                        contentType, s3Path);
+//                    String orgImageUrl = s3Utils.uploadFile(inputStream, imageBytes.length, contentType, s3Path);
+                    String orgImageUrl = "org_image_url";
                     String thumbS3Path = uploadFolder + "/s_" + uploadImageName;
-                    String thumbnailUrl = s3Utils.uploadThumbFile(thumbInputStream, contentType,
-                        thumbS3Path);
+//                    String thumbnailUrl = s3Utils.uploadThumbFile(thumbInputStream, contentType, thumbS3Path);
+                    String thumbnailUrl = "thumbnail_url";
                     images.add(new ProductImage(orgImageUrl, s3Path, thumbnailUrl, thumbS3Path));
                 }
                 product.assignImages(images);

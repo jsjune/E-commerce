@@ -34,7 +34,7 @@ public class SecurityConfig {
             .sessionManagement(
                 session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authorize ->
-                authorize.requestMatchers("/actuator/**", "/h2-console/**").permitAll()
+                authorize.requestMatchers("/actuator/**", "/h2-console/**", "/internal/**").permitAll()
                     .requestMatchers("/**").access(this::hasIpAddress)
                     .anyRequest().authenticated()
             )

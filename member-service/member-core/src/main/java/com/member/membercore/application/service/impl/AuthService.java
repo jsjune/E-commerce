@@ -57,7 +57,7 @@ public class AuthService implements AuthUseCase {
             .company(command.company())
             .build();
         memberRepository.save(member);
-        eventPublisher.publishEvent(new SignupEmailEvent(command.email()));
+//        eventPublisher.publishEvent(new SignupEmailEvent(command.email()));
     }
 
     @Override

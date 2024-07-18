@@ -32,10 +32,10 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-impl:0.12.5'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.12.5'
 
-    // zipkin
-    implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
-    implementation 'io.github.openfeign:feign-micrometer:13.3'
-    implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+//    // zipkin
+//    implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
+//    implementation 'io.github.openfeign:feign-micrometer:13.3'
+//    implementation 'io.micrometer:micrometer-tracing-bridge-brave'
 
     // actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
