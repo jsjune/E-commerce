@@ -13,6 +13,7 @@ public record ProductResponseDto(
     String name,
     String description,
     Long price,
+    Long totalStock,
     Set<String> tags,
     List<String> orgProductImages
 ) {
