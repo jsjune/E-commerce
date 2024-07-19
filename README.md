@@ -56,7 +56,9 @@ $ docker-compose up -d
 </br>
 
 ## 🏛️Architecture
-<img src="https://github.com/user-attachments/assets/2e55d1a6-e3ad-41f6-bcb6-4915675f0e08" width="70%">
+<div>
+  <img src="https://github.com/user-attachments/assets/2e55d1a6-e3ad-41f6-bcb6-4915675f0e08" width="70%">
+</div>
 
 </br>
 
