@@ -163,16 +163,16 @@ services:
     ports:
       - "0:8080"
 
-#  ecommerce-product-scheduler:
-#    image: e-commerce-product-scheduler:0.0.1
-#    depends_on:
-#      - ecommerce-discovery
-#      - mysql-product
-#      - redis
-#    networks:
-#      - ecommerce_network
-#    ports:
-#      - "0:8080"
+  ecommerce-product-scheduler:
+    image: e-commerce-product-scheduler:0.0.1
+    depends_on:
+      - ecommerce-discovery
+      - mysql-product
+      - redis
+    networks:
+      - ecommerce_network
+    ports:
+      - "0:8080"
 
   ecommerce-payment:
     image: e-commerce-payment-core:0.0.1
@@ -194,15 +194,15 @@ services:
     ports:
       - "0:8080"
 
-#  ecommerce-payment-scheduler:
-#    image: e-commerce-payment-scheduler:0.0.1
-#    depends_on:
-#      - ecommerce-discovery
-#      - mysql-payment
-#    networks:
-#      - ecommerce_network
-#    ports:
-#      - "0:8080"
+  ecommerce-payment-scheduler:
+    image: e-commerce-payment-scheduler:0.0.1
+    depends_on:
+      - ecommerce-discovery
+      - mysql-payment
+    networks:
+      - ecommerce_network
+    ports:
+      - "0:8080"
 
   ecommerce-order:
     image: e-commerce-order-core:0.0.1
@@ -226,16 +226,16 @@ services:
     ports:
       - "0:8080"
 
-#  ecommerce-order-scheduler:
-#    image: e-commerce-order-scheduler:0.0.1
-#    depends_on:
-#      - ecommerce-discovery
-#      - mysql-order
-#      - redis
-#    networks:
-#      - ecommerce_network
-#    ports:
-#      - "0:8080"
+  ecommerce-order-scheduler:
+    image: e-commerce-order-scheduler:0.0.1
+    depends_on:
+      - ecommerce-discovery
+      - mysql-order
+      - redis
+    networks:
+      - ecommerce_network
+    ports:
+      - "0:8080"
 
   ecommerce-delivery:
     image: e-commerce-delivery-core:0.0.1
@@ -257,15 +257,15 @@ services:
     ports:
       - "0:8080"
 
-#  ecommerce-delivery-scheduler:
-#    image: e-commerce-delivery-scheduler:0.0.1
-#    depends_on:
-#      - ecommerce-discovery
-#      - mysql-delivery
-#    networks:
-#      - ecommerce_network
-#    ports:
-#      - "0:8080"
+  ecommerce-delivery-scheduler:
+    image: e-commerce-delivery-scheduler:0.0.1
+    depends_on:
+      - ecommerce-discovery
+      - mysql-delivery
+    networks:
+      - ecommerce_network
+    ports:
+      - "0:8080"
 
 networks:
   ecommerce_network:

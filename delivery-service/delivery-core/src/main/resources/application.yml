@@ -5,8 +5,8 @@ spring:
   config:
     import:
       - classpath:/application-local.yml
-      - classpath:/application-prod.yml
-      - classpath:/application-secret.yml
+#      - classpath:/application-prod.yml
+#      - classpath:/application-secret.yml
 
   profiles:
     default: local
