@@ -6,6 +6,8 @@
 ### 📅프로젝트 실행 기간
 2024년 6월 19일 ~ 2024년 7월 17일까지
 
+</br>
+
 ## 📚STACKS
 <div align=center> 
   <img src="https://img.shields.io/badge/java%2017-007396?style=for-the-badge&logo=java&logoColor=white"> 
@@ -24,6 +26,8 @@
   <img src="https://img.shields.io/badge/docker--compose-F7A81B?style=for-the-badge&logo=docker&logoColor=white">
 </div>
 
+</br>
+
 ## 🚀시작 가이드
 #### 📥설치
 ```
@@ -35,14 +39,24 @@ $ cd E-commerce
 $ ./gradlew docker
 $ docker-compose up -d
 ```
+##### 🚨주의
+1. 컨테이너가 25개 띄워집니다!!
+2. 해당 배포 버전은 이미지 업로드와 이메일 기능은 빠져있습니다.
+ 
+</br>
 
 ## 📑API 명세서
 ### [API 명세서 (Postman)](https://documenter.getpostman.com/view/18677964/2sA3XSBMRR#intro)
 
+</br>
+
 ## 🗂ERD
 ![image](https://github.com/user-attachments/assets/8a73293d-8e34-4a3a-8acb-f16654f9e125)
 
+</br>
+
 ## 🏛️Architecture
+![image](https://github.com/user-attachments/assets/2e55d1a6-e3ad-41f6-bcb6-4915675f0e08)
 
 
 
