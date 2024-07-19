@@ -161,6 +161,6 @@ public void consumeOrderFromPayment(ConsumerRecord<String, String> record) {
   - 그렇게 되면 동시에 동일한 데이터를 조회하게 되어 동시성 문제가 터질 수 있다.
   - **해결 방안**: 레디스 분산락 적용 </br>
     <img src="https://github.com/user-attachments/assets/b036c091-ef74-40d3-9822-e349da71e3ee" width="70%">
-- 이미지 업로드 비동기 통신으로 변환 과정에서 문제 발생
+- 이미지 업로드 비동기 통신으로 변환 과정에서 문제 발생 [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/37b94df26b0d46e88b7607656d79ac40?pvs=74)
   - MultipartFile을 이벤트로 보내고 Listener에서 해당 파일을 처리하는 과정에서 NoSuchFileException이 발생
   - **해결 방안**: MultipartFile을 바이트 배열로 변환하여 이벤트를 보내서 해결
