@@ -3,12 +3,12 @@
 ## 프로젝트 소개
 이 프로젝트는 MSA(Microservices Architecture) 기반의 전자상거래 플랫폼을 구축하는 것을 목표로 합니다. MSA는 각 서비스가 독립적으로 개발되고 배포될 수 있도록 하여 시스템의 유연성과 확장성을 높이는 아키텍처입니다. 이를 통해 다양한 기능들을 보다 효율적으로 관리하고, 빠르게 변화하는 비즈니스 요구사항에 유연하게 대응할 수 있습니다. 주요 기능으로는 상품 관리, 주문 처리 등이 있습니다. 
 
-### 📅프로젝트 실행 기간
+### 📅 프로젝트 실행 기간
 2024년 6월 19일 ~ 2024년 7월 17일까지
 
 </br>
 
-## 📚STACKS
+## 📚 STACKS
 <div align=center> 
   <img src="https://img.shields.io/badge/java%2017-007396?style=for-the-badge&logo=java&logoColor=white"> 
   <img src="https://img.shields.io/badge/springboot%203.2.6-6DB33F?style=for-the-badge&logo=springboot&logoColor=white">
@@ -28,7 +28,7 @@
 
 </br>
 
-## 🚀시작 가이드
+## 🚀 시작 가이드
 #### 📥설치
 ```
 $ git clone --branch local-deploy https://github.com/jsjune/E-commerce.git
@@ -45,12 +45,12 @@ $ docker-compose up -d
  
 </br>
 
-## 📑API 명세서
+## 📑 API 명세서
 ### [API 명세서 (Postman)](https://documenter.getpostman.com/view/18677964/2sA3XSBMRR#intro)
 
 </br>
 
-## 🗂ERD
+## 🗂 ERD
 #### Monolithic
 <div>
   <img src="https://github.com/user-attachments/assets/a16ee884-489a-46a0-92e3-ab1bf8927eac" width="70%">
@@ -123,7 +123,7 @@ public void consumeOrderFromPayment(ConsumerRecord<String, String> record) {
 </br>
 
 ## 📈 성능 최적화 및 트러블슈팅
-### 성능 최적화
+### 🕒성능 최적화
 1. Monolithic에서 MSA로 전환 [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/monolithic-msa-e63e65abcc1c47118bcf16022bad421a)
     - 테스트는 로컬에서 jmeter를 사용해서 테스트를 진행했습니다. 
     - 조건은 100초 동안 점진적으로 사용자가 증가하는 조건으로 주문하기에 대한 요청 테스트를 진행했습니다.
@@ -154,13 +154,13 @@ public void consumeOrderFromPayment(ConsumerRecord<String, String> record) {
     - `ApplicationEventPublisher`을 사용하여 비동기통신을 사용하여 개선
     - 5초 -> 100ms, 50배 속도 개선
 
-### 트러블 슈팅
+### 🛠️트러블 슈팅
 - 분산 환경에서 재고 감소에 대한 동시성 문제 [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/fadcbd5a4ed04726a13bbac744a380f0)
   - 기본적으로 파티션을 하나로 하고 컨슈머를 하나만 띄웠을 경우, 동시성 문제가 일어나지 않는다.
   - 하지만 성능을 위해 여러개의 파티션과 그에 맞는 컨슈머 서버를 띄우게 된다.
   - 그렇게 되면 동시에 동일한 데이터를 조회하게 되어 동시성 문제가 터질 수 있다.
-  - **해결 방안: 레디스 분산락 적용** </br>
+  - **해결 방안**: 레디스 분산락 적용 </br>
     <img src="https://github.com/user-attachments/assets/b036c091-ef74-40d3-9822-e349da71e3ee" width="70%">
 - 이미지 업로드 비동기 통신으로 변환 과정에서 문제 발생
   - MultipartFile을 이벤트로 보내고 Listener에서 해당 파일을 처리하는 과정에서 NoSuchFileException이 발생
-  - **해결 방안: MultipartFile을 바이트 배열로 변환하여 이벤트를 보내서 해결**
+  - **해결 방안**: MultipartFile을 바이트 배열로 변환하여 이벤트를 보내서 해결
