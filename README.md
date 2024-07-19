@@ -56,7 +56,27 @@ $ docker-compose up -d
 </br>
 
 ## 🏛️Architecture
-![image](https://github.com/user-attachments/assets/2e55d1a6-e3ad-41f6-bcb6-4915675f0e08)
+<img src="https://github.com/user-attachments/assets/2e55d1a6-e3ad-41f6-bcb6-4915675f0e08" width="70%">
 
+</br>
+
+## 🌟 주요 기능
+<details>
+<summary>주문하기 flow</summary>
+  <img src="https://github.com/user-attachments/assets/67a669b2-654a-4fcc-94c6-0a08b84daab8" width="70%">
+  <ol>
+    <li>레디스에서 재고 차감과 주문서 저장 후 결제 요청 이벤트를 보냄</li>
+    <li>결제 컨슈머 서버에서 결제 내역 저장과 실제 결제 요청을 보낸 후 다시 order로 이벤트를 보냄</li>
+    <li>결제에 대한 상태값을 받은 order는 rollback 요청을 하거나 배송 요청 이벤트를 보냄</li>
+    <li>배송 컨슈머 서버에서 배송 내역 저장과 실제 배송 요청을 보낸 후 다시 order로 이벤트를 보냄</li>
+    <li>배송에 대한 상태값을 받은 order는 rollback 요청을 하거나 상품 재고 감소 요청 이벤트를 보냄</li>
+    <li>상품 컨슈머 서버에서 실제 db에 있는 상품의 재고 감소 후 다시 order로 이벤트를 보냄</li>
+    <li>order에서 재고 감소에 대한 상태값에 따라 rollback 요청을 보냄</li>
+  </ol>
+</details>
+
+</br>
+
+## 📈 성능 최적화 및 트러블슈팅
 
 
