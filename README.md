@@ -51,7 +51,9 @@ $ docker-compose up -d
 </br>
 
 ## 🗂ERD
-![image](https://github.com/user-attachments/assets/8a73293d-8e34-4a3a-8acb-f16654f9e125)
+<div>
+  <img src="https://github.com/user-attachments/assets/8a73293d-8e34-4a3a-8acb-f16654f9e125" width="70%">
+</div>
 
 </br>
 
@@ -78,9 +80,73 @@ $ docker-compose up -d
     <li>order에서 재고 감소에 대한 상태값에 따라 rollback 요청을 보냄</li>
   </ol>
 </details>
-
+<details>
+  <summary>카프카 네트워크 장애가 난다면?</summary>
+  <pre><code>
+@KafkaListener(topics = "${consumers.topic1}", groupId = "${consumers.groupId}")
+public void consumeOrderFromPayment(ConsumerRecord<String, String> record) {
+    try {
+        EventResult eventResult = objectMapper.readValue(record.value(), EventResult.class);
+        if (eventResult.status() == -1) {
+            orderKafkaService.handleRollbackOrderFromPayment(eventResult);
+        } else {
+            if (kafkaHealthIndicator.isKafkaUp()) {
+                orderKafkaService.handleOrderFromPayment(eventResult);
+            } else {
+                log.error("Failed to send payment event");
+                orderKafkaService.occurDeliveryFailure(eventResult);
+            }
+        }
+    } catch (Exception e) {
+        log.error("Failed to consume order from payment", e);
+        throw new RuntimeException("Failed to consume order from payment");
+    }
+}
+  </code></pre>
+  <ol>
+    <li>Kafka health check 수행</li>
+    <li>통신 가능 시 정상적으로 publish</li>
+    <li>통신 불가 시 이벤트를 DB에 저장</li>
+    <ul>
+      <li>스케줄러를 이용해 카프카와의 통신 상태 주기적으로 체크</li>
+      <li>통신 가능 시 DB에 있는 이벤트 정상적으로 전송</li>
+    </ul>
+  </ol>
+</details>
+  
 </br>
 
 ## 📈 성능 최적화 및 트러블슈팅
+### 성능 최적화
+1. Monolithic에서 MSA로 전환 [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/monolithic-msa-e63e65abcc1c47118bcf16022bad421a)
+    - 테스트는 로컬에서 jmeter를 사용해서 테스트를 진행했습니다. 
+    - 조건은 100초 동안 점진적으로 사용자가 증가하는 조건으로 주문하기에 대한 요청 테스트를 진행했습니다.
 
+    |  | 모놀리식 아키텍처 | MSA (동기) | MSA (EDA, 비동기) |
+    | --- | --- | --- | --- |
+    | 3000명일 때 평균 응답 시간 | 6.3초 | 13초 | 0.141초 |
+    | 5000명일 때 평균 응답 시간 | 42초 | 137초 | 0.196초 |
+    | TPS 그래프 | 불규칙적, 평균 22 ~ 25 TPS | 불규칙적, 평균 15 ~ 20 TPS | 일정, 평균 30 ~ 50 TPS |
+    | Latency 그래프 | 우상향 | 우상향 | 대부분 평온 |
 
+    - 이를 통해 EDA 기반 비동기 MSA가 성능 면에서 가장 우수함을 확인할 수 있습니다.
+
+2. 검색 조회 성능 개선 [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/31787fcbc3fa47178d753db7855e78d7)
+    - 500만개의 데이터를 기준으로 테스트 했습니다.
+  
+    |  | 응답 시간 | 응답 속도 개선 정도 |
+    | --- | --- | --- |
+    | 인덱스  | 8500ms |  |
+    | 커버링 인덱스 | 900ms | 944% 빨라짐 |
+    | 캐싱 | 15ms | 56666% 빨라짐 |
+
+3. 이메일 인증 코드 보내기 속도 개선  
+    - `ApplicationEventPublisher`을 사용하여 비동기통신을 사용하여 개선
+    - 12~14초 → 30ms 433배 속도 개선
+
+4. 상품 등록 속도 개선
+    - `ApplicationEventPublisher`을 사용하여 비동기통신을 사용하여 개선
+    - 5초 -> 100ms 50배 속도 개선
+
+### 트러블 슈팅
+- 분산 환경에서 재고 감소에 대한 동시성 문제 [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/fadcbd5a4ed04726a13bbac744a380f0)
