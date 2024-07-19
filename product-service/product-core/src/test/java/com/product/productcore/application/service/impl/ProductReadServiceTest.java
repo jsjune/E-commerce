@@ -3,11 +3,13 @@ package com.product.productcore.application.service.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import com.product.productapi.usecase.ProductReadUseCase;
 import com.product.productapi.usecase.dto.ProductListResponseDto;
 import com.product.productapi.usecase.dto.ProductResponseDto;
+import com.product.productcore.application.utils.RedisUtils;
 import com.product.productcore.openfeign.MemberClient;
 import com.product.productcore.application.service.dto.MemberDto;
 import com.product.productcore.infrastructure.entity.Product;
@@ -35,6 +37,9 @@ class ProductReadServiceTest extends IntegrationTestSupport {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @MockBean
+    private RedisUtils redisUtils;
 
     @BeforeEach
     void setUp() {
@@ -95,6 +100,8 @@ class ProductReadServiceTest extends IntegrationTestSupport {
                 List.of(new ProductImage("image", "imagePath", "thumbnail", "thumbnailPath")))
             .build();
         productRepository.save(product);
+        long totalStock = 10L;
+        when(redisUtils.getStock(anyString())).thenReturn(totalStock);
 
         // when
         ProductResponseDto response = productReadUseCase.getProduct(product.getId());
@@ -102,7 +109,7 @@ class ProductReadServiceTest extends IntegrationTestSupport {
         // then
         assertEquals(response.name(), product.getName());
         assertEquals(response.phoneNumber(), member.phoneNumber());
-
+        assertEquals(response.totalStock(), totalStock);
     }
 
     private MemberDto registerMember(String phoneNumber) {

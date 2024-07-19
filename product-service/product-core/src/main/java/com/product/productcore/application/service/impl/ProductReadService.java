@@ -6,6 +6,7 @@ import com.product.productapi.usecase.dto.ProductListResponseDto;
 import com.product.productapi.usecase.dto.ProductResponseDto;
 import com.product.productcore.application.utils.AesUtil;
 import com.product.productcore.application.utils.ExceptionWrapper;
+import com.product.productcore.application.utils.RedisUtils;
 import com.product.productcore.infrastructure.entity.Product;
 import com.product.productcore.infrastructure.entity.ProductImage;
 import com.product.productcore.infrastructure.repository.ProductRepository;
@@ -27,12 +28,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductReadService implements ProductReadUseCase {
     private final ProductRepository productRepository;
     private final AesUtil aesUtil;
+    private final RedisUtils redisUtils;
 
     @Override
     public ProductResponseDto getProduct(Long productId) throws Exception {
         Optional<Product> findProduct = productRepository.findById(productId);
         if (findProduct.isPresent()) {
             Product product = findProduct.get();
+            Long totalStock = redisUtils.getStock(String.format("product.stock=%d", productId));
             return ProductResponseDto.builder()
                 .sellerId(product.getSeller().getSellerId())
                 .company(product.getSeller().getCompany())
@@ -41,6 +44,7 @@ public class ProductReadService implements ProductReadUseCase {
                 .description(product.getDescription())
                 .price(product.getPrice())
                 .tags(product.getTags())
+                .totalStock(totalStock)
                 .orgProductImages(product.getProductImages().stream()
                     .map(ProductImage::getOrgImageUrl)
                     .collect(Collectors.toList()))
