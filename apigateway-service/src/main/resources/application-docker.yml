@@ -69,6 +69,22 @@ spring:
         - id: member-service
           uri: lb://MEMBER-SERVICE
           predicates:
+            - Path=/auth/usernameCheck # 인증필요X
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/(?<segment>.*), /$\{segment}
+        - id: member-service
+          uri: lb://MEMBER-SERVICE
+          predicates:
+            - Path=/auth/mailCheck # 인증필요X
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/(?<segment>.*), /$\{segment}
+        - id: member-service
+          uri: lb://MEMBER-SERVICE
+          predicates:
             - Path=/auth/** # 인증필요O
             - Method=GET, POST, PUT, DELETE
           filters:
