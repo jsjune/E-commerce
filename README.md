@@ -39,7 +39,7 @@ $ cd E-commerce
 $ ./gradlew docker
 $ docker-compose up -d
 ```
-##### 🚨주의
+#### 🚨주의
 1. 컨테이너가 25개 띄워집니다!!
 2. 해당 배포 버전은 이미지 업로드와 이메일 기능은 빠져있습니다.
  
