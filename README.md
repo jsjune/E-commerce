@@ -126,7 +126,7 @@ public void consumeOrderFromPayment(ConsumerRecord<String, String> record) {
     | --- | --- | --- | --- |
     | 3000명일 때 평균 응답 | 6.3초 | 13초 | 0.141초 |
     | 5000명일 때 평균 응답 | 42초 | 137초 | 0.196초 |
-    | TPS 그래프 | 불규칙적, 평균 22 ~ 25 TPS | 불규칙적, 평균 15 ~ 20 TPS | 일정, 평균 30 ~ 50 TPS |
+    | TPS 그래프 | 불규칙적, <br>평균 22 ~ 25 TPS | 불규칙적, <br>평균 15 ~ 20 TPS | 일정, <br>평균 30 ~ 50 TPS |
     | Latency 그래프 | 우상향 | 우상향 | 대부분 평온 |
 
     - 이를 통해 EDA 기반 비동기 MSA가 성능 면에서 가장 우수함을 확인할 수 있습니다.
