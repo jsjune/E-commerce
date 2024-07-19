@@ -51,6 +51,17 @@ $ docker-compose up -d
 </br>
 
 ## 🗂ERD
+#### 이벤트 스토밍 초기 설계
+<div>
+  <img src="https://github.com/user-attachments/assets/134ee96a-d1f3-48a2-bdc1-db16ec420a7a" width="70%">
+</div>
+
+#### Monolithic
+<div>
+  <img src="https://github.com/user-attachments/assets/a16ee884-489a-46a0-92e3-ab1bf8927eac" width="70%">
+</div>
+
+#### MSA
 <div>
   <img src="https://github.com/user-attachments/assets/8a73293d-8e34-4a3a-8acb-f16654f9e125" width="70%">
 </div>
