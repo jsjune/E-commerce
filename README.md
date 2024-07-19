@@ -156,3 +156,9 @@ public void consumeOrderFromPayment(ConsumerRecord<String, String> record) {
 
 ### 트러블 슈팅
 - 분산 환경에서 재고 감소에 대한 동시성 문제 [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/fadcbd5a4ed04726a13bbac744a380f0)
+  - 기본적으로 파티션을 하나로 하고 컨슈머를 하나만 띄웠을 경우, 동시성 문제가 일어나지 않는다.
+  - 하지만 성능을 위해 여러개의 파티션과 그에 맞는 컨슈머 서버를 띄우게 된다.
+  - 그렇게 되면 동시에 동일한 데이터를 조회하게 되어 동시성 문제가 터질 수 있다.
+  - **해결 방안 레디스 분산락 적용** </br>
+    <img src="https://github.com/user-attachments/assets/b036c091-ef74-40d3-9822-e349da71e3ee" width="70%">
+    
