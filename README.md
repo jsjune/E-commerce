@@ -71,6 +71,7 @@ $ docker-compose up -d
 </br>
 
 ## 🌟 주요 기능
+#### Monolithic에서 MSA 전환 [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/2-MSA-2688ec2dc1c5404b9f5bdbe204d143e6)
 #### 주문하기 - EDA (분산 트랜잭션) [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/3-EDA-6dce1ca4c75a479caac0c514c9b211b2)
 <details>
   <summary>주문하기 flow</summary>
