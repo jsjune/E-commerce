@@ -146,11 +146,13 @@ public void consumeOrderFromPayment(ConsumerRecord<String, String> record) {
     | 커버링 인덱스 | 900ms | 944% 빨라짐 |
     | 캐싱 | 15ms | 56666% 빨라짐 |
 
-3. 이메일 인증 코드 보내기 속도 개선  
+3. 이메일 인증 코드 보내기 속도 개선
+    - 이메일 전송 로직을 비동기 통신으로 처리  
     - `ApplicationEventPublisher`을 사용하여 비동기통신을 사용하여 개선
     - 12~14초 → 30ms, 433배 속도 개선
 
-4. 상품 등록 속도 개선
+5. 상품 등록 속도 개선
+    - S3 이미지 업로드 로직을 비동기 통신으로 처리
     - `ApplicationEventPublisher`을 사용하여 비동기통신을 사용하여 개선
     - 5초 -> 100ms, 50배 속도 개선
 
