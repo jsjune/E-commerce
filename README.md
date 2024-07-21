@@ -51,12 +51,12 @@ $ docker-compose up -d
 </br>
 
 ## 🗂 ERD
-#### Monolithic
+#### 전) Monolithic
 <div>
   <img src="https://github.com/user-attachments/assets/a16ee884-489a-46a0-92e3-ab1bf8927eac" width="70%">
 </div>
 
-#### MSA
+#### 후) MSA
 <div>
   <img src="https://github.com/user-attachments/assets/8a73293d-8e34-4a3a-8acb-f16654f9e125" width="70%">
 </div>
@@ -195,12 +195,15 @@ task jacocoRootCoverageVerification(type: JacocoCoverageVerification) {
     - 5초 -> 100ms, 50배 속도 개선
 
 ### 🛠️트러블 슈팅
-- **분산 환경에서 재고 감소에 대한 동시성 문제** [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/fadcbd5a4ed04726a13bbac744a380f0)
+1. **분산 환경에서 재고 감소에 대한 동시성 문제** [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/fadcbd5a4ed04726a13bbac744a380f0)
   - 기본적으로 파티션을 하나로 하고 컨슈머를 하나만 띄웠을 경우, 동시성 문제가 일어나지 않는다.
   - 하지만 성능을 위해 여러개의 파티션과 그에 맞는 컨슈머 서버를 띄우게 된다.
   - 그렇게 되면 동시에 동일한 데이터를 조회하게 되어 동시성 문제가 터질 수 있다.
   - **해결 방안**: 레디스 분산락 적용 </br>
     <img src="https://github.com/user-attachments/assets/b036c091-ef74-40d3-9822-e349da71e3ee" width="70%">
-- **이미지 업로드 비동기 통신으로 변환 과정에서 문제 발생** [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/37b94df26b0d46e88b7607656d79ac40?pvs=74)
+2. **이미지 업로드 비동기 통신으로 변환 과정에서 문제 발생** [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/37b94df26b0d46e88b7607656d79ac40?pvs=74)
   - MultipartFile을 이벤트로 보내고 Listener에서 해당 파일을 처리하는 과정에서 NoSuchFileException이 발생
   - **해결 방안**: MultipartFile을 바이트 배열로 변환하여 이벤트를 보내서 해결
+
+## 🔗 프로젝트 문서
+[<ins>Monolithic에서 MSA로 전환기</ins>](https://jeongburgger.notion.site/MSA-30465a5476d24ca3a5d79cd4caf5d129?pvs=74)
