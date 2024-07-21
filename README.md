@@ -205,5 +205,7 @@ task jacocoRootCoverageVerification(type: JacocoCoverageVerification) {
   - MultipartFile을 이벤트로 보내고 Listener에서 해당 파일을 처리하는 과정에서 NoSuchFileException이 발생
   - **해결 방안**: MultipartFile을 바이트 배열로 변환하여 이벤트를 보내서 해결
 
+</br>
+
 ## 🔗 프로젝트 문서
 [<ins>Monolithic에서 MSA로 전환기</ins>](https://jeongburgger.notion.site/MSA-30465a5476d24ca3a5d79cd4caf5d129?pvs=74)
