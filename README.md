@@ -146,49 +146,51 @@ $ docker-compose up -d
 
 ## 📈 성능 최적화 및 트러블슈팅
 ### 🕒성능 최적화
-1. **Monolithic에서 MSA로 전환** [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/monolithic-msa-e63e65abcc1c47118bcf16022bad421a)
-    - 테스트는 로컬에서 jmeter를 사용해서 테스트를 진행했습니다. 
-    - 조건은 100초 동안 점진적으로 사용자가 증가하는 조건으로 주문하기에 대한 요청 테스트를 진행했습니다.
+### 1. **Monolithic에서 MSA로 전환** [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/monolithic-msa-e63e65abcc1c47118bcf16022bad421a)
+- 테스트는 로컬에서 jmeter를 사용해서 테스트를 진행했습니다. 
+- 조건은 100초 동안 점진적으로 사용자가 증가하는 조건으로 주문하기에 대한 요청 테스트를 진행했습니다.
 
-    |  | 모놀리식 아키텍처 | MSA (동기) | MSA (EDA, 비동기) |
-    | --- | --- | --- | --- |
-    | 3000명일 때 평균 응답 | 6.3초 | 13초 | 0.141초 |
-    | 5000명일 때 평균 응답 | 42초 | 137초 | 0.196초 |
-    | TPS 그래프 | 불규칙적, <br>평균 22 ~ 25 TPS | 불규칙적, <br>평균 15 ~ 20 TPS | 일정, <br>평균 30 ~ 50 TPS |
-    | Latency 그래프 | 우상향 | 우상향 | 대부분 평온 |
+|  | 모놀리식 아키텍처 | MSA (동기) | MSA (EDA, 비동기) |
+| --- | --- | --- | --- |
+| 3000명일 때 평균 응답 | 6.3초 | 13초 | 0.141초 |
+| 5000명일 때 평균 응답 | 42초 | 137초 | 0.196초 |
+| TPS 그래프 | 불규칙적, <br>평균 22 ~ 25 TPS | 불규칙적, <br>평균 15 ~ 20 TPS | 일정, <br>평균 30 ~ 50 TPS |
+| Latency 그래프 | 우상향 | 우상향 | 대부분 평온 |
 
-    - 이를 통해 EDA 기반 비동기 MSA가 성능 면에서 가장 우수함을 확인할 수 있습니다.
+- 이를 통해 EDA 기반 비동기 MSA가 성능 면에서 가장 우수함을 확인할 수 있습니다.
 
-2. **검색 조회 성능 개선** [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/31787fcbc3fa47178d753db7855e78d7)
-    - 500만개의 데이터를 기준으로 테스트 했습니다.
-  
-    |  | 응답 시간 | 응답 속도 개선 정도 |
-    | --- | --- | --- |
-    | 인덱스  | 8500ms |  |
-    | 커버링 인덱스 | 900ms | 944% 빨라짐 |
-    | 캐싱 | 15ms | 56666% 빨라짐 |
+### 2. **검색 조회 성능 개선** [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/31787fcbc3fa47178d753db7855e78d7)
+- 500만개의 데이터를 기준으로 테스트 했습니다.
 
-3. **이메일 인증 코드 보내기 속도 개선**
-    - 이메일 전송 로직을 비동기 통신으로 처리  
-    - `ApplicationEventPublisher`을 사용하여 비동기통신을 사용하여 개선
-    - 12~14초 → 30ms, 433배 속도 개선
+|  | 응답 시간 | 응답 속도 개선 정도 |
+| --- | --- | --- |
+| 인덱스  | 8500ms |  |
+| 커버링 인덱스 | 900ms | 944% 빨라짐 |
+| 캐싱 | 15ms | 56666% 빨라짐 |
 
-5. **상품 등록 속도 개선**
-    - S3 이미지 업로드 로직을 비동기 통신으로 처리
-    - `ApplicationEventPublisher`을 사용하여 비동기통신을 사용하여 개선
-    - 5초 -> 100ms, 50배 속도 개선
+### 3. **이메일 인증 코드 보내기 속도 개선**
+- 이메일 전송 로직을 비동기 통신으로 처리  
+- `ApplicationEventPublisher`을 사용하여 비동기통신을 사용하여 개선
+- 12~14초 → 30ms, 433배 속도 개선
+
+### 4. **상품 등록 속도 개선**
+- S3 이미지 업로드 로직을 비동기 통신으로 처리
+- `ApplicationEventPublisher`을 사용하여 비동기통신을 사용하여 개선
+- 5초 -> 100ms, 50배 속도 개선
+
+</br>
 
 ### 🛠️트러블 슈팅
-1. **분산 환경에서 재고 감소에 대한 동시성 문제** [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/fadcbd5a4ed04726a13bbac744a380f0)
-  - 기본적으로 파티션을 하나로 하고 컨슈머를 하나만 띄웠을 경우, 동시성 문제가 일어나지 않는다.
-  - 하지만 성능을 위해 여러개의 파티션과 그에 맞는 컨슈머 서버를 띄우게 된다.
-  - 그렇게 되면 동시에 동일한 데이터를 조회하게 되어 동시성 문제가 터질 수 있다.
-  - **해결 방안**: 레디스 분산락 적용 </br>
-    <img src="https://github.com/user-attachments/assets/b036c091-ef74-40d3-9822-e349da71e3ee" width="70%">
-2. **이미지 업로드 비동기 통신으로 변환 과정에서 문제 발생** [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/37b94df26b0d46e88b7607656d79ac40?pvs=74)
-  - MultipartFile을 이벤트로 보내고 Listener에서 해당 파일을 처리하는 과정에서 NoSuchFileException이 발생
-  - **해결 방안**: MultipartFile을 바이트 배열로 변환하여 이벤트를 보내서 해결
-3. **MSA 배포에 대한 고민** [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/01d33564ac9949678febe091a2f03500?pvs=74)
+### 1. **분산 환경에서 재고 감소에 대한 동시성 문제** [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/fadcbd5a4ed04726a13bbac744a380f0)
+- 기본적으로 파티션을 하나로 하고 컨슈머를 하나만 띄웠을 경우, 동시성 문제가 일어나지 않는다.
+- 하지만 성능을 위해 여러개의 파티션과 그에 맞는 컨슈머 서버를 띄우게 된다.
+- 그렇게 되면 동시에 동일한 데이터를 조회하게 되어 동시성 문제가 터질 수 있다.
+- **해결 방안**: 레디스 분산락 적용 </br>
+  <img src="https://github.com/user-attachments/assets/b036c091-ef74-40d3-9822-e349da71e3ee" width="70%">
+### 2. **이미지 업로드 비동기 통신으로 변환 과정에서 문제 발생** [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/37b94df26b0d46e88b7607656d79ac40?pvs=74)
+- MultipartFile을 이벤트로 보내고 Listener에서 해당 파일을 처리하는 과정에서 NoSuchFileException이 발생
+- **해결 방안**: MultipartFile을 바이트 배열로 변환하여 이벤트를 보내서 해결
+### 3. **MSA 배포에 대한 고민** [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/01d33564ac9949678febe091a2f03500?pvs=74)
 <details>
 <summary>예상 아키텍처</summary>
   
