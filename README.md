@@ -71,8 +71,8 @@ $ docker-compose up -d
 </br>
 
 ## 🌟 주요 기능
-#### Monolithic에서 MSA 전환 [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/2-MSA-2688ec2dc1c5404b9f5bdbe204d143e6)
-#### 주문하기 - EDA (분산 트랜잭션) [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/3-EDA-6dce1ca4c75a479caac0c514c9b211b2)
+#### 1. Monolithic에서 MSA 전환 [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/2-MSA-2688ec2dc1c5404b9f5bdbe204d143e6)
+#### 2. 주문하기 - EDA (분산 트랜잭션) [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/3-EDA-6dce1ca4c75a479caac0c514c9b211b2)
 <details>
   <summary>주문하기 flow</summary>
   <img src="https://github.com/user-attachments/assets/67a669b2-654a-4fcc-94c6-0a08b84daab8" width="70%">
@@ -98,10 +98,10 @@ public void consumeOrderFromPayment(ConsumerRecord<String, String> record) {
             orderKafkaService.handleRollbackOrderFromPayment(eventResult);
         } else {
             if (kafkaHealthIndicator.isKafkaUp()) {
-                orderKafkaService.handleOrderFromPayment(eventResult);
+                orderKafkaService.handleOrderFromPayment(eventResult); // 결제 로직 & kafka event 보내기
             } else {
                 log.error("Failed to send payment event");
-                orderKafkaService.occurDeliveryFailure(eventResult);
+                orderKafkaService.occurDeliveryFailure(eventResult); // 이벤트 db 저장
             }
         }
     } catch (Exception e) {
@@ -120,12 +120,49 @@ public void consumeOrderFromPayment(ConsumerRecord<String, String> record) {
     </ul>
   </ol>
 </details>
+
+#### 3. 주요 로직의 테스트 커버리지 85% 달성
+<details>
+  <summary>테스트 커버리지</summary>
+  <ul>
+    <li>전체 테스트 커버리지: 80%</li>
+    <li>주요 로직의 테스트 커버리지: 85% 이상</li>
+    <li>이로 인해 주요 비즈니스 로직의 높은 테스트 커버리지를 보장하여, 코드의 안정성과 신뢰성을 높였습니다.</li>
+  </ul>
+  <pre><code>
+// 커버리지 검증 태스크 추가
+task jacocoRootCoverageVerification(type: JacocoCoverageVerification) {
+    dependsOn('jacocoRootReport')
+    executionData.from fileTree(dir: '.', include: '**/build/jacoco/test.exec')
+    sourceDirectories.from files(includedProjects.collect { it.sourceSets.main.allSource.srcDirs }.flatten())
+
+    // 특정 경로의 클래스만 포함
+    def classFiles = files(includedProjects.collect { it.sourceSets.main.output }.flatten())
+    classFiles = classFiles.asFileTree.matching {
+        include 'com/*/*/application/**'
+        include 'com/*/*/controller/**'
+        include 'com/*/*/infrastructure/kafka/*Service'
+        include 'com/*/*/infrastructure/kafka/*Producer'
+        include 'com/*/*/infrastructure/repository/**'
+    }
+    classDirectories.from classFiles
+
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.85
+            }
+        }
+    }
+}
+  </code></pre>
+</details>
   
 </br>
 
 ## 📈 성능 최적화 및 트러블슈팅
 ### 🕒성능 최적화
-1. Monolithic에서 MSA로 전환 [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/monolithic-msa-e63e65abcc1c47118bcf16022bad421a)
+1. **Monolithic에서 MSA로 전환** [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/monolithic-msa-e63e65abcc1c47118bcf16022bad421a)
     - 테스트는 로컬에서 jmeter를 사용해서 테스트를 진행했습니다. 
     - 조건은 100초 동안 점진적으로 사용자가 증가하는 조건으로 주문하기에 대한 요청 테스트를 진행했습니다.
 
@@ -138,7 +175,7 @@ public void consumeOrderFromPayment(ConsumerRecord<String, String> record) {
 
     - 이를 통해 EDA 기반 비동기 MSA가 성능 면에서 가장 우수함을 확인할 수 있습니다.
 
-2. 검색 조회 성능 개선 [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/31787fcbc3fa47178d753db7855e78d7)
+2. **검색 조회 성능 개선** [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/31787fcbc3fa47178d753db7855e78d7)
     - 500만개의 데이터를 기준으로 테스트 했습니다.
   
     |  | 응답 시간 | 응답 속도 개선 정도 |
@@ -147,23 +184,23 @@ public void consumeOrderFromPayment(ConsumerRecord<String, String> record) {
     | 커버링 인덱스 | 900ms | 944% 빨라짐 |
     | 캐싱 | 15ms | 56666% 빨라짐 |
 
-3. 이메일 인증 코드 보내기 속도 개선
+3. **이메일 인증 코드 보내기 속도 개선**
     - 이메일 전송 로직을 비동기 통신으로 처리  
     - `ApplicationEventPublisher`을 사용하여 비동기통신을 사용하여 개선
     - 12~14초 → 30ms, 433배 속도 개선
 
-5. 상품 등록 속도 개선
+5. **상품 등록 속도 개선**
     - S3 이미지 업로드 로직을 비동기 통신으로 처리
     - `ApplicationEventPublisher`을 사용하여 비동기통신을 사용하여 개선
     - 5초 -> 100ms, 50배 속도 개선
 
 ### 🛠️트러블 슈팅
-- 분산 환경에서 재고 감소에 대한 동시성 문제 [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/fadcbd5a4ed04726a13bbac744a380f0)
+- **분산 환경에서 재고 감소에 대한 동시성 문제** [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/fadcbd5a4ed04726a13bbac744a380f0)
   - 기본적으로 파티션을 하나로 하고 컨슈머를 하나만 띄웠을 경우, 동시성 문제가 일어나지 않는다.
   - 하지만 성능을 위해 여러개의 파티션과 그에 맞는 컨슈머 서버를 띄우게 된다.
   - 그렇게 되면 동시에 동일한 데이터를 조회하게 되어 동시성 문제가 터질 수 있다.
   - **해결 방안**: 레디스 분산락 적용 </br>
     <img src="https://github.com/user-attachments/assets/b036c091-ef74-40d3-9822-e349da71e3ee" width="70%">
-- 이미지 업로드 비동기 통신으로 변환 과정에서 문제 발생 [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/37b94df26b0d46e88b7607656d79ac40?pvs=74)
+- **이미지 업로드 비동기 통신으로 변환 과정에서 문제 발생** [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/37b94df26b0d46e88b7607656d79ac40?pvs=74)
   - MultipartFile을 이벤트로 보내고 Listener에서 해당 파일을 처리하는 과정에서 NoSuchFileException이 발생
   - **해결 방안**: MultipartFile을 바이트 배열로 변환하여 이벤트를 보내서 해결
