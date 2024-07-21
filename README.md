@@ -71,8 +71,8 @@ $ docker-compose up -d
 </br>
 
 ## 🌟 주요 기능
-#### 1. Monolithic에서 MSA 전환 [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/2-MSA-2688ec2dc1c5404b9f5bdbe204d143e6)
-#### 2. 주문하기 - EDA (분산 트랜잭션) [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/3-EDA-6dce1ca4c75a479caac0c514c9b211b2)
+### 1. Monolithic에서 MSA 전환 [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/2-MSA-2688ec2dc1c5404b9f5bdbe204d143e6)
+### 2. 주문하기 - EDA (분산 트랜잭션) [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/3-EDA-6dce1ca4c75a479caac0c514c9b211b2)
 <details>
   <summary>주문하기 flow</summary>
   <img src="https://github.com/user-attachments/assets/67a669b2-654a-4fcc-94c6-0a08b84daab8" width="70%">
@@ -89,27 +89,9 @@ $ docker-compose up -d
 </details>
 <details>
   <summary>카프카 네트워크 장애가 난다면?</summary>
-  <pre><code>
-@KafkaListener(topics = "${consumers.topic1}", groupId = "${consumers.groupId}")
-public void consumeOrderFromPayment(ConsumerRecord<String, String> record) {
-    try {
-        EventResult eventResult = objectMapper.readValue(record.value(), EventResult.class);
-        if (eventResult.status() == -1) {
-            orderKafkaService.handleRollbackOrderFromPayment(eventResult);
-        } else {
-            if (kafkaHealthIndicator.isKafkaUp()) {
-                orderKafkaService.handleOrderFromPayment(eventResult); // 결제 로직 & kafka event 보내기
-            } else {
-                log.error("Failed to send payment event");
-                orderKafkaService.occurDeliveryFailure(eventResult); // 이벤트 db 저장
-            }
-        }
-    } catch (Exception e) {
-        log.error("Failed to consume order from payment", e);
-        throw new RuntimeException("Failed to consume order from payment");
-    }
-}
-  </code></pre>
+  <div>
+    <img src="https://github.com/user-attachments/assets/c7c3585f-bf6b-4b38-8ce4-f94beaf20516" width="70%">
+  </div>
   <ol>
     <li>Kafka health check 수행</li>
     <li>통신 가능 시 정상적으로 publish</li>
@@ -121,7 +103,7 @@ public void consumeOrderFromPayment(ConsumerRecord<String, String> record) {
   </ol>
 </details>
 
-#### 3. 주요 로직의 테스트 커버리지 85% 달성
+### 3. 주요 로직의 테스트 커버리지 85% 달성
 <details>
   <summary>테스트 커버리지</summary>
   <ul>
@@ -130,31 +112,31 @@ public void consumeOrderFromPayment(ConsumerRecord<String, String> record) {
     <li>이로 인해 주요 비즈니스 로직의 높은 테스트 커버리지를 보장하여, 코드의 안정성과 신뢰성을 높였습니다.</li>
   </ul>
   <pre><code>
-// 커버리지 검증 태스크 추가
-task jacocoRootCoverageVerification(type: JacocoCoverageVerification) {
-    dependsOn('jacocoRootReport')
-    executionData.from fileTree(dir: '.', include: '**/build/jacoco/test.exec')
-    sourceDirectories.from files(includedProjects.collect { it.sourceSets.main.allSource.srcDirs }.flatten())
-
-    // 특정 경로의 클래스만 포함
-    def classFiles = files(includedProjects.collect { it.sourceSets.main.output }.flatten())
-    classFiles = classFiles.asFileTree.matching {
-        include 'com/*/*/application/**'
-        include 'com/*/*/controller/**'
-        include 'com/*/*/infrastructure/kafka/*Service'
-        include 'com/*/*/infrastructure/kafka/*Producer'
-        include 'com/*/*/infrastructure/repository/**'
-    }
-    classDirectories.from classFiles
-
-    violationRules {
-        rule {
-            limit {
-                minimum = 0.85
+    // 커버리지 검증 태스크 추가
+    task jacocoRootCoverageVerification(type: JacocoCoverageVerification) {
+        dependsOn('jacocoRootReport')
+        executionData.from fileTree(dir: '.', include: '**/build/jacoco/test.exec')
+        sourceDirectories.from files(includedProjects.collect { it.sourceSets.main.allSource.srcDirs }.flatten())
+    
+        // 특정 경로의 클래스만 포함
+        def classFiles = files(includedProjects.collect { it.sourceSets.main.output }.flatten())
+        classFiles = classFiles.asFileTree.matching {
+            include 'com/*/*/application/**'
+            include 'com/*/*/controller/**'
+            include 'com/*/*/infrastructure/kafka/*Service'
+            include 'com/*/*/infrastructure/kafka/*Producer'
+            include 'com/*/*/infrastructure/repository/**'
+        }
+        classDirectories.from classFiles
+    
+        violationRules {
+            rule {
+                limit {
+                    minimum = 0.85
+                }
             }
         }
     }
-}
   </code></pre>
 </details>
   
