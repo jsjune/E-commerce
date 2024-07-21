@@ -188,6 +188,13 @@ $ docker-compose up -d
 2. **이미지 업로드 비동기 통신으로 변환 과정에서 문제 발생** [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/37b94df26b0d46e88b7607656d79ac40?pvs=74)
   - MultipartFile을 이벤트로 보내고 Listener에서 해당 파일을 처리하는 과정에서 NoSuchFileException이 발생
   - **해결 방안**: MultipartFile을 바이트 배열로 변환하여 이벤트를 보내서 해결
+3. **MSA 배포에 대한 고민** [<ins>자세히 보기</ins>](https://jeongburgger.notion.site/01d33564ac9949678febe091a2f03500?pvs=74)
+<details>
+<summary>예상 아키텍처</summary>
+  
+  ![예상 아키텍처](https://github.com/user-attachments/assets/d1a24121-7ccb-48b8-b47b-f930e236941d)
+  
+</details>
 
 </br>
 
