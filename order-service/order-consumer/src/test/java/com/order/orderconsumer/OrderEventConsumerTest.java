@@ -51,8 +51,6 @@ class OrderEventConsumerTest extends IntegrationTestSupport {
     private ProductOrderRepository productOrderRepository;
     @Autowired
     private ApplicationEvents events;
-    @MockBean
-    private OrderKafkaProducer orderKafkaProducer;
 
     @BeforeEach
     void setUp() {

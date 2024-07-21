@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
-@EnableAsync
 @Import(OrderCoreApplication.class)
 public class OrderConsumerApplication {
 

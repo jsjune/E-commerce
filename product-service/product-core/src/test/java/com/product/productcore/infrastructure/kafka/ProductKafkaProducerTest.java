@@ -2,11 +2,13 @@ package com.product.productcore.infrastructure.kafka;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.product.productcore.config.log.LoggingProducer;
 import com.product.productcore.infrastructure.kafka.event.EventResult;
 import com.product.productcore.testConfig.IntegrationTestSupport;
 import java.util.concurrent.CompletableFuture;
@@ -25,6 +27,8 @@ class ProductKafkaProducerTest extends IntegrationTestSupport {
     private KafkaTemplate<String, String> kafkaTemplate;
     @Mock
     private CompletableFuture<SendResult<String, String>> future;
+    @MockBean
+    private LoggingProducer loggingProducer;
 
     @DisplayName("카프카로 상품 이벤트 발생")
     @Test
@@ -32,9 +36,10 @@ class ProductKafkaProducerTest extends IntegrationTestSupport {
         // given
         EventResult eventResult = EventResult.builder().build();
         String topic = "product_result";
+        when(kafkaTemplate.send(eq(topic), anyString())).thenReturn(future);
+        doNothing().when(loggingProducer).sendMessage(anyString(), anyString());
 
         // when
-        when(kafkaTemplate.send(eq(topic), anyString())).thenReturn(future);
         productKafkaProducer.occurProductEvent(eventResult);
 
         // then

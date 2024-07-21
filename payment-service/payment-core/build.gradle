@@ -39,11 +39,6 @@ dependencies {
     // actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
-    // https://mvnrepository.com/artifact/org.testcontainers/testcontainers
-    testImplementation 'org.testcontainers:testcontainers:1.19.7'
-    // https://mvnrepository.com/artifact/org.testcontainers/kafka
-    testImplementation 'org.testcontainers:kafka:1.19.7'
-
     implementation project(':payment-service:payment-api')
 }
 

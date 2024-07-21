@@ -85,6 +85,7 @@ tasks.register("jacocoRootReport", JacocoReport) {
 
 // 커버리지 검증 태스크 추가
 task jacocoRootCoverageVerification(type: JacocoCoverageVerification) {
+    dependsOn('jacocoRootReport')
     executionData.from fileTree(dir: '.', include: '**/build/jacoco/test.exec')
     sourceDirectories.from files(includedProjects.collect { it.sourceSets.main.allSource.srcDirs }.flatten())
 

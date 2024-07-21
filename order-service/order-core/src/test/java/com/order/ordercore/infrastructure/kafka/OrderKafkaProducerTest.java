@@ -2,10 +2,12 @@ package com.order.ordercore.infrastructure.kafka;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.order.ordercore.config.log.LoggingProducer;
 import com.order.ordercore.testConfig.IntegrationTestSupport;
 import com.order.ordercore.infrastructure.kafka.event.EventResult;
 import com.order.ordercore.infrastructure.kafka.event.ProductOrderEvent;
@@ -28,6 +30,8 @@ class OrderKafkaProducerTest extends IntegrationTestSupport {
     private KafkaTemplate<String, String> kafkaTemplate;
     @Mock
     private CompletableFuture<SendResult<String, String>> future;
+    @MockBean
+    private LoggingProducer loggingProducer;
 
     @Test
     @DisplayName("카프카로 배송 이벤트 발생")
@@ -35,9 +39,10 @@ class OrderKafkaProducerTest extends IntegrationTestSupport {
         // given
         EventResult event = EventResult.builder().build();
         String topic = "delivery_request";
+        when(kafkaTemplate.send(eq(topic), anyString())).thenReturn(future);
+        doNothing().when(loggingProducer).sendMessage(anyString(), anyString());
 
         // when
-        when(kafkaTemplate.send(eq(topic), anyString())).thenReturn(future);
         orderKafkaProducer.occurDeliveryEvent(event);
 
         // then
@@ -50,9 +55,10 @@ class OrderKafkaProducerTest extends IntegrationTestSupport {
         // given
         EventResult event = EventResult.builder().build();
         String topic = "product_request";
+        when(kafkaTemplate.send(eq(topic), anyString())).thenReturn(future);
+        doNothing().when(loggingProducer).sendMessage(anyString(), anyString());
 
         // when
-        when(kafkaTemplate.send(eq(topic), anyString())).thenReturn(future);
         orderKafkaProducer.occurProductEvent(event);
 
         // then
@@ -65,9 +71,10 @@ class OrderKafkaProducerTest extends IntegrationTestSupport {
         // given
         EventResult event = EventResult.builder().build();
         String topic = "payment_rollback_request";
+        when(kafkaTemplate.send(eq(topic), anyString())).thenReturn(future);
+        doNothing().when(loggingProducer).sendMessage(anyString(), anyString());
 
         // when
-        when(kafkaTemplate.send(eq(topic), anyString())).thenReturn(future);
         orderKafkaProducer.occurRollbackPaymentEvent(event);
 
         // then
@@ -80,9 +87,10 @@ class OrderKafkaProducerTest extends IntegrationTestSupport {
         // given
         EventResult event = EventResult.builder().build();
         String topic = "delivery_rollback_request";
+        when(kafkaTemplate.send(eq(topic), anyString())).thenReturn(future);
+        doNothing().when(loggingProducer).sendMessage(anyString(), anyString());
 
         // when
-        when(kafkaTemplate.send(eq(topic), anyString())).thenReturn(future);
         orderKafkaProducer.occurRollbackDeliveryEvent(event);
 
         // then
@@ -95,9 +103,10 @@ class OrderKafkaProducerTest extends IntegrationTestSupport {
         // given
         SubmitOrderEvent event = SubmitOrderEvent.builder().build();
         String topic = "submit_order_product_request";
+        when(kafkaTemplate.send(eq(topic), anyString())).thenReturn(future);
+        doNothing().when(loggingProducer).sendMessage(anyString(), anyString());
 
         // when
-        when(kafkaTemplate.send(eq(topic), anyString())).thenReturn(future);
         orderKafkaProducer.occurSubmitOrderFromProductEvent(event);
 
         // then
@@ -110,9 +119,10 @@ class OrderKafkaProducerTest extends IntegrationTestSupport {
         // given
         SubmitOrderEvents event = SubmitOrderEvents.builder().build();
         String topic = "submit_order_cart_request";
+        when(kafkaTemplate.send(eq(topic), anyString())).thenReturn(future);
+        doNothing().when(loggingProducer).sendMessage(anyString(), anyString());
 
         // when
-        when(kafkaTemplate.send(eq(topic), anyString())).thenReturn(future);
         orderKafkaProducer.occurSubmitOrderFromCartEvent(event);
 
         // then
@@ -125,9 +135,10 @@ class OrderKafkaProducerTest extends IntegrationTestSupport {
         // given
         ProductOrderEvent event = ProductOrderEvent.builder().build();
         String topic = "payment_request";
+        when(kafkaTemplate.send(eq(topic), anyString())).thenReturn(future);
+        doNothing().when(loggingProducer).sendMessage(anyString(), anyString());
 
         // when
-        when(kafkaTemplate.send(eq(topic), anyString())).thenReturn(future);
         orderKafkaProducer.submitOrderComplete(event);
 
         // then
@@ -140,9 +151,10 @@ class OrderKafkaProducerTest extends IntegrationTestSupport {
         // given
         String topic = "order_submit_request";
         String message = "message";
+        when(kafkaTemplate.send(eq(topic), eq(message))).thenReturn(future);
+        doNothing().when(loggingProducer).sendMessage(anyString(), anyString());
 
         // when
-        when(kafkaTemplate.send(eq(topic), eq(message))).thenReturn(future);
         orderKafkaProducer.occurOutBoxEvent(topic, message);
 
         // then

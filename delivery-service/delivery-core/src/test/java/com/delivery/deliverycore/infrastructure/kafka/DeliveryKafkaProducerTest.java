@@ -2,10 +2,12 @@ package com.delivery.deliverycore.infrastructure.kafka;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.delivery.deliverycore.config.log.LoggingProducer;
 import com.delivery.deliverycore.infrastructure.kafka.event.EventResult;
 import com.delivery.deliverycore.testConfig.IntegrationTestSupport;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -25,6 +27,8 @@ class DeliveryKafkaProducerTest extends IntegrationTestSupport {
     private KafkaTemplate<String, String> kafkaTemplate;
     @Mock
     private CompletableFuture<SendResult<String, String>> future;
+    @MockBean
+    private LoggingProducer loggingProducer;
 
     @DisplayName("카프카로 배송 이벤트 발생")
     @Test
@@ -32,9 +36,10 @@ class DeliveryKafkaProducerTest extends IntegrationTestSupport {
         // given
         EventResult eventResult = EventResult.builder().build();
         String topic = "delivery_result";
+        when(kafkaTemplate.send(eq(topic), anyString())).thenReturn(future);
+        doNothing().when(loggingProducer).sendMessage(anyString(), anyString());
 
         // when
-        when(kafkaTemplate.send(eq(topic), anyString())).thenReturn(future);
         deliveryKafkaProducer.occurDeliveryEvent(eventResult);
 
         // then

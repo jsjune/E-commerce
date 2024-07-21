@@ -47,8 +47,6 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.testcontainers/testcontainers
     testImplementation 'org.testcontainers:testcontainers:1.19.7'
-    // https://mvnrepository.com/artifact/org.testcontainers/kafka
-    testImplementation 'org.testcontainers:kafka:1.19.7'
 
     implementation project (':delivery-service:delivery-api')
 

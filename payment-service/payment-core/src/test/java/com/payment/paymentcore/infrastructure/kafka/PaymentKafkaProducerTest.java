@@ -2,11 +2,13 @@ package com.payment.paymentcore.infrastructure.kafka;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.payment.paymentcore.config.log.LoggingProducer;
 import com.payment.paymentcore.testConfig.IntegrationTestSupport;
 import com.payment.paymentcore.infrastructure.kafka.event.EventResult;
 import java.util.concurrent.CompletableFuture;
@@ -26,6 +28,8 @@ class PaymentKafkaProducerTest extends IntegrationTestSupport {
     private KafkaTemplate<String, String> kafkaTemplate;
     @Mock
     private CompletableFuture<SendResult<String, String>> future;
+    @MockBean
+    private LoggingProducer loggingProducer;
 
     @DisplayName("카프카로 결제 이벤트 발생")
     @Test
@@ -33,9 +37,10 @@ class PaymentKafkaProducerTest extends IntegrationTestSupport {
         // given
         EventResult eventResult = EventResult.builder().build();
         String topic = "payment_result";
+        when(kafkaTemplate.send(eq(topic), anyString())).thenReturn(future);
+        doNothing().when(loggingProducer).sendMessage(anyString(), anyString());
 
         // when
-        when(kafkaTemplate.send(eq(topic), anyString())).thenReturn(future);
         paymentKafkaProducer.occurPaymentEvent(eventResult);
 
         // then
