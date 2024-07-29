@@ -1,8 +1,8 @@
 package com.member.memberapi.controller.internal;
 
 
-import com.member.memberapi.usecase.InternalCartUseCase;
-import com.member.memberapi.usecase.dto.CartDto;
+import com.member.membercore.application.service.InternalCartUseCase;
+import com.member.membercore.application.service.dto.CartDto;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;

@@ -1,6 +1,7 @@
 package com.member.memberapi.controller.req;
 
-import com.member.memberapi.usecase.dto.LoginDto;
+
+import com.member.membercore.application.service.dto.LoginDto;
 
 public record LoginRequestDto (
     String account,

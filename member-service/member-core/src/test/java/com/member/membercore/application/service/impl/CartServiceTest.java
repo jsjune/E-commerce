@@ -4,10 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import com.member.memberapi.usecase.CartUseCase;
-import com.member.memberapi.usecase.dto.CartResponseDto;
 import com.member.membercore.IntegrationTestSupport;
 import com.member.membercore.adapter.ProductClient;
+import com.member.membercore.application.service.CartUseCase;
+import com.member.membercore.application.service.dto.CartResponseDto;
 import com.member.membercore.application.service.dto.ProductDto;
 import com.member.membercore.infrastructure.entity.Cart;
 import com.member.membercore.infrastructure.entity.Member;

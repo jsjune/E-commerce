@@ -1,13 +1,13 @@
 package com.member.membercore.application.service.impl;
 
 
-import com.member.memberapi.common.error.ErrorCode;
-import com.member.memberapi.common.error.GlobalException;
-import com.member.memberapi.usecase.EmailUseCase;
-import com.member.memberapi.usecase.dto.EmailDto;
+import com.member.membercore.application.service.EmailUseCase;
+import com.member.membercore.application.service.dto.EmailDto;
 import com.member.membercore.application.service.dto.EmailEvent;
 import com.member.membercore.application.utils.EmailValidator;
 import com.member.membercore.application.utils.RedisUtils;
+import com.member.membercore.config.common.error.ErrorCode;
+import com.member.membercore.config.common.error.GlobalException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;

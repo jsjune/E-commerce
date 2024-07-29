@@ -1,4 +1,4 @@
-package com.member.memberapi.common.error;
+package com.member.membercore.config.common.error;
 
 import lombok.Getter;
 

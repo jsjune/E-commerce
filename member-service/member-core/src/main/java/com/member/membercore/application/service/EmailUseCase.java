@@ -1,6 +1,7 @@
-package com.member.memberapi.usecase;
+package com.member.membercore.application.service;
 
-import com.member.memberapi.usecase.dto.EmailDto;
+
+import com.member.membercore.application.service.dto.EmailDto;
 
 public interface EmailUseCase {
 

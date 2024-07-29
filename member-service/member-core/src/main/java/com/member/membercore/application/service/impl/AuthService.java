@@ -1,20 +1,20 @@
 package com.member.membercore.application.service.impl;
 
 
-import com.member.memberapi.common.error.ErrorCode;
-import com.member.memberapi.common.error.GlobalException;
-import com.member.memberapi.usecase.AuthUseCase;
-import com.member.memberapi.usecase.dto.LoginDto;
-import com.member.memberapi.usecase.dto.LoginResponseDto;
-import com.member.memberapi.usecase.dto.MemberDto;
-import com.member.memberapi.usecase.dto.MemberInfoResponseDto;
-import com.member.memberapi.usecase.dto.PasswordDto;
-import com.member.memberapi.usecase.dto.SignupDto;
-import com.member.memberapi.usecase.dto.UserInfoDto;
 import com.member.membercore.application.auth.LoginUser;
+import com.member.membercore.application.service.AuthUseCase;
+import com.member.membercore.application.service.dto.LoginDto;
+import com.member.membercore.application.service.dto.LoginResponseDto;
+import com.member.membercore.application.service.dto.MemberDto;
+import com.member.membercore.application.service.dto.MemberInfoResponseDto;
+import com.member.membercore.application.service.dto.PasswordDto;
+import com.member.membercore.application.service.dto.SignupDto;
 import com.member.membercore.application.service.dto.SignupEmailEvent;
+import com.member.membercore.application.service.dto.UserInfoDto;
 import com.member.membercore.application.utils.AesUtil;
 import com.member.membercore.application.utils.EmailValidator;
+import com.member.membercore.config.common.error.ErrorCode;
+import com.member.membercore.config.common.error.GlobalException;
 import com.member.membercore.config.jwt.JwtUtils;
 import com.member.membercore.infrastructure.entity.Member;
 import com.member.membercore.infrastructure.entity.UserRole;

@@ -1,6 +1,6 @@
-package com.member.memberapi.common.error;
+package com.member.membercore.config.common.error;
 
-import com.member.memberapi.common.Response;
+import com.member.membercore.config.common.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

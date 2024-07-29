@@ -1,7 +1,7 @@
 package com.member.membercore.application.service.impl;
 
-import com.member.memberapi.usecase.InternalCartUseCase;
-import com.member.memberapi.usecase.dto.CartDto;
+import com.member.membercore.application.service.InternalCartUseCase;
+import com.member.membercore.application.service.dto.CartDto;
 import com.member.membercore.infrastructure.repository.CartRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

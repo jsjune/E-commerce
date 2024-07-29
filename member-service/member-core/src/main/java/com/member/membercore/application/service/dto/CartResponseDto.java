@@ -1,4 +1,4 @@
-package com.member.memberapi.usecase.dto;
+package com.member.membercore.application.service.dto;
 
 import com.ecommerce.common.cache.CachingCartListDto;
 import java.util.List;

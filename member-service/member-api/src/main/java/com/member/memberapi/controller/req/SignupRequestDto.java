@@ -1,6 +1,6 @@
 package com.member.memberapi.controller.req;
 
-import com.member.memberapi.usecase.dto.SignupDto;
+import com.member.membercore.application.service.dto.SignupDto;
 import lombok.Builder;
 
 @Builder

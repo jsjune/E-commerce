@@ -1,6 +1,6 @@
-package com.member.memberapi.usecase;
+package com.member.membercore.application.service;
 
-import com.member.memberapi.usecase.dto.CartDto;
+import com.member.membercore.application.service.dto.CartDto;
 import java.util.List;
 
 public interface InternalCartUseCase {

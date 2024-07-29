@@ -11,7 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.ecommerce.common.cache.CachingCartListDto;
 import com.member.memberapi.testConfig.ControllerTestSupport;
-import com.member.memberapi.usecase.dto.CartResponseDto;
+import com.member.membercore.application.service.dto.CartResponseDto;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

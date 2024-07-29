@@ -1,6 +1,6 @@
-package com.delivery.deliveryapi.common.error;
+package com.delivery.deliverycore.config.common.error;
 
-import com.delivery.deliveryapi.common.Response;
+import com.delivery.deliverycore.config.common.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

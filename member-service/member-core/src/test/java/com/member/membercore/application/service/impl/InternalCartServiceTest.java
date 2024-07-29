@@ -3,11 +3,11 @@ package com.member.membercore.application.service.impl;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-import com.member.memberapi.usecase.CartUseCase;
-import com.member.memberapi.usecase.InternalCartUseCase;
-import com.member.memberapi.usecase.dto.CartDto;
 import com.member.membercore.IntegrationTestSupport;
 import com.member.membercore.adapter.ProductClient;
+import com.member.membercore.application.service.CartUseCase;
+import com.member.membercore.application.service.InternalCartUseCase;
+import com.member.membercore.application.service.dto.CartDto;
 import com.member.membercore.application.service.dto.ProductDto;
 import com.member.membercore.infrastructure.entity.Cart;
 import com.member.membercore.infrastructure.entity.Member;

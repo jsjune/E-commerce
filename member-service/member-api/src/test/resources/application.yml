@@ -34,3 +34,4 @@ eureka:
   client:
     enabled: false
 
+

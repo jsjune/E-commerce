@@ -1,6 +1,7 @@
 package com.member.memberapi.controller.req;
 
-import com.member.memberapi.usecase.dto.EmailDto;
+
+import com.member.membercore.application.service.dto.EmailDto;
 
 public record EmailRequest(
     String email,

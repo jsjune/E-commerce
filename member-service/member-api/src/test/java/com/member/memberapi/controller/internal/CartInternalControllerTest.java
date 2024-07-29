@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.member.memberapi.testConfig.ControllerTestSupport;
-import com.member.memberapi.usecase.dto.CartDto;
+import com.member.membercore.application.service.dto.CartDto;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

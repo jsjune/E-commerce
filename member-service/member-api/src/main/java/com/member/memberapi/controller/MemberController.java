@@ -1,15 +1,15 @@
 package com.member.memberapi.controller;
 
 
-import com.member.memberapi.common.Response;
+import com.member.membercore.application.service.AuthUseCase;
+import com.member.membercore.application.service.dto.LoginResponseDto;
+import com.member.membercore.application.service.dto.MemberInfoResponseDto;
+import com.member.membercore.config.common.Response;
 import com.member.memberapi.controller.req.LoginRequestDto;
 import com.member.memberapi.controller.req.PasswordRequestDto;
 import com.member.memberapi.controller.req.SignupRequestDto;
 import com.member.memberapi.controller.req.UserInfoRequestDto;
 import com.member.memberapi.controller.req.UserValidationRequestDto;
-import com.member.memberapi.usecase.AuthUseCase;
-import com.member.memberapi.usecase.dto.LoginResponseDto;
-import com.member.memberapi.usecase.dto.MemberInfoResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;

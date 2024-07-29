@@ -1,8 +1,8 @@
 package com.member.membercore.application.auth;
 
 
-import com.member.memberapi.common.error.ErrorCode;
-import com.member.memberapi.common.error.GlobalException;
+import com.member.membercore.config.common.error.ErrorCode;
+import com.member.membercore.config.common.error.GlobalException;
 import com.member.membercore.infrastructure.entity.Member;
 import com.member.membercore.infrastructure.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;

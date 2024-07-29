@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import com.member.memberapi.usecase.dto.EmailDto;
 import com.member.membercore.IntegrationTestSupport;
+import com.member.membercore.application.service.dto.EmailDto;
 import com.member.membercore.application.service.dto.EmailEvent;
 import com.member.membercore.application.utils.RedisUtils;
 import org.junit.jupiter.api.DisplayName;

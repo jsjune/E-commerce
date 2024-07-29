@@ -1,6 +1,7 @@
 package com.member.memberapi.controller.req;
 
-import com.member.memberapi.usecase.dto.PasswordDto;
+
+import com.member.membercore.application.service.dto.PasswordDto;
 
 public record PasswordRequestDto(
     String currentPw,

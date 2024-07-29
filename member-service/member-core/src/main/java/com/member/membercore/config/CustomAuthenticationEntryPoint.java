@@ -2,8 +2,8 @@ package com.member.membercore.config;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.member.memberapi.common.Response;
-import com.member.memberapi.common.error.ErrorCode;
+import com.member.membercore.config.common.Response;
+import com.member.membercore.config.common.error.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;

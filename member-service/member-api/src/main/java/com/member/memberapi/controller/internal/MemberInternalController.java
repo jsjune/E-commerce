@@ -1,8 +1,8 @@
 package com.member.memberapi.controller.internal;
 
 
-import com.member.memberapi.usecase.AuthUseCase;
-import com.member.memberapi.usecase.dto.MemberDto;
+import com.member.membercore.application.service.AuthUseCase;
+import com.member.membercore.application.service.dto.MemberDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;

@@ -1,6 +1,6 @@
 package com.member.memberapi.controller.req;
 
-import com.member.memberapi.usecase.dto.UserInfoDto;
+import com.member.membercore.application.service.dto.UserInfoDto;
 import lombok.Builder;
 
 @Builder

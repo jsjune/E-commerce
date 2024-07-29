@@ -1,7 +1,7 @@
-package com.member.memberapi.usecase;
+package com.member.membercore.application.service;
 
 
-import com.member.memberapi.usecase.dto.CartResponseDto;
+import com.member.membercore.application.service.dto.CartResponseDto;
 
 public interface CartUseCase {
 

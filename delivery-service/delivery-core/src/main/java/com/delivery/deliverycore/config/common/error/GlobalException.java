@@ -1,4 +1,4 @@
-package com.delivery.deliveryapi.common.error;
+package com.delivery.deliverycore.config.common.error;
 
 import lombok.Getter;
 

@@ -1,9 +1,9 @@
 package com.member.memberapi.controller;
 
 
-import com.member.memberapi.common.Response;
-import com.member.memberapi.usecase.CartUseCase;
-import com.member.memberapi.usecase.dto.CartResponseDto;
+import com.member.membercore.application.service.CartUseCase;
+import com.member.membercore.application.service.dto.CartResponseDto;
+import com.member.membercore.config.common.Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;

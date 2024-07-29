@@ -28,7 +28,16 @@ dependencies {
     // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-mail
     implementation 'org.springframework.boot:spring-boot-starter-mail:3.2.6'
 
+    // kafka
+    implementation 'org.springframework.kafka:spring-kafka'
+
+    // https://mvnrepository.com/artifact/org.testcontainers/testcontainers
+    testImplementation 'org.testcontainers:testcontainers:1.19.7'
+    // https://mvnrepository.com/artifact/org.testcontainers/kafka
+    testImplementation 'org.testcontainers:kafka:1.19.7'
+
     implementation project(':common')
+    implementation project(':member-service:member-core')
 }
 
 test {

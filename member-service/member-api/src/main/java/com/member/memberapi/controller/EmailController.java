@@ -2,9 +2,7 @@ package com.member.memberapi.controller;
 
 
 import com.member.memberapi.controller.req.EmailRequest;
-import com.member.memberapi.usecase.EmailUseCase;
-import jakarta.mail.MessagingException;
-import java.io.UnsupportedEncodingException;
+import com.member.membercore.application.service.EmailUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

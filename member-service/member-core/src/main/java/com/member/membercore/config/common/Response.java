@@ -1,4 +1,4 @@
-package com.delivery.deliveryapi.common;
+package com.member.membercore.config.common;
 
 import java.time.LocalDateTime;
 import lombok.Getter;
