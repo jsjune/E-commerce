@@ -1,14 +1,12 @@
 package com.payment.paymentconsumer;
 
-import com.payment.paymentcore.PaymentCoreApplication;
+import com.payment.paymentcore.AppConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-@Import(PaymentCoreApplication.class)
+@Import(AppConfig.class)
 public class PaymentConsumerApplication {
 
     public static void main(String[] args) {

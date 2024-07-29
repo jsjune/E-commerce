@@ -1,4 +1,4 @@
-package com.payment.paymentapi.usecase.dto;
+package com.payment.paymentcore.application.service.dto;
 
 import java.util.List;
 

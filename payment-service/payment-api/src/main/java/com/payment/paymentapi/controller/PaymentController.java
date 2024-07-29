@@ -1,10 +1,10 @@
 package com.payment.paymentapi.controller;
 
 
-import com.payment.paymentapi.common.Response;
+import com.payment.paymentcore.application.service.dto.PaymentMethodResponseDto;
+import com.payment.paymentcore.config.common.Response;
 import com.payment.paymentapi.controller.req.PaymentMethodRequestDto;
-import com.payment.paymentapi.usecase.PaymentMethodUseCase;
-import com.payment.paymentapi.usecase.dto.PaymentMethodResponseDto;
+import com.payment.paymentcore.application.service.PaymentMethodUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -1,4 +1,4 @@
-package com.payment.paymentapi.common.error;
+package com.payment.paymentcore.config.common.error;
 
 import lombok.Getter;
 

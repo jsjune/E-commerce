@@ -1,6 +1,6 @@
-package com.payment.paymentapi.common.error;
+package com.payment.paymentcore.config.common.error;
 
-import com.payment.paymentapi.common.Response;
+import com.payment.paymentcore.config.common.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

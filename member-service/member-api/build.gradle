@@ -34,6 +34,7 @@ dependencies {
     testImplementation 'org.testcontainers:kafka:1.19.7'
 
     implementation project(':member-service:member-core')
+    implementation project(':common')
 }
 
 test {

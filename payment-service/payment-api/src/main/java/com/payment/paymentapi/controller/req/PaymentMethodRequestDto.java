@@ -1,6 +1,6 @@
 package com.payment.paymentapi.controller.req;
 
-import com.payment.paymentapi.usecase.dto.RegisterPaymentMethodDto;
+import com.payment.paymentcore.application.service.dto.RegisterPaymentMethodDto;
 import lombok.Builder;
 
 @Builder

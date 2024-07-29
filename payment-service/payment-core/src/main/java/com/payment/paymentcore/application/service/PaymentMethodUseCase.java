@@ -1,8 +1,8 @@
-package com.payment.paymentapi.usecase;
+package com.payment.paymentcore.application.service;
 
 
-import com.payment.paymentapi.usecase.dto.PaymentMethodResponseDto;
-import com.payment.paymentapi.usecase.dto.RegisterPaymentMethodDto;
+import com.payment.paymentcore.application.service.dto.PaymentMethodResponseDto;
+import com.payment.paymentcore.application.service.dto.RegisterPaymentMethodDto;
 
 public interface PaymentMethodUseCase {
 

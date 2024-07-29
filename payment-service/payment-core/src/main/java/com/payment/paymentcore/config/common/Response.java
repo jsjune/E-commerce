@@ -1,4 +1,4 @@
-package com.payment.paymentapi.common;
+package com.payment.paymentcore.config.common;
 
 import java.time.LocalDateTime;
 import lombok.Getter;

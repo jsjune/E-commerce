@@ -12,8 +12,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.payment.paymentapi.controller.req.PaymentMethodRequestDto;
 import com.payment.paymentapi.testConfig.ControllerTestSupport;
-import com.payment.paymentapi.usecase.dto.PaymentMethodListDto;
-import com.payment.paymentapi.usecase.dto.PaymentMethodResponseDto;
+import com.payment.paymentcore.application.service.dto.PaymentMethodListDto;
+import com.payment.paymentcore.application.service.dto.PaymentMethodResponseDto;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

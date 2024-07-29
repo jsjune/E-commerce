@@ -1,10 +1,10 @@
 package com.payment.paymentcore.application.service.impl;
 
 
-import com.payment.paymentapi.usecase.PaymentMethodUseCase;
-import com.payment.paymentapi.usecase.dto.PaymentMethodListDto;
-import com.payment.paymentapi.usecase.dto.PaymentMethodResponseDto;
-import com.payment.paymentapi.usecase.dto.RegisterPaymentMethodDto;
+import com.payment.paymentcore.application.service.PaymentMethodUseCase;
+import com.payment.paymentcore.application.service.dto.PaymentMethodListDto;
+import com.payment.paymentcore.application.service.dto.PaymentMethodResponseDto;
+import com.payment.paymentcore.application.service.dto.RegisterPaymentMethodDto;
 import com.payment.paymentcore.application.utils.AesUtil;
 import com.payment.paymentcore.infrastructure.entity.PaymentMethod;
 import com.payment.paymentcore.infrastructure.entity.PaymentType;

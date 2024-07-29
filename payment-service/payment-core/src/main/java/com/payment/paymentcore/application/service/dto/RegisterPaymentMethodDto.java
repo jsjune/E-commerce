@@ -1,13 +1,13 @@
-package com.payment.paymentapi.usecase.dto;
+package com.payment.paymentcore.application.service.dto;
 
 import lombok.Builder;
 
 @Builder
-public record PaymentMethodListDto(
-    Long paymentId,
+public record RegisterPaymentMethodDto(
     String paymentType,
     String bank,
     String accountNumber,
     String creditCardNumber
 ) {
+
 }
