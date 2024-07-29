@@ -1,4 +1,4 @@
-package com.product.productapi.usecase.dto;
+package com.product.productcore.application.service.dto;
 
 import java.io.Serializable;
 import lombok.Builder;

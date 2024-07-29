@@ -66,8 +66,6 @@ dependencies {
     // actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
-    implementation project(':product-service:product-api')
-
 }
 
 // QueryDsl 디렉토리 경로

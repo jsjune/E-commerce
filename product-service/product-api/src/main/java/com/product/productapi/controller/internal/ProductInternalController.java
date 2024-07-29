@@ -1,9 +1,7 @@
 package com.product.productapi.controller.internal;
 
-import com.product.productapi.usecase.InternalProductUseCase;
-import com.product.productapi.usecase.ProductReadUseCase;
-import com.product.productapi.usecase.ProductWriteUseCase;
-import com.product.productapi.usecase.dto.ProductDto;
+import com.product.productcore.application.service.InternalProductUseCase;
+import com.product.productcore.application.service.dto.ProductDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

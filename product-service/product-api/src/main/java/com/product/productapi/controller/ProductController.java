@@ -1,12 +1,12 @@
 package com.product.productapi.controller;
 
 
-import com.product.productapi.common.Response;
+import com.product.productcore.config.common.Response;
 import com.product.productapi.controller.req.ProductRequestDto;
-import com.product.productapi.usecase.ProductReadUseCase;
-import com.product.productapi.usecase.ProductWriteUseCase;
-import com.product.productapi.usecase.dto.ProductListResponseDto;
-import com.product.productapi.usecase.dto.ProductResponseDto;
+import com.product.productcore.application.service.ProductReadUseCase;
+import com.product.productcore.application.service.ProductWriteUseCase;
+import com.product.productcore.application.service.dto.ProductListResponseDto;
+import com.product.productcore.application.service.dto.ProductResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;

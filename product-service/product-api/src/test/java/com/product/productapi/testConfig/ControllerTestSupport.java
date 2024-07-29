@@ -2,20 +2,19 @@ package com.product.productapi.testConfig;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.product.productapi.AppConfig;
-import com.product.productapi.controller.ProductController;
-import com.product.productapi.controller.internal.ProductInternalController;
-import com.product.productapi.usecase.InternalProductUseCase;
-import com.product.productapi.usecase.ProductReadUseCase;
-import com.product.productapi.usecase.ProductWriteUseCase;
+import com.product.productcore.application.service.InternalProductUseCase;
+import com.product.productcore.application.service.ProductReadUseCase;
+import com.product.productcore.application.service.ProductWriteUseCase;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(controllers = {ProductController.class, ProductInternalController.class})
-@ContextConfiguration(classes = {AppConfig.class})
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
 public abstract class ControllerTestSupport {
     @Autowired
     protected MockMvc mockMvc;

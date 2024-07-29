@@ -1,6 +1,6 @@
-package com.product.productapi.common.error;
+package com.product.productcore.config.common.error;
 
-import com.product.productapi.common.Response;
+import com.product.productcore.config.common.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

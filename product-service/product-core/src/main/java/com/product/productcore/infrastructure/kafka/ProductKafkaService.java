@@ -2,7 +2,6 @@ package com.product.productcore.infrastructure.kafka;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.product.productapi.usecase.InternalProductUseCase;
 import com.product.productcore.application.service.ProductDecreaseUseCase;
 import com.product.productcore.infrastructure.entity.ProductOutBox;
 import com.product.productcore.infrastructure.kafka.event.EventResult;

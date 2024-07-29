@@ -1,6 +1,6 @@
 package com.product.productapi.controller.req;
 
-import com.product.productapi.usecase.dto.RegisterProductDto;
+import com.product.productcore.application.service.dto.RegisterProductDto;
 import java.util.List;
 import java.util.Set;
 import lombok.Builder;

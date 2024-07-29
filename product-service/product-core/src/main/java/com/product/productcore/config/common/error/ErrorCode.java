@@ -1,4 +1,4 @@
-package com.product.productapi.common.error;
+package com.product.productcore.config.common.error;
 
 
 import lombok.Getter;

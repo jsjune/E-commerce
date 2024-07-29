@@ -1,4 +1,4 @@
-package com.product.productapi.usecase.dto;
+package com.product.productcore.application.service.dto;
 
 import java.util.List;
 import java.util.Set;

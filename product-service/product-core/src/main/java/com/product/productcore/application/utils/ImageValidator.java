@@ -1,7 +1,7 @@
 package com.product.productcore.application.utils;
 
-import com.product.productapi.common.error.ErrorCode;
-import com.product.productapi.common.error.GlobalException;
+import com.product.productcore.config.common.error.ErrorCode;
+import com.product.productcore.config.common.error.GlobalException;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.web.multipart.MultipartFile;

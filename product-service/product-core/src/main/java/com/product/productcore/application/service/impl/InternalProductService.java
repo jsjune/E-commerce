@@ -1,7 +1,7 @@
 package com.product.productcore.application.service.impl;
 
-import com.product.productapi.usecase.InternalProductUseCase;
-import com.product.productapi.usecase.dto.ProductDto;
+import com.product.productcore.application.service.InternalProductUseCase;
+import com.product.productcore.application.service.dto.ProductDto;
 import com.product.productcore.infrastructure.entity.Product;
 import com.product.productcore.infrastructure.entity.ProductImage;
 import com.product.productcore.infrastructure.repository.ProductRepository;

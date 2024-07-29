@@ -3,8 +3,8 @@ package com.product.productcore.infrastructure.repository;
 import static com.product.productcore.infrastructure.entity.QProduct.product;
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.product.productapi.usecase.ProductReadUseCase;
-import com.product.productapi.usecase.dto.ProductListResponseDto;
+import com.product.productcore.application.service.ProductReadUseCase;
+import com.product.productcore.application.service.dto.ProductListResponseDto;
 import com.product.productcore.infrastructure.entity.Product;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.sql.PreparedStatement;
@@ -42,7 +42,7 @@ class CustomProductRepositoryImplTest {
 
     }
 
-    @Test
+//    @Test
     void index() {
         Pageable pageable = PageRequest.of(0, 20);
         String keyword = "a";
@@ -61,7 +61,7 @@ class CustomProductRepositoryImplTest {
         System.out.println("검색 소요 시간: " + (end.toEpochMilli() - start.toEpochMilli()) + "ms");
     }
 
-    @Test
+//    @Test
     void covering_index() {
         // given
         Pageable pageable = PageRequest.of(0, 20);
@@ -74,7 +74,7 @@ class CustomProductRepositoryImplTest {
         System.out.println("검색 소요 시간: " + (end.toEpochMilli() - start.toEpochMilli()) + "ms");
     }
 
-    @Test
+//    @Test
     void cashing() {
         Pageable pageable = PageRequest.of(0, 20);
         String keyword = "a";

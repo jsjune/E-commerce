@@ -13,9 +13,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.product.productapi.controller.req.ProductRequestDto;
 import com.product.productapi.testConfig.ControllerTestSupport;
-import com.product.productapi.usecase.dto.ProductListDto;
-import com.product.productapi.usecase.dto.ProductListResponseDto;
-import com.product.productapi.usecase.dto.ProductResponseDto;
+import com.product.productcore.application.service.dto.ProductListDto;
+import com.product.productcore.application.service.dto.ProductListResponseDto;
+import com.product.productcore.application.service.dto.ProductResponseDto;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.DisplayName;

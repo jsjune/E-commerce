@@ -3,8 +3,8 @@ package com.product.productcore.application.utils;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.product.productapi.common.error.ErrorCode;
-import com.product.productapi.common.error.GlobalException;
+import com.product.productcore.config.common.error.ErrorCode;
+import com.product.productcore.config.common.error.GlobalException;
 import com.product.productcore.testConfig.IntegrationTestSupport;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;

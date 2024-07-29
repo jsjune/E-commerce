@@ -1,9 +1,9 @@
 package com.product.productcore.application.service.impl;
 
-import com.product.productapi.usecase.ProductReadUseCase;
-import com.product.productapi.usecase.dto.ProductListDto;
-import com.product.productapi.usecase.dto.ProductListResponseDto;
-import com.product.productapi.usecase.dto.ProductResponseDto;
+import com.product.productcore.application.service.ProductReadUseCase;
+import com.product.productcore.application.service.dto.ProductListDto;
+import com.product.productcore.application.service.dto.ProductListResponseDto;
+import com.product.productcore.application.service.dto.ProductResponseDto;
 import com.product.productcore.application.utils.AesUtil;
 import com.product.productcore.application.utils.ExceptionWrapper;
 import com.product.productcore.application.utils.RedisUtils;

@@ -1,4 +1,4 @@
-package com.product.productapi.common;
+package com.product.productcore.config.common;
 
 import java.time.LocalDateTime;
 import lombok.Getter;

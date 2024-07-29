@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.product.productapi.usecase.ProductWriteUseCase;
-import com.product.productapi.usecase.dto.RegisterProductDto;
+import com.product.productcore.application.service.ProductWriteUseCase;
+import com.product.productcore.application.service.dto.RegisterProductDto;
 import com.product.productcore.openfeign.MemberClient;
 import com.product.productcore.application.service.dto.ImageUploadEvent;
 import com.product.productcore.application.service.dto.MemberDto;

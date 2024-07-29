@@ -6,9 +6,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import com.product.productapi.usecase.ProductReadUseCase;
-import com.product.productapi.usecase.dto.ProductListResponseDto;
-import com.product.productapi.usecase.dto.ProductResponseDto;
+import com.product.productcore.application.service.ProductReadUseCase;
+import com.product.productcore.application.service.dto.ProductListResponseDto;
+import com.product.productcore.application.service.dto.ProductResponseDto;
 import com.product.productcore.application.utils.RedisUtils;
 import com.product.productcore.openfeign.MemberClient;
 import com.product.productcore.application.service.dto.MemberDto;

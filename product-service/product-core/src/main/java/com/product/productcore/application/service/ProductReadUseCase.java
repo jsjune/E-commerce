@@ -1,7 +1,7 @@
-package com.product.productapi.usecase;
+package com.product.productcore.application.service;
 
-import com.product.productapi.usecase.dto.ProductListResponseDto;
-import com.product.productapi.usecase.dto.ProductResponseDto;
+import com.product.productcore.application.service.dto.ProductListResponseDto;
+import com.product.productcore.application.service.dto.ProductResponseDto;
 import org.springframework.data.domain.Pageable;
 
 public interface ProductReadUseCase {

@@ -1,6 +1,7 @@
-package com.product.productapi.usecase;
+package com.product.productcore.application.service;
 
-import com.product.productapi.usecase.dto.ProductDto;
+
+import com.product.productcore.application.service.dto.ProductDto;
 
 public interface InternalProductUseCase {
     Boolean incrementStock(Long productId, Long quantity);
