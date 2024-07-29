@@ -1,6 +1,6 @@
 package com.delivery.deliveryapi.Controller.req;
 
-import com.delivery.deliveryapi.usecase.dto.RegisterAddressDto;
+import com.delivery.deliverycore.application.service.dto.RegisterAddressDto;
 import lombok.Builder;
 
 @Builder

@@ -13,8 +13,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.delivery.deliveryapi.Controller.req.AddressRequestDto;
 import com.delivery.deliveryapi.testConfig.ControllerTestSupport;
-import com.delivery.deliveryapi.usecase.dto.DeliveryAddressListDto;
-import com.delivery.deliveryapi.usecase.dto.DeliveryAddressListResponseDto;
+import com.delivery.deliverycore.application.service.dto.DeliveryAddressListDto;
+import com.delivery.deliverycore.application.service.dto.DeliveryAddressListResponseDto;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

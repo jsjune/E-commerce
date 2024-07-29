@@ -1,14 +1,12 @@
 package com.delivery.deliveryconsumer;
 
-import com.delivery.deliverycore.DeliveryCoreApplication;
+import com.delivery.deliverycore.AppConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-@Import(DeliveryCoreApplication.class)
+@Import(AppConfig.class)
 public class DeliveryConsumerApplication {
 
     public static void main(String[] args) {

@@ -2,9 +2,9 @@ package com.delivery.deliverycore.application.service.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.delivery.deliveryapi.usecase.DeliveryAddressUseCase;
-import com.delivery.deliveryapi.usecase.dto.DeliveryAddressListResponseDto;
-import com.delivery.deliveryapi.usecase.dto.RegisterAddressDto;
+import com.delivery.deliverycore.application.service.DeliveryAddressUseCase;
+import com.delivery.deliverycore.application.service.dto.DeliveryAddressListResponseDto;
+import com.delivery.deliverycore.application.service.dto.RegisterAddressDto;
 import com.delivery.deliverycore.application.utils.AesUtil;
 import com.delivery.deliverycore.infrastructure.entity.DeliveryAddress;
 import com.delivery.deliverycore.infrastructure.repository.DeliveryAddressRepository;

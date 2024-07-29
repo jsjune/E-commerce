@@ -1,4 +1,4 @@
-package com.delivery.deliveryapi.usecase.dto;
+package com.delivery.deliverycore.application.service.dto;
 
 import java.util.List;
 

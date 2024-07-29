@@ -2,10 +2,10 @@ package com.delivery.deliverycore.application.service.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.delivery.deliveryapi.Controller.req.AddressRequestDto;
-import com.delivery.deliveryapi.usecase.DeliveryAddressUseCase;
+import com.delivery.deliverycore.application.service.DeliveryAddressUseCase;
 import com.delivery.deliverycore.application.service.DeliveryProcessUseCase;
 import com.delivery.deliverycore.application.service.dto.ProcessDelivery;
+import com.delivery.deliverycore.application.service.dto.RegisterAddressDto;
 import com.delivery.deliverycore.infrastructure.entity.Delivery;
 import com.delivery.deliverycore.infrastructure.entity.DeliveryAddress;
 import com.delivery.deliverycore.infrastructure.repository.DeliveryAddressRepository;
@@ -38,8 +38,8 @@ class DeliveryProcessServiceTest extends IntegrationTestSupport {
     void process_delivery() throws Exception {
         // given
         long memberId = 1L;
-        AddressRequestDto request = getAddressRequest(true);
-        deliveryAddressUseCase.registerAddress(memberId, request.mapToCommand());
+        RegisterAddressDto request = getAddressRequest(true);
+        deliveryAddressUseCase.registerAddress(memberId, request);
         DeliveryAddress findDeliveryAddress = deliveryAddressRepository.findAll().stream().findFirst()
             .get();
         ProcessDelivery command = ProcessDelivery.builder()
@@ -60,8 +60,8 @@ class DeliveryProcessServiceTest extends IntegrationTestSupport {
         assertEquals(result.getProductName(), command.productName());
     }
 
-    private static AddressRequestDto getAddressRequest(boolean mainAddress) {
-        return AddressRequestDto.builder()
+    private static RegisterAddressDto getAddressRequest(boolean mainAddress) {
+        return RegisterAddressDto.builder()
             .street("서울시 강남구")
             .detailAddress("역삼동")
             .zipCode("12345")

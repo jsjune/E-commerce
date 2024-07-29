@@ -92,11 +92,11 @@ task jacocoRootCoverageVerification(type: JacocoCoverageVerification) {
     // 특정 경로의 클래스만 포함
     def classFiles = files(includedProjects.collect { it.sourceSets.main.output }.flatten())
     classFiles = classFiles.asFileTree.matching {
-        include 'com/*/*/application/**'  // 원하는 경로를 포함
-        include 'com/*/*/controller/**'  // 원하는 경로를 포함
-        include 'com/*/*/infrastructure/kafka/*Service'  // 원하는 경로를 포함
-        include 'com/*/*/infrastructure/kafka/*Producer'  // 원하는 경로를 포함
-        include 'com/*/*/infrastructure/repository/**'  // 원하는 경로를 포함
+        include 'com/*/*/application/**'
+        include 'com/*/*/controller/**'
+        include 'com/*/*/infrastructure/kafka/*Service'
+        include 'com/*/*/infrastructure/kafka/*Producer'
+        include 'com/*/*/infrastructure/repository/**'
     }
     classDirectories.from classFiles
 

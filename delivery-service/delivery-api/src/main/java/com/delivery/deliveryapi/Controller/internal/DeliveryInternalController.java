@@ -1,6 +1,6 @@
 package com.delivery.deliveryapi.Controller.internal;
 
-import com.delivery.deliveryapi.usecase.InternalDeliveryUseCase;
+import com.delivery.deliverycore.application.service.InternalDeliveryUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

@@ -1,4 +1,4 @@
-package com.delivery.deliveryapi.usecase;
+package com.delivery.deliverycore.application.service;
 
 
 public interface InternalDeliveryUseCase {

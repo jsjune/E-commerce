@@ -1,7 +1,7 @@
 package com.delivery.deliverycore.application.service.impl;
 
 
-import com.delivery.deliveryapi.usecase.InternalDeliveryUseCase;
+import com.delivery.deliverycore.application.service.InternalDeliveryUseCase;
 import com.delivery.deliverycore.infrastructure.entity.DeliveryStatus;
 import com.delivery.deliverycore.infrastructure.repository.DeliveryRepository;
 import lombok.RequiredArgsConstructor;
