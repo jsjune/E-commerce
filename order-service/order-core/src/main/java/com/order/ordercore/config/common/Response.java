@@ -1,4 +1,4 @@
-package com.order.orderapi.common;
+package com.order.ordercore.config.common;
 
 import java.time.LocalDateTime;
 import lombok.Getter;

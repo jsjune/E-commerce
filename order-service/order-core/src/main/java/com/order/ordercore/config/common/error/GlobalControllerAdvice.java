@@ -1,6 +1,6 @@
-package com.order.orderapi.common.error;
+package com.order.ordercore.config.common.error;
 
-import com.order.orderapi.common.Response;
+import com.order.ordercore.config.common.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

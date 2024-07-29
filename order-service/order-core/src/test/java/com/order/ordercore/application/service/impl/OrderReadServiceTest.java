@@ -2,11 +2,11 @@ package com.order.ordercore.application.service.impl;
 
 import static org.mockito.Mockito.when;
 
-import com.order.orderapi.usecase.OrderReadUseCase;
-import com.order.orderapi.usecase.dto.OrderDetailResponseDto;
-import com.order.orderapi.usecase.dto.OrderListResponseDto;
-import com.order.orderapi.usecase.dto.RegisterOrderFromCartDto;
-import com.order.orderapi.usecase.dto.RegisterOrderFromProductDto;
+import com.order.ordercore.application.service.OrderReadUseCase;
+import com.order.ordercore.application.service.dto.OrderDetailResponseDto;
+import com.order.ordercore.application.service.dto.OrderListResponseDto;
+import com.order.ordercore.application.service.dto.RegisterOrderFromCartDto;
+import com.order.ordercore.application.service.dto.RegisterOrderFromProductDto;
 import com.order.ordercore.testConfig.IntegrationTestSupport;
 import com.order.ordercore.adapter.MemberClient;
 import com.order.ordercore.adapter.ProductClient;

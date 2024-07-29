@@ -5,7 +5,7 @@ import static reactor.core.publisher.Mono.when;
 
 import com.order.ordercore.testConfig.IntegrationTestSupport;
 import com.order.ordercore.application.service.dto.OrderRollbackDto;
-import com.order.ordercore.application.utils.RedisUtils;
+import com.order.ordercore.infrastructure.redis.RedisUtils;
 import com.order.ordercore.infrastructure.entity.OrderLine;
 import com.order.ordercore.infrastructure.entity.OrderLineStatus;
 import com.order.ordercore.infrastructure.entity.ProductOrder;

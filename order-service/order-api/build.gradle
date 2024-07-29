@@ -25,8 +25,18 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
     // https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-netflix-eureka-client
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:4.1.0'
+
+    // https://mvnrepository.com/artifact/org.testcontainers/testcontainers
+    testImplementation 'org.testcontainers:testcontainers:1.19.7'
+    // https://mvnrepository.com/artifact/org.testcontainers/kafka
+    testImplementation 'org.testcontainers:kafka:1.19.7'
+
+    implementation project(':order-service:order-core')
+    implementation project(':common')
 }
 
 test {

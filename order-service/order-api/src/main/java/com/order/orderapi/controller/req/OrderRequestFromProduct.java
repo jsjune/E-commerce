@@ -1,7 +1,7 @@
 package com.order.orderapi.controller.req;
 
 
-import com.order.orderapi.usecase.dto.OrderDtoFromProduct;
+import com.order.ordercore.application.service.dto.OrderDtoFromProduct;
 
 public record OrderRequestFromProduct(
     Long paymentMethodId,

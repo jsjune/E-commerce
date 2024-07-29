@@ -59,7 +59,7 @@ dependencies {
     testImplementation 'org.testcontainers:testcontainers:1.19.7'
 
     implementation project(':common')
-    implementation project(':order-service:order-api')
+
 }
 
 // QueryDsl 디렉토리 경로

@@ -1,8 +1,8 @@
-package com.order.orderapi.usecase;
+package com.order.ordercore.application.service;
 
 
-import com.order.orderapi.usecase.dto.OrderDtoFromCart;
-import com.order.orderapi.usecase.dto.OrderDtoFromProduct;
+import com.order.ordercore.application.service.dto.OrderDtoFromCart;
+import com.order.ordercore.application.service.dto.OrderDtoFromProduct;
 
 public interface OrderWriteUseCase {
 

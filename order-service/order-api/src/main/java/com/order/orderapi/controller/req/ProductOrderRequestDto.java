@@ -1,7 +1,7 @@
 package com.order.orderapi.controller.req;
 
 
-import com.order.orderapi.usecase.dto.RegisterOrderFromProductDto;
+import com.order.ordercore.application.service.dto.RegisterOrderFromProductDto;
 
 public record ProductOrderRequestDto(
     Long productId,

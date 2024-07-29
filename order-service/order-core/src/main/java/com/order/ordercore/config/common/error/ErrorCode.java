@@ -1,4 +1,4 @@
-package com.order.orderapi.common.error;
+package com.order.ordercore.config.common.error;
 
 
 import lombok.Getter;

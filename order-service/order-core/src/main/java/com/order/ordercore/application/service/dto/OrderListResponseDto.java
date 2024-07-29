@@ -1,4 +1,4 @@
-package com.order.orderapi.usecase.dto;
+package com.order.ordercore.application.service.dto;
 
 
 import java.util.List;

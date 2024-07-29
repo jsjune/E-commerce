@@ -1,7 +1,7 @@
 package com.order.ordercore.application.service.impl;
 
 import com.order.ordercore.application.service.dto.OrderRollbackDto;
-import com.order.ordercore.application.utils.RedisUtils;
+import com.order.ordercore.infrastructure.redis.RedisUtils;
 import com.order.ordercore.infrastructure.entity.ProductOrder;
 import com.order.ordercore.infrastructure.repository.OrderLineRepository;
 import com.order.ordercore.infrastructure.repository.ProductOrderRepository;

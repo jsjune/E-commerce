@@ -2,14 +2,14 @@ package com.order.orderapi.controller;
 
 
 import com.order.orderapi.controller.req.CartOrderRequestDto;
-import com.order.orderapi.usecase.OrderReadUseCase;
-import com.order.orderapi.common.Response;
+import com.order.ordercore.application.service.OrderReadUseCase;
+import com.order.ordercore.application.service.dto.OrderDetailResponseDto;
+import com.order.ordercore.application.service.dto.OrderListResponseDto;
+import com.order.ordercore.config.common.Response;
 import com.order.orderapi.controller.req.OrderRequestFromCart;
 import com.order.orderapi.controller.req.OrderRequestFromProduct;
 import com.order.orderapi.controller.req.ProductOrderRequestDto;
-import com.order.orderapi.usecase.OrderWriteUseCase;
-import com.order.orderapi.usecase.dto.OrderDetailResponseDto;
-import com.order.orderapi.usecase.dto.OrderListResponseDto;
+import com.order.ordercore.application.service.OrderWriteUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -1,6 +1,6 @@
 package com.order.orderapi.controller.req;
 
-import com.order.orderapi.usecase.dto.OrderDtoFromCart;
+import com.order.ordercore.application.service.dto.OrderDtoFromCart;
 import java.util.List;
 
 public record OrderRequestFromCart(

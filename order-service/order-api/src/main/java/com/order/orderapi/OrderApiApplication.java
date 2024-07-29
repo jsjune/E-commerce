@@ -1,15 +1,15 @@
-package com.order.orderconsumer;
+package com.order.orderapi;
 
 import com.order.ordercore.AppConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
 
-@SpringBootApplication
 @Import(AppConfig.class)
-public class OrderConsumerApplication {
+@SpringBootApplication
+public class OrderApiApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(OrderConsumerApplication.class, args);
+        SpringApplication.run(OrderApiApplication.class, args);
     }
 }
